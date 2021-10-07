@@ -1,0 +1,65 @@
+Awesome Text System that supports a wide variety of customizable effects.
+It's not too slow?  It's cool.  it's easy to use?
+It's capable of allowing for customized styles and effects similar to CSS
+Auto wrapping, spacing, kerning, etc.  It's a nightmare.
+
+
+okay, so how do we do this.
+Basic text Features.
+Wrapping and alignment.  No styles.  No images. DONE!
+Add forced line breaks.
+Add pagination
+Add typing
+
+
+Text Graph
+draw_scripture(x,y,"this   <style green></img spr_test></style>",options)
+<char><char><char><char><breakable><breakable-tail><breakable-tail><style green></img></style><breakable></br>
+
+Graph Result Structure
+totalWidth
+totalHeight
+linesArray[{
+	width, 
+	height, 
+	characters:[
+		{
+			style, 
+			steps,
+			width,
+			height,
+			draw():width
+		}
+	]
+}]
+
+draw scripture loops through lines array 
+
+options {
+	cacheKey:"",
+	defaultStyle: global.__scriptureDefaultStyle,
+	hAlign: fa_left,
+	vAlign: fa_top,
+	typingPos: -1, //-1 for all
+	maxWidth: 200,
+	lineSpacing: 0,
+	maxLines: -1,
+	currentPage: 0
+}
+
+defaultStyle {
+	color: c_white,
+	alpha: 1,
+	font: -1,
+	kerning: 0,
+}
+
+translation {
+	x,
+	y,
+	
+}
+
+
+{char}{char}{char}{ }{char}{char}{char}{ }{ }
+{char}{char}
