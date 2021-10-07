@@ -7,7 +7,7 @@ Auto wrapping, spacing, kerning, etc.  It's a nightmare.
 okay, so how do we do this.
 Basic text Features.
 Wrapping and alignment.  No styles.  No images. DONE!
-Add forced line breaks.
+Add forced line breaks. DONE!
 Add pagination
 Add typing
 

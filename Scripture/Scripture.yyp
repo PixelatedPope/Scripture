@@ -6,7 +6,6 @@
     {"id":{"name":"Object1","path":"objects/Object1/Object1.yy",},"order":3,},
     {"id":{"name":"fntDefault","path":"fonts/fntDefault/fntDefault.yy",},"order":7,},
     {"id":{"name":"fntBold","path":"fonts/fntBold/fntBold.yy",},"order":8,},
-    {"id":{"name":"scrScriptureOLD","path":"scripts/scrScriptureOLD/scrScriptureOLD.yy",},"order":4,},
     {"id":{"name":"array_find_index","path":"scripts/array_find_index/array_find_index.yy",},"order":0,},
     {"id":{"name":"sin_oscillate","path":"scripts/sin_oscillate/sin_oscillate.yy",},"order":5,},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},"order":1,},

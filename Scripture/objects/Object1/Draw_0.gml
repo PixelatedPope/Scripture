@@ -3,6 +3,7 @@
 var _width = 600;
 var _height = 400;
 var _spacing = 50;
+
 var _test = testOptions(10,30, _width, _height);
 var _options = _test.options;
 var _x = _test.x;
@@ -25,4 +26,4 @@ draw_text_ext(_x,_y,
 
 draw_set_halign(fa_right)
 draw_set_valign(fa_bottom);
-draw_text(room_width-5, room_height-5, fps_real);
+draw_text(room_width-5, room_height-5, string(fps_real) + "\n" + string(fps));

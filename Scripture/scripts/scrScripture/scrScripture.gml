@@ -47,6 +47,8 @@ function __scriptureLine() constructor {
 			width += _char.width;
 			if(_char.height > height) height = _char.height;
 		}
+		if(height == 0)
+			height = string_height("QWERTYUIOPASDFGHJKLZXCVBNM<>,./;'[]{}:\"?");
 	}
 	
 }
@@ -66,6 +68,14 @@ function __scriptureParseText(_text,_options) {
 		var _char = string_char_at(_text,0);
 		_text = string_delete(_text,1,1);
 		switch(_char) {
+			case "\n": 
+				var _newLine = new __scriptureLine();
+				array_push(_result.text,_newLine);
+				_curLine.calcDimensions()
+				_curWidth = 0;
+				_curLine = _newLine;
+				continue;
+			break;
 			case "<": break;//{_text,tag} = __scriptureHandleTag;
 			
 			case " ":
@@ -95,7 +105,6 @@ function __scriptureParseText(_text,_options) {
 			_curLine.calcDimensions();
 			if(_result.totalWidth < _curLine.width) 
 				_result.totalWidth = _curLine.width;
-			_result.totalHeight += _curLine.height + _options.lineSpacing;
 			
 			var _lastSpace = 0;
 			_curLine = _newLine;
@@ -103,14 +112,18 @@ function __scriptureParseText(_text,_options) {
 			_curWidth = _curLine.width;
 		}
 	}
+	
 	_curLine.calcDimensions();
 	if(_result.totalWidth < _curLine.width) 
 		_result.totalWidth = _curLine.width;
-	_result.totalHeight += _curLine.height + _options.lineSpacing;
+	_result.totalHeight = 0;
+	for(var _i = 0; _i < array_length(_result.text); _i++){
+		_result.totalHeight += _result.text[_i].height;
+	}
+	
 	return _result;
 }
 
-///@func
 function draw_scripture(_x, _y, _string, _options){
 	var _parsedText = global.__scriptureCache[$ _options.cacheKey];
 	if(_parsedText == undefined) {
@@ -139,7 +152,7 @@ function draw_scripture(_x, _y, _string, _options){
 		}
 		//var _startX = _drawX;
 		//var _startY = _drawY;
-		var _lineHeight = 0;
+		var _lineHeight = _text[_l].height;
 		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
 			_char = _text[_l].text[_c];
 			_drawX += _char.draw(_drawX,_drawY);

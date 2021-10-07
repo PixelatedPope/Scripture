@@ -16,7 +16,7 @@ testOptions = function(_x, _y, _width, _height){
 		vAlign: fa_middle,
 		//typingPos: -1, //-1 for all
 		maxWidth: _width,
-		lineSpacing: -5,
+		lineSpacing: 0,
 		//maxLines: -1,
 		//currentPage: 0
 	}
