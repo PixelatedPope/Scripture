@@ -12,6 +12,7 @@ Add pagination DONE!
 Add typing DONE!
 
 REFINE --
+Force Finish Typing / Advance Page (50% done)
 
 Text Graph
 draw_scripture(x,y,"this   <style green></img spr_test></style>",options)

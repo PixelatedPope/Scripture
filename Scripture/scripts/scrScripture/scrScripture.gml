@@ -50,7 +50,14 @@ function __scriptureText() constructor {
 	totalWidth = 0;
 	text = [];
 	typePos = 0;
-	
+	getLength = function() { return array_length(text) }
+	getTotalCharacters = function() {
+		var _count = 0;
+		for(var _i = 0; _i < getLength(); _i++) {
+			_count += array_length(text[_i].text);
+		}
+		return _count;
+	}
 	getHeight = function() {
 		var _start = __scriptureGetCurrentLine(),
 				_count = global.__scripOptions.maxLines,
@@ -187,7 +194,7 @@ function __scriptureGetCachedText(_string, _options) {
 }
 
 function __scriptureGetPageCount(_text = global.__scripText, _options = global.__scripOptions) {
-	return 	floor(array_length(_text.text) / _options.maxLines);
+	return 	floor(_text.getLength() / _options.maxLines);
 }
 
 function __scriptureGetCurrentLine() {
@@ -196,7 +203,7 @@ function __scriptureGetCurrentLine() {
 
 function __scriptureIsPageFinished(_cur) {
 	//Be very sure when you clean up this logic, idiot.
-	var _length = array_length(global.__scripText.text);	
+	var _length = global.__scripText.getLength();	
 	if(_length <= _cur) return true;
 	
 	var _isPaginated = global.__scripOptions.maxLines > 0;
@@ -215,7 +222,12 @@ function __scriptureIsTyping() {
 function scripture_advance_page(_options){
 	var _text = global.__scripCache[$ _options.cacheKey];
 	if(_text == undefined) return;
-	if(_options.currentPage < __scriptureGetPageCount(_text,_options )){
+
+	//finish typing this page
+	if(__scriptureIsTyping() && _text.typePos < _text.getTotalCharacters()) {
+		_text.typePos = _text.getTotalCharacters();
+		return true;
+	} else if(_options.maxLines > 0 && _options.currentPage < __scriptureGetPageCount(_text,_options )){
 		_options.currentPage++;
 		_text.typePos = 0;
 		return true;

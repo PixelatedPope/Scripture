@@ -25,7 +25,7 @@ draw_scripture(_x, _y,
 
 _x += _width + _spacing;
 draw_scripture(_x, _y, 
-	"SingleLineThatIsTooLongAndIsGoingToCauseMeSeriousProblems",
+	"SingleLineThatIsToo-LongAndIsGoing-ToCauseMeSerious-Problems",
   options2);
 	
 _x += _width + _spacing;
