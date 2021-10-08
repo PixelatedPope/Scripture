@@ -86,7 +86,7 @@ function __scriptureParseText(_string) {
 	var _curWidth = 0;
 	var _curLine = new __scriptureLine();
 	_result.text[0] = _curLine;
-	var _lastSpace = 0;
+	var _lastSpace = undefined;
 	while(string_length(_string) > 0) {
 		var _char = string_char_at(_string,0);
 		_string = string_delete(_string,1,1);
@@ -125,7 +125,7 @@ function __scriptureParseText(_string) {
 		}
 		
 		//Handle Wrapping
-		if(_curWidth > global.__scripOptions.maxWidth) {
+		if(_lastSpace != undefined && _curWidth > global.__scripOptions.maxWidth) {
 			var _newLine = new __scriptureLine();
 			array_push(_result.text,_newLine);
 			var _length = array_length(_curLine.text) - _lastSpace;
@@ -136,7 +136,7 @@ function __scriptureParseText(_string) {
 			if(_result.totalWidth < _curLine.width) 
 				_result.totalWidth = _curLine.width;
 			
-			var _lastSpace = 0;
+			_lastSpace = undefined;
 			_curLine = _newLine;
 			_curLine.calcDimensions()
 			_curWidth = _curLine.width;
