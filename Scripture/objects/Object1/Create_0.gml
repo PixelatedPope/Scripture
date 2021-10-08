@@ -5,10 +5,10 @@ options = {
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
-		typeSpeed: 3, //0 for instant
+		typeSpeed: 1, //0 for instant
 		maxWidth: 0,
 		lineSpacing: 10,
-		maxLines: 5,
+		maxLines: 2,
 		currentPage: 0
 }
 
@@ -17,10 +17,22 @@ options2 = {
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
-		typeSpeed: 3, //0 for instant
+		typeSpeed: 0, //0 for instant
 		maxWidth: 0,
 		lineSpacing: 10,
 		maxLines: 5,
+		currentPage: 0
+}
+
+options3 = {
+		cacheKey: "Test 3",
+		hAlign: fa_center,
+		vAlign: fa_middle,
+		
+		typeSpeed: 0, //0 for instant
+		maxWidth: 0,
+		lineSpacing: -2,
+		maxLines: 0,
 		currentPage: 0
 }
 
@@ -28,7 +40,7 @@ testOptions = function(_x, _y, _width, _height){
 	options.maxWidth = _width;
 	if(keyboard_check_pressed(vk_space)) {
 		if(!scripture_advance_page(options)) {
-			//Textbox Is Done
+			room_restart(); //MEMORY LEAK?
 		}
 	}
 	if(keyboard_check(vk_right))
@@ -57,5 +69,13 @@ testOptions = function(_x, _y, _width, _height){
 			case fa_middle: _y += _height/2; break;
 	}
 	
+	
+options2.maxWidth = _width;
+options2.vAlign = options.vAlign;
+options2.hAlign = options.hAlign;
+options3.maxWidth = _width;
+options3.vAlign = options.vAlign;
+options3.hAlign = options.hAlign;
+
 	return {x: _x, y: _y}
 }

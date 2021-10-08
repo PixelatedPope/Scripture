@@ -46,7 +46,6 @@ function __scriptureLine() constructor {
 
 function __scriptureText() constructor {
 	totalWidth = 0;
-	totalHeight = 0;
 	text = [];
 	typePos = 0;
 	
@@ -57,8 +56,17 @@ function __scriptureText() constructor {
 		for(var _i = _start; _i < _start + _count; _i++) {
 			if(_i >= array_length(text))
 				return _height;
-			_height += text[_i].height + global.__scripOptions.lineSpacing*.5;
+			_height += text[_i].height + global.__scripOptions.lineSpacing;
 		}
+		return _height;
+	}
+	
+	getTotalHeight = function() {	
+		var _height = 0;
+		for(var _i = 0; _i < array_length(text); _i++){
+			_height += text[_i].height + global.__scripOptions.lineSpacing;
+		}
+		
 		return _height;
 	}
 	
@@ -129,10 +137,6 @@ function __scriptureParseText(_string) {
 	_curLine.calcDimensions();
 	if(_result.totalWidth < _curLine.width) 
 		_result.totalWidth = _curLine.width;
-	_result.totalHeight = 0;
-	for(var _i = 0; _i < array_length(_result.text); _i++){
-		_result.totalHeight += _result.text[_i].height;
-	}
 	
 	return _result;
 }
@@ -140,21 +144,24 @@ function __scriptureParseText(_string) {
 function __scriptureApplyVAlign(_y) {
 	var _options = global.__scripOptions;
 	switch(_options.vAlign) {
-		case fa_top:    return _y - _options.lineSpacing * 2;
-		case fa_bottom: return _y - (_options.maxLines <= 0 
-																 ? global.__scripText.totalHeight
-																 : global.__scripText.getHeight() + _options.lineSpacing); 
+		case fa_top:    return _y;
+		
 		case fa_middle: return _y - (_options.maxLines <= 0 
-																 ? global.__scripText.totalHeight / 2 
-																 : global.__scripText.getHeight()); 
+																 ? global.__scripText.getTotalHeight() / 2 
+																 : global.__scripText.getHeight() / 2); 
+																 
+		case fa_bottom: return _y - (_options.maxLines <= 0 
+																 ? global.__scripText.getTotalHeight()
+																 : global.__scripText.getHeight()) + _options.lineSpacing; 
+																 
 	}	
 }
 
 function __scriptureApplyHAlign(_x, _line) {
 		switch(global.__scripOptions.hAlign) {
 			case fa_left: return _x;
-			case fa_right: return _x - _line.width; break;
 			case fa_center: return _x - _line.width / 2; break;
+			case fa_right: return _x - _line.width; break;
 	}	
 }
 
@@ -170,8 +177,8 @@ function __scriptureGetCachedText(_string, _options) {
 	global.__scripText = _parsedText;
 }
 
-function __scriptureGetPageCount() {
-	return 	floor(array_length(global.__scripText.text) / global.__scripOptions.maxLines);
+function __scriptureGetPageCount(_text = global.__scripText, _options = global.__scripOptions) {
+	return 	floor(array_length(_text.text) / _options.maxLines);
 }
 
 function __scriptureGetCurrentLine() {
@@ -180,7 +187,19 @@ function __scriptureGetCurrentLine() {
 }
 
 function __scriptureIsPageFinished(_cur) {
-	return  array_length(global.__scripText.text) <= _cur ||  _cur - __scriptureGetCurrentLine()  >= global.__scripOptions.maxLines ;
+	//Be very sure when you clean up this logic, idiot.
+	var _length = array_length(global.__scripText.text);	
+	var _isPaginated = global.__scripOptions.maxLines > 0;
+	var _curLineNum = _cur - __scriptureGetCurrentLine();
+	var _linePerPage = global.__scripOptions.maxLines;
+	
+	if(_length <= _cur) return true;
+	
+	if(_isPaginated) {
+		return _curLineNum >= _linePerPage
+	}
+	
+	return _length <= _cur
 }
 
 function __scriptureIsTyping() {
@@ -190,9 +209,9 @@ function __scriptureIsTyping() {
 #endregion
 
 function scripture_advance_page(_options){
-	var _text = global.__scripCache[$ global.__scripOptions.cacheKey];
+	var _text = global.__scripCache[$ _options.cacheKey];
 	if(_text == undefined) return;
-	if(_options.currentPage < __scriptureGetPageCount()){
+	if(_options.currentPage < __scriptureGetPageCount(_text,_options )){
 		_options.currentPage++;
 		_text.typePos = 0;
 		return true;
@@ -213,12 +232,11 @@ function draw_scripture(_x, _y, _string, _options){
 			_pos = 0,
 		  _drawY = __scriptureApplyVAlign(_y);
 	
-	
 	for(var _l = __scriptureGetCurrentLine(); !__scriptureIsPageFinished(_l); _l++) {
 		_drawX = __scriptureApplyHAlign(_x, _text[_l]);
 		var _lineHeight = _text[_l].height;
 		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
-			if(__scriptureIsTyping && _pos >= global.__scripText.typePos) return;
+			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) return;
 			
 			_char = _text[_l].text[_c];
 			_drawX += _char.draw(_drawX,_drawY);
