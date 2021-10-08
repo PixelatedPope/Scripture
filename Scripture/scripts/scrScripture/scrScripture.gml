@@ -8,10 +8,12 @@ function __scriptureChar(_char, _style={}) constructor{
 	char = _char;
 	style = _style; 
 	steps = 0;
-	//TODO: setfont
+	
 	width = string_width(char);
 	height = string_height(char);
+	
 	draw = function(_x, _y){
+		steps++;
 		draw_text(_x, _y, char);
 		return width;
 	} //:width
@@ -142,36 +144,36 @@ function __scriptureParseText(_string) {
 }
 
 function __scriptureApplyVAlign(_y) {
-	var _options = global.__scripOptions;
+	var _options = global.__scripOptions,
+			_text = global.__scripText;
 	switch(_options.vAlign) {
 		case fa_top:    return _y;
 		
 		case fa_middle: return _y - (_options.maxLines <= 0 
-																 ? global.__scripText.getTotalHeight() / 2 
-																 : global.__scripText.getHeight() / 2); 
+																 ? _text.getTotalHeight() / 2 - _options.lineSpacing / 2
+																 : _text.getHeight() / 2  - _options.lineSpacing / 2); 
 																 
 		case fa_bottom: return _y - (_options.maxLines <= 0 
-																 ? global.__scripText.getTotalHeight()
-																 : global.__scripText.getHeight()) + _options.lineSpacing; 
-																 
+																 ? _text.getTotalHeight()
+																 : _text.getHeight()) + _options.lineSpacing; 
 	}	
 }
 
 function __scriptureApplyHAlign(_x, _line) {
-		switch(global.__scripOptions.hAlign) {
-			case fa_left: return _x;
-			case fa_center: return _x - _line.width / 2; break;
-			case fa_right: return _x - _line.width; break;
+	switch(global.__scripOptions.hAlign) {
+		case fa_left: return _x;
+		case fa_center: return _x - _line.width / 2; break;
+		case fa_right: return _x - _line.width; break;
 	}	
 }
 
 function __scriptureGetCachedText(_string, _options) {
 	global.__scripString = _string;
 	global.__scripOptions = _options;
-	var _parsedText = global.__scripCache[$ global.__scripOptions.cacheKey];
+	var _parsedText = global.__scripCache[$ _options.cacheKey];
 	if(_parsedText == undefined) {
 		_parsedText = __scriptureParseText(_string)
-		global.__scripCache[$ global.__scripOptions.cacheKey] = _parsedText;
+		global.__scripCache[$ _options.cacheKey] = _parsedText;
 	}
 	
 	global.__scripText = _parsedText;
@@ -182,24 +184,19 @@ function __scriptureGetPageCount(_text = global.__scripText, _options = global._
 }
 
 function __scriptureGetCurrentLine() {
-	var _options = global.__scripOptions;
-	return 	min( _options.currentPage,__scriptureGetPageCount()) * _options.maxLines;
+	return 	min( global.__scripOptions.currentPage,__scriptureGetPageCount()) * global.__scripOptions.maxLines;
 }
 
 function __scriptureIsPageFinished(_cur) {
 	//Be very sure when you clean up this logic, idiot.
 	var _length = array_length(global.__scripText.text);	
+	if(_length <= _cur) return true;
+	
 	var _isPaginated = global.__scripOptions.maxLines > 0;
 	var _curLineNum = _cur - __scriptureGetCurrentLine();
 	var _linePerPage = global.__scripOptions.maxLines;
-	
-	if(_length <= _cur) return true;
-	
-	if(_isPaginated) {
-		return _curLineNum >= _linePerPage
-	}
-	
-	return _length <= _cur
+		
+	return _isPaginated ? _curLineNum >= _linePerPage : _length <= _cur;
 }
 
 function __scriptureIsTyping() {

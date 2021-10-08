@@ -16,7 +16,7 @@ repeat(3) {
 	draw_rectangle(_pos.x, _pos.y, _pos.x + _width, _pos.y+_height, true);
 	_pos.x += _width + _spacing;
 }
-
+draw_set_font(fntBold)
 draw_set_color(c_white);
 draw_scripture(_x, _y, 
 	//"Single Line",

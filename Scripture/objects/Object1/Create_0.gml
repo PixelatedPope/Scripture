@@ -7,7 +7,7 @@ options = {
 		
 		typeSpeed: 1, //0 for instant
 		maxWidth: 0,
-		lineSpacing: 10,
+		lineSpacing: 0,
 		maxLines: 2,
 		currentPage: 0
 }
@@ -29,10 +29,10 @@ options3 = {
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
-		typeSpeed: 0, //0 for instant
+		typeSpeed: .1, //0 for instant
 		maxWidth: 0,
 		lineSpacing: -2,
-		maxLines: 0,
+		maxLines: 3,
 		currentPage: 0
 }
 
