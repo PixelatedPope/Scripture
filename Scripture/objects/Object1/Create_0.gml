@@ -1,19 +1,35 @@
+show_debug_overlay(true)
+
 options = {
-		cacheKey:"test",
+		cacheKey: "Test",
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
 		typeSpeed: 3, //0 for instant
 		maxWidth: 0,
-		lineSpacing: 0,
-		maxLines: 4,
+		lineSpacing: 10,
+		maxLines: 5,
+		currentPage: 0
+}
+
+options2 = {
+		cacheKey: "Test 2",
+		hAlign: fa_center,
+		vAlign: fa_middle,
+		
+		typeSpeed: 3, //0 for instant
+		maxWidth: 0,
+		lineSpacing: 10,
+		maxLines: 5,
 		currentPage: 0
 }
 
 testOptions = function(_x, _y, _width, _height){
 	options.maxWidth = _width;
 	if(keyboard_check_pressed(vk_space)) {
-		scripture_advance_page(options);
+		if(!scripture_advance_page(options)) {
+			//Textbox Is Done
+		}
 	}
 	if(keyboard_check(vk_right))
 		options.hAlign = fa_right;
