@@ -19,8 +19,9 @@ repeat(3) {
 draw_set_font(fntBold)
 draw_set_color(c_white);
 draw_scripture(_x, _y, 
+	testString,
 	//"Single Line",
-	"Page 1 \n test \n Page 2 \n test \n Page 3 \n test \n Page 4",
+	//"<pink>Page 1 \n test \n Page 2 \n test \n Page 3 \n test \n Page 4",
   options);
 
 _x += _width + _spacing;

@@ -5,63 +5,14 @@ Auto wrapping, spacing, kerning, etc.  It's a nightmare.
 
 
 okay, so how do we do this.
-Basic text Features.
-Wrapping and alignment.  No styles.  No images. DONE!
-Add forced line breaks. DONE!
-Add pagination DONE!
-Add typing DONE!
+Basic text Features. DONE!
+Wrapping and alignment. DONE!
+forced line breaks. DONE!
+pagination DONE!
+typing DONE!
+Force Finish Typing / Advance Page DONE!
 
-REFINE --
-Force Finish Typing / Advance Page (50% done)
-
-Text Graph
-draw_scripture(x,y,"this   <style green></img spr_test></style>",options)
-<char><char><char><char><breakable><breakable-tail><breakable-tail><style green></img></style><breakable></br>
-
-Graph Result Structure
-totalWidth
-totalHeight
-linesArray[{
-	width, 
-	height, 
-	characters:[
-		{
-			style, 
-			steps,
-			width,
-			height,
-			draw():width
-		}
-	]
-}]
-
-draw scripture loops through lines array 
-
-options {
-	cacheKey:"",
-	defaultStyle: global.__scriptureDefaultStyle,
-	hAlign: fa_left,
-	vAlign: fa_top,
-	typingPos: -1, //-1 for all
-	maxWidth: 200,
-	lineSpacing: 0,
-	maxLines: -1,
-	currentPage: 0
-}
-
-defaultStyle {
-	color: c_white,
-	alpha: 1,
-	font: -1,
-	kerning: 0,
-}
-
-translation {
-	x,
-	y,
-	
-}
-
-
-{char}{char}{char}{ }{char}{char}{char}{ }{ }
-{char}{char}
+Time To Get Complicated
+consume tags
+consume closing tags
+allow escaped < characters ???

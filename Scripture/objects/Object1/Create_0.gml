@@ -1,16 +1,21 @@
 show_debug_overlay(true)
 
-testString = "Lorem ipsum dolor sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+scripture_add_style("pink", {
+	color: make_color_rgb(255,180,180)
+});
 
+testString = "Lorem ipsum <pink>dolor</pink> sit amet,\n consectetur<pink> adipiscing elit</pink>, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
+defaultStyle = new __scriptureStyle();
 options = {
 		cacheKey: "Test",
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
-		typeSpeed: .1, //0 for instant
+		typeSpeed: 1, //0 for instant
 		maxWidth: 0,
 		lineSpacing: 0,
-		maxLines: 2,
+		maxLines: 10,
 		currentPage: 0
 }
 
@@ -31,10 +36,10 @@ options3 = {
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
-		typeSpeed: .1, //0 for instant
+		typeSpeed: 0, //0 for instant
 		maxWidth: 0,
 		lineSpacing: -2,
-		maxLines: 0,
+		maxLines: 4,
 		currentPage: 0
 }
 
@@ -42,7 +47,7 @@ testOptions = function(_x, _y, _width, _height){
 	options.maxWidth = _width;
 	if(keyboard_check_pressed(vk_space)) {		
 		if(!scripture_advance_page(options))
-			room_restart(); //MEMORY LEAK OR SUPER GENIUS TAKING ADVANTAGE OF CACHE?
+			game_restart(); //MEMORY LEAK OR SUPER GENIUS TAKING ADVANTAGE OF CACHE?
 		
 		scripture_advance_page(options2);
 		scripture_advance_page(options3);

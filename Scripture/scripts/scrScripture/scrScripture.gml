@@ -1,10 +1,35 @@
+//*************************************************************************
+// Hi!  Welcome to Scripture!  Make sure you know what you are doing before
+// making any changes in this file. The consequences could be dire!
+//
+// - Pixelated Pope
+//*************************************************************************
+
 global.__scripCache = {};
 global.__scripText = {};
 global.__scripOptions = {};
 global.__scripString = "";
+global.__scripStyles = {};
+global.__scripProtectedKeys = ["default",__SCRIPTURE_DEFULT_STYLE_KEY,"img"];
+global.__scripStyleStack = [];
+global.__scripActiveStyle = {};
+
+#macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
 
 #region Scripture Constructors
-function __scriptureChar(_char, _style={}) constructor{
+function __scriptureStyle(_style = undefined) constructor {
+	
+	if(_style == undefined) {
+			color = c_white
+			
+			return;
+	}
+	//Return a duplicate of the given style with new key
+	color = _style.color;
+	
+}
+
+function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	char = _char;
 	style = _style; 
 	steps = 0;
@@ -14,6 +39,7 @@ function __scriptureChar(_char, _style={}) constructor{
 	
 	draw = function(_x, _y){
 		steps++;
+		draw_set_color(style.color);
 		draw_text(_x, _y, char);
 		return width;
 	} //:width
@@ -51,13 +77,23 @@ function __scriptureText() constructor {
 	text = [];
 	typePos = 0;
 	getLength = function() { return array_length(text) }
-	getTotalCharacters = function() {
-		var _count = 0;
-		for(var _i = 0; _i < getLength(); _i++) {
-			_count += array_length(text[_i].text);
-		}
-		return _count;
-	}
+	//getTotalCharacters = function() {
+	//	var _count = 0;
+	//	for(var _i = 0; _i < getLength(); _i++) {
+	//		_count += array_length(text[_i].text);
+	//	}
+	//	return _count;
+	//}
+	
+	//getCharactersOnPage = function(_options) {
+	//	if(_options.maxLines <= 0) return getTotalCharacters();
+		
+	//	var _curPage = _options.currentPage;
+	//	var _maxLines = _options.maxLines;
+	//	var _cur = __scriptureGetCurrentLine(id, _options);
+	//	for(var _l = _cur; 
+	//}
+	
 	getHeight = function() {
 		var _start = __scriptureGetCurrentLine(),
 				_count = global.__scripOptions.maxLines,
@@ -88,7 +124,77 @@ function __scriptureText() constructor {
 
 #region Scripture Interal Functions 
 
+function __scripture_style_name_is_protected(_key) {
+	for(var _i = 0; _i < array_length(global.__scripProtectedKeys); _i++) {
+		if(_key == global.__scripProtectedKeys[_i]) return true;	
+	}
+	return false;
+}
+
+function __scriptureHandleTag(_string) {
+	var _tagContent = "";
+	var _isClosingTag = string_char_at(_string,1) == "/";
+	if(_isClosingTag)
+		_string = string_delete(_string,1,1);
+		
+	while(string_char_at(_string,1) != ">") {
+		_tagContent += string_char_at(_string,1);
+		_string = string_delete(_string,1,1);
+		
+		if(string_length(_string) == 0) {
+			show_message("Unclosed Tag Found/n Check your shit, yo.");	
+			game_end();
+		}
+	}
+	_string = string_delete(_string,1,1);
+
+	return {tag: _tagContent, updatedString: _string, isClosingTag: _isClosingTag}
+}
+
+function __scriptureRebuildActiveStyle() {
+	var _style = {};
+	for(var _i = 0; _i < array_length(global.__scripStyleStack); _i++) {
+		var _stackStyle = global.__scripStyleStack[_i];
+		var _props = variable_struct_get_names(_stackStyle)
+    for(var _j = 0; _j < array_length(_props); _j++) {
+      var _prop = _props[_j];
+      if(_prop == "key") continue;
+      _style[$ _prop] = _stackStyle[$ _prop];
+    }
+	}
+	global.__scripActiveStyle = _style;
+}
+
+function __scriptureFindStyleIndex(_key){
+  for(var _i = 0; _i < array_length(global.__scripStyleStack); _i++) {
+    if(global.__scripStyleStack[_i].key == _key) return _i;
+  }
+  return -1;
+}
+
+function __scriptureDequeueStyle(_key) {
+	if(array_length(global.__scripStyleStack) <= 1) return;
+	
+  var _index = __scriptureFindStyleIndex(_key);
+  if(_index == -1) return;
+  array_delete(global.__scripStyleStack,_index,1);
+	__scriptureRebuildActiveStyle();
+}
+
+function __scriptureEnqueueStyle(_key) {
+  var _style = global.__scripStyles[$ _key];
+  if(_style == undefined) return;
+		
+  var _index = __scriptureFindStyleIndex(_key);
+  if(_index != -1) return;
+		
+  array_push(global.__scripStyleStack,_style);
+	__scriptureRebuildActiveStyle();
+}
+
 function __scriptureParseText(_string) {
+	global.__scripStyleStack = [];
+	__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
 	var _result = new __scriptureText();
 	var _curWidth = 0;
 	var _curLine = new __scriptureLine();
@@ -106,7 +212,23 @@ function __scriptureParseText(_string) {
 				_curLine = _newLine;
 				continue;
 			break;
-			case "<": break;//{_text,tag} = __scriptureHandleTag;
+			case "<": 
+				var _tagResult = __scriptureHandleTag(_string);
+				_string = _tagResult.updatedString;
+				switch(_tagResult.tag) {
+					case "img": 
+					
+					break;
+					default: //Handle Styles
+						if(global.__scripStyles[$ _tagResult.tag] == undefined) continue;
+						
+						if(_tagResult.isClosingTag) {
+							__scriptureDequeueStyle(_tagResult.tag);
+						} else {
+							__scriptureEnqueueStyle(_tagResult.tag);
+						}
+				}
+			break;
 			
 			case "-":				
 				var _space = new __scriptureChar(_char)
@@ -127,6 +249,7 @@ function __scriptureParseText(_string) {
 			
 			default: //Character
 				var _newChar = new __scriptureChar(_char);
+				_newChar.style = new __scriptureStyle(global.__scripActiveStyle);
 				_curWidth += _newChar.width;
 				array_push(_curLine.text, _newChar);
 		}
@@ -197,8 +320,8 @@ function __scriptureGetPageCount(_text = global.__scripText, _options = global._
 	return 	floor(_text.getLength() / _options.maxLines);
 }
 
-function __scriptureGetCurrentLine() {
-	return 	min( global.__scripOptions.currentPage,__scriptureGetPageCount()) * global.__scripOptions.maxLines;
+function __scriptureGetCurrentLine(_text = global.__scripText, _options = global.__scripOptions) {
+	return 	min( _options.currentPage, __scriptureGetPageCount(_text, _options)) * _options.maxLines;
 }
 
 function __scriptureIsPageFinished(_cur) {
@@ -213,36 +336,39 @@ function __scriptureIsPageFinished(_cur) {
 	return _isPaginated ? _curLineNum >= _linePerPage : _length <= _cur;
 }
 
-function __scriptureIsTyping() {
-	return global.__scripOptions.typeSpeed > 0;	
+function __scriptureIsTyping(_options = global.__scripOptions) {
+	return _options.typeSpeed > 0;	
 }
 
 #endregion
 
-function scripture_advance_page(_options){
+function scripture_advance_page(_options) {
 	var _text = global.__scripCache[$ _options.cacheKey];
 	if(_text == undefined) return;
 
 	//finish typing this page
-	if(__scriptureIsTyping() && _text.typePos < _text.getTotalCharacters()) {
-		_text.typePos = _text.getTotalCharacters();
+	
+	if(__scriptureIsTyping(_options) && !_text.complete) { //_text.typePos < _text.getCharactersOnPage(_options)) {
+		_text.typePos = infinity;
 		return true;
 	} else if(_options.maxLines > 0 && _options.currentPage < __scriptureGetPageCount(_text,_options )){
 		_options.currentPage++;
 		_text.typePos = 0;
+		_text.complete = false;
 		return true;
 	}
 	return false;
 }
 
-function draw_scripture(_x, _y, _string, _options){
+function draw_scripture(_x, _y, _string, _options) {
 	draw_set_halign(fa_left);
 	draw_set_valign(fa_top);
 	
 	__scriptureGetCachedText(_string, _options)
 	if(__scriptureIsTyping())
 		global.__scripText.progressType(_options.typeSpeed);
-
+		
+	global.__scripText.complete = false;
 	var	_drawX,
 			_text = global.__scripText.text,
 			_pos = 0,
@@ -263,5 +389,28 @@ function draw_scripture(_x, _y, _string, _options){
 		_drawY += _lineHeight + _options.lineSpacing;
 	}
 	
-	return global.__scripText;
+	global.__scripText.complete = true;
+	
+}
+	
+function scripture_add_style(_key, _style) {
+	if(__scripture_style_name_is_protected(_key) || global.__scripStyles[$ _key] != undefined) {
+		show_debug_message("Style keys must be unique")
+		return;
+	}
+	_style.key = _key;
+	global.__scripStyles[$ _key] = _style;
+}
+
+function scripture_set_default_style(_style){
+	global.__scripStyles.defaultStyle = _style;
+	global.__scripStyles.defaultStyle.key = "defaultStyle";
+}
+scripture_set_default_style(new __scriptureStyle());
+
+function scripture_clear_cache(_key = undefined) {
+	if(_key == undefined)
+		global.__scripCache = {}
+	else
+		variable_struct_remove(global.__scripCache, _key);
 }
