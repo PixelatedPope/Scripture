@@ -19,8 +19,8 @@ options2 = {
 		
 		typeSpeed: 0, //0 for instant
 		maxWidth: 0,
-		lineSpacing: 10,
-		maxLines: 5,
+		lineSpacing: 0,
+		maxLines: 0,
 		currentPage: 0
 }
 

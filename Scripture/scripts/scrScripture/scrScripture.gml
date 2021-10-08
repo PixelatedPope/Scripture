@@ -101,6 +101,13 @@ function __scriptureParseText(_string) {
 			break;
 			case "<": break;//{_text,tag} = __scriptureHandleTag;
 			
+			case "-":				
+				var _space = new __scriptureChar(_char)
+				array_push(_curLine.text,_space);
+				_curWidth += _space.width;
+				_lastSpace = array_length(_curLine.text);
+			break;
+			
 			case " ":
 				var _currentLength = array_length(_curLine.text);
 				if(_currentLength == 0) continue;
