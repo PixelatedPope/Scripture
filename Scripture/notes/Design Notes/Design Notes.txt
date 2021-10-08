@@ -8,9 +8,10 @@ okay, so how do we do this.
 Basic text Features.
 Wrapping and alignment.  No styles.  No images. DONE!
 Add forced line breaks. DONE!
-Add pagination
+Add pagination DONE!
 Add typing DONE!
 
+REFINE --
 
 Text Graph
 draw_scripture(x,y,"this   <style green></img spr_test></style>",options)

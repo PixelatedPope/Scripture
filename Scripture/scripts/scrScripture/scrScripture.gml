@@ -1,18 +1,9 @@
 global.__scriptureCache = {};
+global.__scriptureText = {};
+global.__scriptureOptions = {};
+global.__scriptureString = "";
 
-/*
-var _options = {
-	cacheKey:"test",
-	hAlign: fa_left,
-	vAlign: fa_top,
-	//typingPos: -1, //-1 for all
-	maxWidth: 200,
-	//lineSpacing: 0,
-	//maxLines: -1,
-	//currentPage: 0
-}
-*/
-
+#region Scripture Constructors
 function __scriptureChar(_char, _style={}) constructor{
 	char = _char;
 	style = _style; 
@@ -53,29 +44,41 @@ function __scriptureLine() constructor {
 	
 }
 
-function __scriptureParseText(_text,_options) {
-	var _result = {
-		totalWidth: 0,
-		totalHeight: 0,
-		text: [],
-		getHeight: function(_start, _count) {
-			var _height = 0;
-			for(var _i = _start; _i < _start + _count; _i++) {
-				if(_i >= array_length(text))
-					return _height;
-				_height += text[_i].height;
-			}
-			return _height;
+function __scriptureText() constructor {
+	totalWidth = 0;
+	totalHeight = 0;
+	text = [];
+	typePos = 0;
+	pageCompleted = false;
+	
+	getHeight = function(_start, _count) {
+		var _height = 0;
+		for(var _i = _start; _i < _start + _count; _i++) {
+			if(_i >= array_length(text))
+				return _height;
+			_height += text[_i].height;
 		}
-	};
+		return _height;
+	}
+	
+	progressType = function(_amount) {
+		typePos+=_amount;	
+	}
+}
+
+#endregion
+
+#region Scripture Interal Functions 
+
+function __scriptureParseText(_string) {
+	var _result = new __scriptureText();
 	var _curWidth = 0;
 	var _curLine = new __scriptureLine();
 	_result.text[0] = _curLine;
 	var _lastSpace = 0;
-	
-	while(string_length(_text) > 0) {
-		var _char = string_char_at(_text,0);
-		_text = string_delete(_text,1,1);
+	while(string_length(_string) > 0) {
+		var _char = string_char_at(_string,0);
+		_string = string_delete(_string,1,1);
 		switch(_char) {
 			case "\n": 
 				var _newLine = new __scriptureLine();
@@ -104,7 +107,7 @@ function __scriptureParseText(_text,_options) {
 		}
 		
 		//Handle Wrapping
-		if(_curWidth > _options.maxWidth) {
+		if(_curWidth > global.__scriptureOptions.maxWidth) {
 			var _newLine = new __scriptureLine();
 			array_push(_result.text,_newLine);
 			var _length = array_length(_curLine.text) - _lastSpace;
@@ -133,48 +136,99 @@ function __scriptureParseText(_text,_options) {
 	return _result;
 }
 
-#macro __scriptureCurrentLine	min(_options.currentPage,_pageCount) * _options.maxLines
+function __scriptureApplyVAlign(_y) {
+	var _options = global.__scriptureOptions;
+	switch(_options.vAlign) {
+		case fa_top:    return _y;
+		case fa_bottom: return _y - (_options.maxLines == 0 
+																 ? global.__scriptureText.totalHeight 
+																 : global.__scriptureText.getHeight(__scriptureGetCurrentLine(), _options.maxLines)); 
+		case fa_middle: return _y - (_options.maxLines == 0 
+																 ? global.__scriptureText.totalHeight / 2 
+																 : global.__scriptureText.getHeight(__scriptureGetCurrentLine(), _options.maxLines)); 
+	}	
+}
+
+function __scriptureApplyHAlign(_x, _line) {
+		switch(global.__scriptureOptions.hAlign) {
+			case fa_left: return _x;
+			case fa_right: return _x - _line.width; break;
+			case fa_center: return _x - _line.width / 2; break;
+	}	
+}
+
+function __scriptureGetCachedText(_string, _options) {
+	global.__scriptureString = _string;
+	global.__scriptureOptions = _options;
+	var _parsedText = global.__scriptureCache[$ global.__scriptureOptions.cacheKey];
+	if(_parsedText == undefined) {
+		_parsedText = __scriptureParseText(_string)
+		global.__scriptureCache[$ global.__scriptureOptions.cacheKey] = _parsedText;
+	}
+	
+	global.__scriptureText = _parsedText;
+}
+
+function __scriptureGetPageCount() {
+	return 	floor(array_length(global.__scriptureText.text) / global.__scriptureOptions.maxLines)-1;
+}
+
+function __scriptureGetCurrentLine() {
+	var _options = global.__scriptureOptions;
+	return 	min( _options.currentPage,__scriptureGetPageCount()) * _options.maxLines;
+}
+
+function __scriptureIsPageFinished(_cur) {
+	var _outOfText = array_length(global.__scriptureText) <= _cur
+	var _endOfPage = global.__scriptureOptions.maxLines <= _cur - __scriptureGetCurrentLine()
+	return  _outOfText || _endOfPage;
+}
+
+function __scriptureIsTyping() {
+	return global.__scriptureOptions.typeSpeed > 0;	
+}
+
+#endregion
+
+function scripture_advance_page(_options){
+	var _text = global.__scriptureCache[$ global.__scriptureOptions.cacheKey];
+	if(_text == undefined) return;
+	
+	_options.currentPage++;
+	_options.typePos = 0;
+	
+}
 
 function draw_scripture(_x, _y, _string, _options){
-	var _parsedText = global.__scriptureCache[$ _options.cacheKey];
-	if(_parsedText == undefined) {
-		_parsedText = __scriptureParseText(_string, _options)
-		global.__scriptureCache[$ _options.cacheKey] = _parsedText;
-	}
-	
 	draw_set_halign(fa_left);
 	draw_set_valign(fa_top);
+	
+	__scriptureGetCachedText(_string, _options)
+	if(__scriptureIsTyping())
+		global.__scriptureText.progressType(_options.typeSpeed);
 
-	var _text = _parsedText.text;
-	var _drawY;
-	var _drawX;
-	var _pos = 0;
-	var _pageCount = floor(array_length(_text) / _options.maxLines)-1;
-	switch(_options.vAlign) {
-		case fa_top: _drawY = _y; break;
-		case fa_bottom: _drawY = _y - (_options.maxLines == 0 ? _parsedText.totalHeight : _parsedText.getHeight(__scriptureCurrentLine,_options.maxLines)); break;
-		case fa_middle:  _drawY = _y - (_options.maxLines == 0 ? _parsedText.totalHeight / 2 : _parsedText.getHeight(__scriptureCurrentLine,_options.maxLines)); break;
-	}
+	var	_drawX,
+			_text = global.__scriptureText.text,
+			_pos = 0,
+		  _drawY = __scriptureApplyVAlign(_y);
 	
 	
-	for(var _l = __scriptureCurrentLine; _l < array_length(_text) && _l - __scriptureCurrentLine < _options.maxLines; _l++) {
-		switch(_options.hAlign) {
-			case fa_left: _drawX = _x; break;
-			case fa_right: _drawX = _x - _text[_l].width; break;
-			case fa_center: _drawX = _x - _text[_l].width / 2; break;
-		}
-		//var _startX = _drawX;
-		//var _startY = _drawY;
+	for(var _l = __scriptureGetCurrentLine(); !__scriptureIsPageFinished(_l); _l++) {
+		if(_l == 24)
+			__scriptureIsPageFinished(_l);
+		_drawX = __scriptureApplyHAlign(_x, _text[_l]);
 		var _lineHeight = _text[_l].height;
 		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
-			if(_options.typePos != -1 && _pos >= _options.typePos) return;
+			if(__scriptureIsTyping && _pos >= global.__scriptureText.typePos) return;
+			
 			_char = _text[_l].text[_c];
 			_drawX += _char.draw(_drawX,_drawY);
-			if(_char.height > _lineHeight) _lineHeight = _char.height;
+			if(_char.height > _lineHeight) 
+				_lineHeight = _char.height;
 			_pos++;
 		}
 		_drawY += _lineHeight + _options.lineSpacing;
-		//draw_rectangle(_startX, _startY, _drawX, _drawY,true);
-		//draw_rectangle(_startX, _startY, _startX + _text[_l].width, _startY + _text[_l].height,true);
 	}
+	
+	return global.__scriptureText;
 }
