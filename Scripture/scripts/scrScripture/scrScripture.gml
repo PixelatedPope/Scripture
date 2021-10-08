@@ -58,6 +58,15 @@ function __scriptureParseText(_text,_options) {
 		totalWidth: 0,
 		totalHeight: 0,
 		text: [],
+		getHeight: function(_start, _count) {
+			var _height = 0;
+			for(var _i = _start; _i < _start + _count; _i++) {
+				if(_i >= array_length(text))
+					return _height;
+				_height += text[_i].height;
+			}
+			return _height;
+		}
 	};
 	var _curWidth = 0;
 	var _curLine = new __scriptureLine();
@@ -124,6 +133,8 @@ function __scriptureParseText(_text,_options) {
 	return _result;
 }
 
+#macro __scriptureCurrentLine	min(_options.currentPage,_pageCount) * _options.maxLines
+
 function draw_scripture(_x, _y, _string, _options){
 	var _parsedText = global.__scriptureCache[$ _options.cacheKey];
 	if(_parsedText == undefined) {
@@ -135,28 +146,32 @@ function draw_scripture(_x, _y, _string, _options){
 	draw_set_valign(fa_top);
 
 	var _text = _parsedText.text;
-	var _drawY = _y;
+	var _drawY;
+	var _drawX;
+	var _pos = 0;
+	var _pageCount = floor(array_length(_text) / _options.maxLines)-1;
 	switch(_options.vAlign) {
 		case fa_top: _drawY = _y; break;
-		case fa_bottom: _drawY = _y - _parsedText.totalHeight; break;
-		case fa_middle:  _drawY = _y - _parsedText.totalHeight / 2; break;
+		case fa_bottom: _drawY = _y - (_options.maxLines == 0 ? _parsedText.totalHeight : _parsedText.getHeight(__scriptureCurrentLine,_options.maxLines)); break;
+		case fa_middle:  _drawY = _y - (_options.maxLines == 0 ? _parsedText.totalHeight / 2 : _parsedText.getHeight(__scriptureCurrentLine,_options.maxLines)); break;
 	}
 	
-	var _drawX;
-	for(var _l = 0; _l < array_length(_text); _l++) {
-		
+	
+	for(var _l = __scriptureCurrentLine; _l < array_length(_text) && _l - __scriptureCurrentLine < _options.maxLines; _l++) {
 		switch(_options.hAlign) {
 			case fa_left: _drawX = _x; break;
 			case fa_right: _drawX = _x - _text[_l].width; break;
-			case fa_center:  _drawX = _x - _text[_l].width / 2; break;
+			case fa_center: _drawX = _x - _text[_l].width / 2; break;
 		}
 		//var _startX = _drawX;
 		//var _startY = _drawY;
 		var _lineHeight = _text[_l].height;
 		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
+			if(_options.typePos != -1 && _pos >= _options.typePos) return;
 			_char = _text[_l].text[_c];
 			_drawX += _char.draw(_drawX,_drawY);
 			if(_char.height > _lineHeight) _lineHeight = _char.height;
+			_pos++;
 		}
 		_drawY += _lineHeight + _options.lineSpacing;
 		//draw_rectangle(_startX, _startY, _drawX, _drawY,true);

@@ -1,26 +1,22 @@
-/// @description 
-//scripture_define_style("yellow",{
-//	color: c_yellow,
-//});
-//scripture_define_style("green",{
-//	color: c_green,
-//});
-//scripture_define_style("mashed", {
-//	kerning: 0,
-//});
+typePos = 0;
+currentPage = 0;
 
 testOptions = function(_x, _y, _width, _height){
 	var _options = {
 		cacheKey:"test",
 		hAlign: fa_center,
 		vAlign: fa_middle,
-		//typingPos: -1, //-1 for all
+		typePos: -1,// for all
 		maxWidth: _width,
 		lineSpacing: 0,
-		//maxLines: -1,
-		//currentPage: 0
+		maxLines: 4,
+		currentPage: currentPage
 	}
 
+	typePos += .25;
+
+	if(keyboard_check_pressed(vk_space)) 
+		currentPage++;
 	if(keyboard_check(vk_right))
 		_options.hAlign = fa_right;
 	if(keyboard_check(vk_left))
@@ -42,6 +38,6 @@ testOptions = function(_x, _y, _width, _height){
 			case fa_right: _y+=_height; break;
 			case fa_middle: _y+=_height/2; break;
 	}
-
+	
 	return {x: _x, y: _y, options: _options}
 }

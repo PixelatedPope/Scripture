@@ -1,6 +1,6 @@
 /// @description
 
-var _width = 600;
+var _width = 200;
 var _height = 400;
 var _spacing = 50;
 
@@ -8,6 +8,8 @@ var _test = testOptions(10,30, _width, _height);
 var _options = _test.options;
 var _x = _test.x;
 var _y = _test.y;
+
+
 
 draw_rectangle(10, 30, 10+_options.maxWidth, 30+_height, true);
 draw_scripture(_x, _y, 

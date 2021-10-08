@@ -9,7 +9,7 @@ Basic text Features.
 Wrapping and alignment.  No styles.  No images. DONE!
 Add forced line breaks. DONE!
 Add pagination
-Add typing
+Add typing DONE!
 
 
 Text Graph
