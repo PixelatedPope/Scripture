@@ -5,8 +5,8 @@ show_debug_overlay(true)
 scripture_add_style("spin", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 			var _dir = (_steps+_pos) * 5;
-			_char.xOff = lengthdir_x(5,	_dir);
-			_char.yOff = lengthdir_y(5, _dir);
+			//_char.xOff = lengthdir_x(5,	_dir);
+			//_char.yOff = lengthdir_y(5, _dir);
 			_char.angle = _dir;
 			//_char.alpha = lengthdir_x(1,	_dir);
 			
@@ -27,6 +27,11 @@ scripture_add_style("color", {
 scripture_add_style("slow down", {
 	font: fntDefault,
 	speedMod: .1
+});
+
+scripture_add_style("tight", {
+	font: fntBold,
+	kerning: -5,	
 });
 
 scripture_add_style("flyin", {
@@ -77,7 +82,7 @@ scripture_add_style("small", {
 	font: fntDefault
 });
 
-testString = "<color><shutter><bleep>Lorem ipsum DOLOR <squiggle> sit amet,\n consectetur<pink> adipiscing elit, <slow down>sed do eiusmod tempor</slow down> incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+testString = "<bold><tight><bleep>Lorem ipsum DOLOR <spin><squiggle> <squiggle> <squiggle></spin> sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 defaultStyle = new __scriptureStyle();
 options = {

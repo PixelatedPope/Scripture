@@ -28,6 +28,7 @@ function __scriptureStyle(_style = undefined) constructor {
 			color = c_white;
 			font = -1;
 			speedMod = 1;
+			kerning = 0;
 			onDraw = function(){};
 			return;
 	}
@@ -35,6 +36,7 @@ function __scriptureStyle(_style = undefined) constructor {
 	color = _style.color;
 	font = _style.font;
 	speedMod = _style.speedMod;
+	kerning = _style.kerning;
 	onDraw = _style.onDraw;
 }
 
@@ -46,12 +48,12 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 	style = _style;
 	steps = 0;
 	
-	width = sprite_get_width(sprite);
+	width = sprite_get_width(sprite) + style.kerning;
 	height = sprite_get_height(sprite);
 	centerX = width/2;
 	centerY = height/2;
-	originX = sprite_get_xoffset(sprite);
-	originY = sprite_get_yoffset(sprite);
+	//originX = sprite_get_xoffset(sprite);
+	//originY = sprite_get_yoffset(sprite);
 	alpha = 1;
 	xScale = 1;
 	yScale = 1;
@@ -80,7 +82,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	style = _style; 
 	steps = 0;
 	draw_set_font(style.font);
-	width = string_width(char);
+	width = string_width(char) + style.kerning;
 	height = string_height(char);
 	centerX = width/2;
 	centerY = height/2;
@@ -113,10 +115,10 @@ function __scriptureLine() constructor {
 	height = 0;
 	text = [];
 	trimWhiteSpace = function(){
-		while(array_length(text) != 0 && (variable_struct_exists(text[0],"char") && text[0].char == " "))
+		while(array_length(text) != 0 && (text[0].type == SCRIPTURE_TYPE_CHAR && text[0].char == " "))
 			array_delete(text[0],0,1);
 		
-		while(array_length(text) > 1 && text[array_length(text)-1].char == " ")
+		while(array_length(text) > 1 && (text[array_length(text)-1].type == SCRIPTURE_TYPE_CHAR && text[array_length(text)-1].char == " "))
 			array_delete(text,array_length(text)-1,1);
 			
 	}

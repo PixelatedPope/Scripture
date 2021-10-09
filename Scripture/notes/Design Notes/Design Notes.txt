@@ -20,8 +20,8 @@ soundEffects DONE!!!
 
 
 Support Image "characters" DONE!
-Support Kerning
-Support Speed Adjustments
+Support Kerning DONE!
+Support Speed Adjustments DONE!
 Support "Event" "characters"
 
 Bonus?
