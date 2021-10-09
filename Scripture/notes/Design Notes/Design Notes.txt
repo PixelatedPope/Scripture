@@ -18,10 +18,13 @@ consume closing tags DONE!
 onDraw Function DONE!!!
 soundEffects DONE!!!
 
-Set Step for all characters on page advance to something really high
-Support Image "characters"
+
+Support Image "characters" DONE!
 Support "Event" "characters"
+Support Kerning
+Support Speed Adjustments
 
 Bonus?
-Set default style
-Allow escaped < characters ???
+Test setting default style
+Set Step for all characters on page advance to something really high?
+Allow escaped < characters?  Allow changing of open/close tag characters?

@@ -3,30 +3,54 @@ show_debug_overlay(true)
 //scripture_set_default_style({})
 
 scripture_add_style("spin", {
-	onDraw: function(_char, _steps, _pos) {
+	onDraw: function(_x, _y, _char, _steps, _pos) {
 			var _dir = (_steps+_pos) * 5;
 			_char.xOff = lengthdir_x(5,	_dir);
 			_char.yOff = lengthdir_y(5, _dir);
 			_char.angle = _dir;
-			_char.alpha = lengthdir_x(1,	_dir);
+			//_char.alpha = lengthdir_x(1,	_dir);
 			
 		}
 });
 
 scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft);
 
-scripture_add_style("pink", {
-	color: make_color_rgb(255,180,180),
-	onDraw: function(_char, _steps, _pos) {
-			var _dir = (_steps+_pos) * 3;
-			_char.alpha = lengthdir_x(1,	_dir);
-			_char.angle = _dir * 1.5;
+//scripture_add_style("pink", {
+//	color: make_color_rgb(255,180,180),
+//	onDraw: function(_x, _y, _char, _steps, _pos) {
+//			var _dir = (_steps+_pos) * 3;
+//			_char.alpha = lengthdir_x(1,	_dir);
+//			_char.angle = _dir * 1.5;
+//		}
+//});
+
+scripture_add_style("flyin", {
+	onDraw: function(_x, _y, _char, _steps, _pos) {
+		if(_steps == 0) {
+			_char.startX = -20;
+			_char.startY = -40;
 		}
+		var _percent = clamp(_steps / room_speed,0,1);
+		//_char.alpha =_pos;
+		_char.xOff = twerp(TwerpType.out_cubic,_char.startX,0,_percent);
+		_char.yOff = twerp(TwerpType.out_back,_char.startY,0,_percent);
+		
+	}
+});
+
+scripture_add_style("firework", {
+	onDraw: function(_x, _y, _char, _steps, _pos) {
+		if(_steps != 0 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
+		
+		effect_create_above(ef_firework,_x + random_range(-5,5), _y + random_range(-5,5), 0,make_color_hsv(irandom(255),255,255))
+		
+	}
 });
 
 scripture_add_style("bleep", {
-		onDraw: function(_char, _steps, _pos) {
-			if(_steps == 0) audio_play_sound_unique(sndBeep, 10, false, false, .5)	
+		onDraw: function(_x, _y, _char, _steps, _pos) {
+			if(_steps != 0 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
+			audio_play_sound_unique(sndBeep, 10, false, false, .25)	
 		}
 })
 
@@ -38,7 +62,7 @@ scripture_add_style("small", {
 	font: fntDefault
 });
 
-testString = "<small><bleep><spin><squiggle><squiggle><squiggle>Lorem ipsum <pink><bold>DOLOR</bold></pink> sit amet</spin>,\n consectetur<pink> adipiscing elit</pink>, sed do eiusmod tempor</bold> incididunt<img sprSquiggle24x24TopLeft> ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</bleep></small>"
+testString = "<flyin>Lorem ipsum DOLOR sit amet,\n consectetur<pink> adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 defaultStyle = new __scriptureStyle();
 options = {
@@ -46,10 +70,10 @@ options = {
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
-		typeSpeed: 1, //0 for instant
+		typeSpeed: .25, //0 for instant
 		maxWidth: 0,
 		lineSpacing: 0,
-		maxLines: 1,
+		maxLines: 10,
 		currentPage: 0
 }
 

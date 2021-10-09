@@ -10,19 +10,20 @@ global.__scripText = {};
 global.__scripOptions = {};
 global.__scripString = "";
 global.__scripStyles = {};
-global.__scripProtectedKeys = ["default",__SCRIPTURE_DEFULT_STYLE_KEY,"img"];
+global.__scripProtectedKeys = ["default", __SCRIPTURE_DEFULT_STYLE_KEY];
 global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
 
 #macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
-#macro __SCRIPTURE_TYPE_STYLE 0
-#macro __SCRIPTURE_TYPE_IMG 1
-#macro __SCRIPTURE_TYPE_EVENT 2
+#macro SCRIPTURE_TYPE_STYLE 0
+#macro SCRIPTURE_TYPE_IMG 1
+#macro SCRIPTURE_TYPE_EVENT 2
+#macro SCRIPTURE_TYPE_CHAR 3
 
 
 #region Scripture Constructors
 function __scriptureStyle(_style = undefined) constructor {
-	type = __SCRIPTURE_TYPE_STYLE
+	type = SCRIPTURE_TYPE_STYLE
 	if(_style == undefined) {
 			color = c_white;
 			font = -1;
@@ -36,7 +37,7 @@ function __scriptureStyle(_style = undefined) constructor {
 }
 
 function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
-	type = __SCRIPTURE_TYPE_IMG;
+	type = SCRIPTURE_TYPE_IMG;
 	sprite = _spr;
 	image = 0;
 	speed = sprite_get_speed_type(_spr) == spritespeed_framespergameframe ? sprite_get_speed(sprite) : sprite_get_speed(sprite) / room_speed;
@@ -58,7 +59,7 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 	
 	draw = function(_x, _y, _index, _lineHeight) {
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](self,steps, _index);	
+			style.onDraw[_i](_x, _y, self, steps, _index);	
 		}
 		steps++;
 		
@@ -72,6 +73,7 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 }
 
 function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
+	type = SCRIPTURE_TYPE_CHAR
 	char = _char;
 	style = _style; 
 	steps = 0;
@@ -89,16 +91,15 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	
 	draw = function(_x, _y, _index, _lineHeight){
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](self,steps, _index);	
+			style.onDraw[_i](_x, _y, self, steps, _index);	
 		}
-		
 		steps++;
 
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(alpha);
 		draw_text_transformed(_x + centerX + xOff, 
-													_y + centerY + yOff + _lineHeight - height, 
+													_y + centerY + yOff,// + _lineHeight - height, 
 													char, xScale, yScale, angle);
 		return width;
 	} //:width
@@ -282,7 +283,7 @@ function __scriptureParseText(_string) {
 				var _style = global.__scripStyles[$ _tagResult.tag];
 				if(_style == undefined) continue;
 				switch(_style.type){
-					case __SCRIPTURE_TYPE_STYLE:
+					case SCRIPTURE_TYPE_STYLE:
 						if(_tagResult.isClosingTag) {
 							__scriptureDequeueStyle(_tagResult.tag);
 						} else {
@@ -290,13 +291,13 @@ function __scriptureParseText(_string) {
 						}
 					break;
 						
-					case __SCRIPTURE_TYPE_IMG:
+					case SCRIPTURE_TYPE_IMG:
 						var _newImg = new __scriptureImg(_style.sprite, new __scriptureStyle(global.__scripActiveStyle));
 						_curWidth += _newImg.width;
 						array_push(_curLine.text, _newImg);
 					break;
 					
-					case __SCRIPTURE_TYPE_EVENT:
+					case SCRIPTURE_TYPE_EVENT:
 						
 					break;
 				}
@@ -388,8 +389,6 @@ function __scriptureGetCachedText(_string, _options) {
 }
 
 function __scriptureGetPageCount(_text = global.__scripText, _options = global.__scripOptions) {
-	var _length = _text.getLength();
-	var _maxLines = _options.maxLines;
 	return 	ceil(_text.getLength() / _options.maxLines)-1;
 }
 
@@ -457,7 +456,6 @@ function scripture_advance_page(_options) {
 	if(_text == undefined) return;
 
 	//finish typing this page
-	var _pageCount = __scriptureGetPageCount(_text, _options);
 	if(__scriptureIsTyping(_options) && !_text.complete) {
 		_text.typePos = infinity;
 		return true;
@@ -471,18 +469,18 @@ function scripture_advance_page(_options) {
 }
 	
 function scripture_add_style(_key, _style) {
-	if(__scripture_style_name_is_protected(_key) || global.__scripStyles[$ _key] != undefined) {
-		show_debug_message("Key must be unique")
+	if(__scripture_style_name_is_protected(_key)) {
+		show_debug_message("Attempted to use a protected Scripture Tag.  Sorry.")
 		return;
 	}
 	_style.key = _key;
-	_style.type = __SCRIPTURE_TYPE_STYLE;
+	_style.type = SCRIPTURE_TYPE_STYLE;
 	global.__scripStyles[$ _key] = _style;
 }
 
 function scripture_register_sprite(_key, _sprite) {
-	if(__scripture_style_name_is_protected(_key) || global.__scripStyles[$ _key] != undefined) {
-		show_debug_message("Key must be unique")
+	if(__scripture_style_name_is_protected(_key)) {
+		show_debug_message("Attempted to use a protected Scripture Tag.  Sorry.")
 		return;
 	}
 	
@@ -492,7 +490,7 @@ function scripture_register_sprite(_key, _sprite) {
 	}
 	
 	global.__scripStyles[$ _key] = {
-		type: __SCRIPTURE_TYPE_IMG,
+		type: SCRIPTURE_TYPE_IMG,
 		sprite: _sprite,
 		key: _key
 	}
