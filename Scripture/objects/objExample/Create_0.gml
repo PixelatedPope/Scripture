@@ -2,7 +2,7 @@ show_debug_overlay(true)
 
 scripture_set_tag_characters("[","]");
 
-scripture_add_style("spin", {
+scripture_register_style("spin", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 			var _dir = (_steps+_pos) * 5;
 			_char.angle = _dir;
@@ -12,7 +12,7 @@ scripture_add_style("spin", {
 scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft);
 scripture_register_event("show message", function(){ show_message("Yup") });
 
-scripture_add_style("color", {
+scripture_register_style("color", {
 	font: fntBold,
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		if(_steps == 0)
@@ -20,25 +20,24 @@ scripture_add_style("color", {
 	}
 });
 
-scripture_add_style("slow down", {
+scripture_register_style("slow down", {
 	font: fntDefault,
 	speedMod: .1
 });
 
-scripture_add_style("tight", {
+scripture_register_style("tight", {
 	font: fntBold,
 	kerning: -5,	
 });
 
-scripture_add_style("flyin", {
+scripture_register_style("flyin", {
 	font: fntBold,
 	color: c_yellow,
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		
-		if(_steps == 0) {
-			_char.startX = -20;
-			_char.startY = -100;
-		}
+		_char.startX = -20;
+		_char.startY = -100;
+		
 		
 		var _percent = clamp(_steps / room_speed,0,1);
 		_char.alpha = _percent * 2;
@@ -49,14 +48,14 @@ scripture_add_style("flyin", {
 	}
 });
 
-scripture_add_style("shutter", {
+scripture_register_style("shutter", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		var _percent = clamp(_steps / room_speed,0,1);
 		_char.xScale = twerp(TwerpType.out_expo,0,1,_percent);
 	}
 });
 
-scripture_add_style("fireworks", {
+scripture_register_style("fireworks", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		if(_steps != 0 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
 		
@@ -65,24 +64,24 @@ scripture_add_style("fireworks", {
 	}
 });
 
-scripture_add_style("bleep", {
+scripture_register_style("bleep", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		if(_steps != 10 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
 		audio_play_sound_unique(sndBeep, 10, false, false, .25)	
 	}
 })
 
-scripture_add_style("bold", {
+scripture_register_style("bold", {
 	font: fntBold
 });
 
-scripture_add_style("small", {
+scripture_register_style("small", {
 	font: fntDefault
 });
 
 scripture_set_default_style("flyin");
 
-testString = "Lorem ipsum DOLOR sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+testString = "Lorem ipsum DOLOR sit amet,\n consectetur adipiscing[squiggle][show message] elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 defaultStyle = new __scriptureStyle();
 options = {
@@ -124,7 +123,7 @@ options3 = {
 testOptions = function(_x, _y, _width, _height){
 	options.maxWidth = _width;
 	if(keyboard_check_pressed(vk_space)) {		
-		if(!scripture_advance_page(options))
+		if(!scripture_advance_page(options, true))
 			game_restart(); //MEMORY LEAK OR SUPER GENIUS TAKING ADVANTAGE OF CACHE?
 		
 		scripture_advance_page(options2);

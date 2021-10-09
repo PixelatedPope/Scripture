@@ -478,13 +478,23 @@ function draw_scripture(_x, _y, _string, _options) {
 }
 
 
-function scripture_advance_page(_options) {
+function scripture_advance_page(_options, _shortcutAnimations = true) {
 	var _text = global.__scripCache[$ _options.cacheKey];
 	if(_text == undefined) return;
 
 	//finish typing this page
 	if(__scriptureIsTyping(_options) && !_text.complete) {
 		_text.typePos = infinity;
+		if(_shortcutAnimations) {
+			var _start = _options.currentPage * _options.maxLines;
+			var _end = _start + _options.maxLines;
+			for(var _l = _start; _l < _end && _l < array_length(_text.text); _l++) {
+				for(var _c = 0; _c < array_length(_text.text[_l].text); _c++) {
+						var _char = _text.text[_l].text[_c];
+						_char.steps = 1000000;
+				}
+			}
+		}
 		return true;
 	} else if(_options.maxLines > 0 && _options.currentPage < __scriptureGetPageCount(_text,_options )){
 		_options.currentPage++;
@@ -495,7 +505,7 @@ function scripture_advance_page(_options) {
 	return false;
 }
 	
-function scripture_add_style(_key, _style) {
+function scripture_register_style(_key, _style) {
 	if(__scriptureStyleNameIsProtected(_key)) return;
 	_style.key = _key;
 	_style.type = SCRIPTURE_TYPE_STYLE;
