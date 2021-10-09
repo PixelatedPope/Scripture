@@ -15,41 +15,44 @@ scripture_add_style("spin", {
 
 scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft);
 
-//scripture_add_style("pink", {
-//	color: make_color_rgb(255,180,180),
-//	onDraw: function(_x, _y, _char, _steps, _pos) {
-//			var _dir = (_steps+_pos) * 3;
-//			_char.alpha = lengthdir_x(1,	_dir);
-//			_char.angle = _dir * 1.5;
-//		}
-//});
 
-scripture_add_style("flyin", {
+scripture_add_style("color", {
+	font: fntBold,
 	onDraw: function(_x, _y, _char, _steps, _pos) {
-		if(_steps == 0) {
-			_char.startX = -20;
-			_char.startY = -40;
-		}
-		var _percent = clamp(_steps / room_speed,0,1);
-		//_char.alpha =_pos;
-		_char.xOff = twerp(TwerpType.out_cubic,_char.startX,0,_percent);
-		_char.yOff = twerp(TwerpType.out_back,_char.startY,0,_percent);
-		
+		if(_steps == 0)
+			_char.style.color = make_color_hsv(irandom(255),165,255);
 	}
 });
 
-scripture_add_style("firework", {
+scripture_add_style("flyin", {
+	onDraw: function(_x, _y, _char, _steps, _pos) {
+		
+		if(_steps == 0) {
+			_char.startX = -20;
+			_char.startY = -100;
+		}
+		
+		var _percent = clamp(_steps / room_speed,0,1);
+		_char.alpha = _percent * 2;
+		_char.xScale = _percent;
+		_char.yScale = _percent;
+		_char.xOff = twerp(TwerpType.out_cubic,_char.startX,0,_percent);
+		_char.yOff = twerp(TwerpType.out_bounce,_char.startY,0,_percent);
+	}
+});
+
+scripture_add_style("fireworks", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		if(_steps != 0 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
 		
-		effect_create_above(ef_firework,_x + random_range(-5,5), _y + random_range(-5,5), 0,make_color_hsv(irandom(255),255,255))
+		effect_create_above(ef_firework,_x + _char.centerY + random_range(-5,5), _y + _char.centerY + random_range(-5,5), 0,make_color_hsv(irandom(255),255,255))
 		
 	}
 });
 
 scripture_add_style("bleep", {
 		onDraw: function(_x, _y, _char, _steps, _pos) {
-			if(_steps != 0 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
+			if(_steps != 10 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
 			audio_play_sound_unique(sndBeep, 10, false, false, .25)	
 		}
 })
@@ -62,7 +65,7 @@ scripture_add_style("small", {
 	font: fntDefault
 });
 
-testString = "<flyin>Lorem ipsum DOLOR sit amet,\n consectetur<pink> adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+testString = "<color><flyin><bleep>Lorem ipsum DOLOR <squiggle> sit amet,\n consectetur<pink> adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 defaultStyle = new __scriptureStyle();
 options = {

@@ -94,12 +94,13 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 			style.onDraw[_i](_x, _y, self, steps, _index);	
 		}
 		steps++;
-
+		
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(alpha);
+
 		draw_text_transformed(_x + centerX + xOff, 
-													_y + centerY + yOff,// + _lineHeight - height, 
+													_y + centerY + yOff,
 													char, xScale, yScale, angle);
 		return width;
 	} //:width
