@@ -16,8 +16,6 @@ repeat(3) {
 	draw_rectangle(_pos.x, _pos.y, _pos.x + _width, _pos.y+_height, true);
 	_pos.x += _width + _spacing;
 }
-draw_set_font(fntBold)
-draw_set_color(c_white);
 draw_scripture(_x, _y, 
 	testString,
 	//"Single Line",
@@ -26,7 +24,7 @@ draw_scripture(_x, _y,
 
 _x += _width + _spacing;
 draw_scripture(_x, _y, 
-	"SingleLineThatIsToo-LongAndIsGoing-ToCauseMeSerious-Problems",
+	"<bold>Single<pink>Line</bold>ThatIsToo-Long<bold>AndIsGoing-ToCauseMe</pink>Serious-Problems</bold>",
   options2);
 	
 _x += _width + _spacing;

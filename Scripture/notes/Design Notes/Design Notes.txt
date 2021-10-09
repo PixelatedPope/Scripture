@@ -13,6 +13,15 @@ typing DONE!
 Force Finish Typing / Advance Page DONE!
 
 Time To Get Complicated
-consume tags
-consume closing tags
+consume tags DONE!
+consume closing tags DONE!
+onDraw Function DONE!!!
+
+Set Step for all characters on page advance to something really high
+Support Image "characters"
+
+
+
+
+Bonus?
 allow escaped < characters ???

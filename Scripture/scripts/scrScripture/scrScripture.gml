@@ -20,27 +20,43 @@ global.__scripActiveStyle = {};
 function __scriptureStyle(_style = undefined) constructor {
 	
 	if(_style == undefined) {
-			color = c_white
-			
+			color = c_white;
+			font = -1;
+			onDraw = function(){};
 			return;
 	}
 	//Return a duplicate of the given style with new key
 	color = _style.color;
-	
+	font = _style.font;
+	onDraw = _style.onDraw;
 }
 
 function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	char = _char;
 	style = _style; 
 	steps = 0;
-	
+	draw_set_font(style.font);
 	width = string_width(char);
 	height = string_height(char);
+	centerX = width/2;
+	centerY = height/2;
+	alpha = 1;
+	xScale = 1;
+	yScale = 1;
+	xOff = 0;
+	yOff = 0;
+	angle = 0;
 	
-	draw = function(_x, _y){
+	draw = function(_x, _y, _index){
+		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
+			style.onDraw[_i](self,steps, _index);	
+		}
+		
 		steps++;
+		draw_set_font(style.font);
 		draw_set_color(style.color);
-		draw_text(_x, _y, char);
+		draw_set_alpha(alpha);
+		draw_text_transformed(_x + centerX + xOff, _y + yOff + centerY, char, xScale, yScale, angle);
 		return width;
 	} //:width
 }
@@ -152,14 +168,18 @@ function __scriptureHandleTag(_string) {
 }
 
 function __scriptureRebuildActiveStyle() {
-	var _style = {};
+	var _style = {onDraw: []};
 	for(var _i = 0; _i < array_length(global.__scripStyleStack); _i++) {
 		var _stackStyle = global.__scripStyleStack[_i];
 		var _props = variable_struct_get_names(_stackStyle)
     for(var _j = 0; _j < array_length(_props); _j++) {
       var _prop = _props[_j];
       if(_prop == "key") continue;
-      _style[$ _prop] = _stackStyle[$ _prop];
+			if(_prop == "onDraw") {
+				array_push(_style.onDraw,_stackStyle.onDraw);
+			} else {
+				_style[$ _prop] = _stackStyle[$ _prop];
+			}
     }
 	}
 	global.__scripActiveStyle = _style;
@@ -248,8 +268,7 @@ function __scriptureParseText(_string) {
 			break;
 			
 			default: //Character
-				var _newChar = new __scriptureChar(_char);
-				_newChar.style = new __scriptureStyle(global.__scripActiveStyle);
+				var _newChar = new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle));
 				_curWidth += _newChar.width;
 				array_push(_curLine.text, _newChar);
 		}
@@ -361,8 +380,8 @@ function scripture_advance_page(_options) {
 }
 
 function draw_scripture(_x, _y, _string, _options) {
-	draw_set_halign(fa_left);
-	draw_set_valign(fa_top);
+	draw_set_halign(fa_center);
+	draw_set_valign(fa_middle);
 	
 	__scriptureGetCachedText(_string, _options)
 	if(__scriptureIsTyping())
@@ -381,7 +400,7 @@ function draw_scripture(_x, _y, _string, _options) {
 			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) return;
 			
 			_char = _text[_l].text[_c];
-			_drawX += _char.draw(_drawX,_drawY);
+			_drawX += _char.draw(_drawX,_drawY,_pos);
 			if(_char.height > _lineHeight) 
 				_lineHeight = _char.height;
 			_pos++;
@@ -390,7 +409,7 @@ function draw_scripture(_x, _y, _string, _options) {
 	}
 	
 	global.__scripText.complete = true;
-	
+	draw_set_alpha(1);
 }
 	
 function scripture_add_style(_key, _style) {

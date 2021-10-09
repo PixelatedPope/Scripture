@@ -2,11 +2,11 @@
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "Scripts",
-    "path": "folders/Scripts.yy",
+    "name": "Helpful Scripts",
+    "path": "folders/Helpful Scripts.yy",
   },
   "resourceVersion": "1.0",
-  "name": "array_find_index_ext",
+  "name": "twerp",
   "tags": [],
   "resourceType": "GMScript",
 }

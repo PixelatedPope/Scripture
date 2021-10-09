@@ -1,13 +1,12 @@
 {
   "resources": [
     {"id":{"name":"Design Notes","path":"notes/Design Notes/Design Notes.yy",},"order":2,},
+    {"id":{"name":"twerp","path":"scripts/twerp/twerp.yy",},"order":0,},
     {"id":{"name":"scrScripture","path":"scripts/scrScripture/scrScripture.yy",},"order":9,},
-    {"id":{"name":"array_find_index_ext","path":"scripts/array_find_index_ext/array_find_index_ext.yy",},"order":1,},
     {"id":{"name":"Object1","path":"objects/Object1/Object1.yy",},"order":3,},
     {"id":{"name":"fntDefault","path":"fonts/fntDefault/fntDefault.yy",},"order":7,},
     {"id":{"name":"fntBold","path":"fonts/fntBold/fntBold.yy",},"order":8,},
-    {"id":{"name":"array_find_index","path":"scripts/array_find_index/array_find_index.yy",},"order":0,},
-    {"id":{"name":"sin_oscillate","path":"scripts/sin_oscillate/sin_oscillate.yy",},"order":5,},
+    {"id":{"name":"sin_oscillate","path":"scripts/sin_oscillate/sin_oscillate.yy",},"order":1,},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},"order":1,},
   ],
   "Options": [
@@ -33,7 +32,7 @@
     {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
   ],
   "Folders": [
-    {"folderPath":"folders/Scripts.yy","order":6,"resourceVersion":"1.0","name":"Scripts","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/Helpful Scripts.yy","order":6,"resourceVersion":"1.0","name":"Helpful Scripts","tags":[],"resourceType":"GMFolder",},
   ],
   "AudioGroups": [
     {"targets":-1,"resourceVersion":"1.3","name":"audiogroup_default","resourceType":"GMAudioGroup",},
