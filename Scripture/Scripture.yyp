@@ -8,8 +8,9 @@
     {"id":{"name":"fntBold","path":"fonts/fntBold/fntBold.yy",},"order":8,},
     {"id":{"name":"sin_oscillate","path":"scripts/sin_oscillate/sin_oscillate.yy",},"order":1,},
     {"id":{"name":"sndBeep","path":"sounds/sndBeep/sndBeep.yy",},"order":10,},
+    {"id":{"name":"sprSquiggle24x24TopLeft","path":"sprites/sprSquiggle24x24TopLeft/sprSquiggle24x24TopLeft.yy",},"order":11,},
     {"id":{"name":"audio_play_sound_unique","path":"scripts/audio_play_sound_unique/audio_play_sound_unique.yy",},"order":2,},
-    {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},"order":1,},
+    {"id":{"name":"rmExample","path":"rooms/rmExample/rmExample.yy",},"order":1,},
   ],
   "Options": [
     {"name":"Amazon Fire","path":"options/amazonfire/options_amazonfire.yy",},
@@ -31,7 +32,7 @@
     "children": [],
   },
   "RoomOrderNodes": [
-    {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"roomId":{"name":"rmExample","path":"rooms/rmExample/rmExample.yy",},},
   ],
   "Folders": [
     {"folderPath":"folders/Helpful Scripts.yy","order":6,"resourceVersion":"1.0","name":"Helpful Scripts","tags":[],"resourceType":"GMFolder",},

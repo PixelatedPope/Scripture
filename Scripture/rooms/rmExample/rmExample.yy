@@ -22,7 +22,7 @@
   "creationCodeFile": "",
   "inheritCode": false,
   "instanceCreationOrder": [
-    {"name":"inst_78FDD16A","path":"rooms/Room1/Room1.yy",},
+    {"name":"inst_78FDD16A","path":"rooms/rmExample/rmExample.yy",},
   ],
   "inheritCreationOrder": false,
   "sequenceId": null,
@@ -50,7 +50,7 @@
     "path": "Scripture.yyp",
   },
   "resourceVersion": "1.0",
-  "name": "Room1",
+  "name": "rmExample",
   "tags": [],
   "resourceType": "GMRoom",
 }

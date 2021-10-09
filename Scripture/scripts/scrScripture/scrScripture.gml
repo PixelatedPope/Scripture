@@ -31,6 +31,41 @@ function __scriptureStyle(_style = undefined) constructor {
 	onDraw = _style.onDraw;
 }
 
+function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
+	sprite = _spr;
+	image = 0;
+	speed = sprite_get_speed_type(_spr) == spritespeed_framespergameframe ? sprite_get_speed(sprite) : sprite_get_speed(sprite) / room_speed;
+	style = _style;
+	steps = 0;
+	
+	width = sprite_get_width(sprite);
+	height = sprite_get_height(sprite);
+	centerX = width/2;
+	centerY = height/2;
+	originX = sprite_get_xoffset(sprite);
+	originY = sprite_get_yoffset(sprite);
+	alpha = 1;
+	xScale = 1;
+	yScale = 1;
+	xOff = 0;
+	yOff = 0;
+	angle = 0;
+	
+	draw = function(_x, _y, _index, _lineHeight) {
+		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
+			style.onDraw[_i](self,steps, _index);	
+		}
+		steps++;
+		
+		draw_sprite_ext(sprite, image, 
+										_x + centerX + xOff, 
+										_y + centerY + yOff, 
+										xScale, yScale, angle, style.color, alpha);
+		image += speed;
+		return width;
+	} //:width
+}
+
 function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	char = _char;
 	style = _style; 
@@ -47,16 +82,22 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	yOff = 0;
 	angle = 0;
 	
-	draw = function(_x, _y, _index){
+	draw = function(_x, _y, _index, _lineHeight){
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
 			style.onDraw[_i](self,steps, _index);	
 		}
 		
 		steps++;
+		if(global.__scripOptions.vAlign == fa_middle) {
+			var _height = height;
+			var _break = true;	
+		}
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(alpha);
-		draw_text_transformed(_x + centerX + xOff, _y + yOff + centerY, char, xScale, yScale, angle);
+		draw_text_transformed(_x + centerX + xOff, 
+													_y + centerY + yOff + _lineHeight - height, 
+													char, xScale, yScale, angle);
 		return width;
 	} //:width
 }
@@ -66,7 +107,7 @@ function __scriptureLine() constructor {
 	height = 0;
 	text = [];
 	trimWhiteSpace = function(){
-		while(array_length(text) != 0 && text[0].char == " ")
+		while(array_length(text) != 0 && (variable_struct_exists(text[0],"char") && text[0].char == " "))
 			array_delete(text[0],0,1);
 		
 		while(array_length(text) > 1 && text[array_length(text)-1].char == " ")
@@ -150,6 +191,7 @@ function __scripture_style_name_is_protected(_key) {
 function __scriptureHandleTag(_string) {
 	var _tagContent = "";
 	var _isClosingTag = string_char_at(_string,1) == "/";
+	var _isImageTag = false;
 	if(_isClosingTag)
 		_string = string_delete(_string,1,1);
 		
@@ -157,14 +199,20 @@ function __scriptureHandleTag(_string) {
 		_tagContent += string_char_at(_string,1);
 		_string = string_delete(_string,1,1);
 		
-		if(string_length(_string) == 0) {
+		if(string_char_at(_string,1) == " " && _tagContent == "img"){
+			_tagContent = "";	
+			_isImageTag = true;
+			_string = string_delete(_string,1,1);
+		}
+		
+		if(string_char_at(_string,1) == "<" || string_length(_string) == 0) {
 			show_message("Unclosed Tag Found/n Check your shit, yo.");	
 			game_end();
 		}
 	}
 	_string = string_delete(_string,1,1);
 
-	return {tag: _tagContent, updatedString: _string, isClosingTag: _isClosingTag}
+	return {tag: _tagContent, updatedString: _string, isClosingTag: _isClosingTag, isImageTag: _isImageTag}
 }
 
 function __scriptureRebuildActiveStyle() {
@@ -235,25 +283,28 @@ function __scriptureParseText(_string) {
 			case "<": 
 				var _tagResult = __scriptureHandleTag(_string);
 				_string = _tagResult.updatedString;
-				switch(_tagResult.tag) {
-					case "img": 
-					
-					break;
-					default: //Handle Styles
-						if(global.__scripStyles[$ _tagResult.tag] == undefined) continue;
+				if(_tagResult.isImageTag) {
+					var _spr = asset_get_index(_tagResult.tag);
+					if(_spr == -1 || !sprite_exists(_spr)) continue;
+					var _newImg = new __scriptureImg(_spr, new __scriptureStyle(global.__scripActiveStyle));
+					_curWidth += _newImg.width;
+					array_push(_curLine.text, _newImg);
+				} else {
+					//Style
+					if(global.__scripStyles[$ _tagResult.tag] == undefined) continue;
 						
-						if(_tagResult.isClosingTag) {
-							__scriptureDequeueStyle(_tagResult.tag);
-						} else {
-							__scriptureEnqueueStyle(_tagResult.tag);
-						}
+					if(_tagResult.isClosingTag) {
+						__scriptureDequeueStyle(_tagResult.tag);
+					} else {
+						__scriptureEnqueueStyle(_tagResult.tag);
+					}
 				}
 			break;
 			
 			case "-":				
-				var _space = new __scriptureChar(_char)
-				array_push(_curLine.text,_space);
-				_curWidth += _space.width;
+				var _hyphen = new __scriptureChar(_char)
+				array_push(_curLine.text,_hyphen);
+				_curWidth += _hyphen.width;
 				_lastSpace = array_length(_curLine.text);
 			break;
 			
@@ -306,19 +357,19 @@ function __scriptureApplyVAlign(_y) {
 		case fa_top:    return _y;
 		
 		case fa_middle: return _y - (_options.maxLines <= 0 
-																 ? _text.getTotalHeight() / 2 - _options.lineSpacing / 2
-																 : _text.getHeight() / 2  - _options.lineSpacing / 2); 
+																 ? floor(_text.getTotalHeight() / 2 - _options.lineSpacing / 2)
+																 : floor(_text.getHeight() / 2  - _options.lineSpacing / 2)); 
 																 
 		case fa_bottom: return _y - (_options.maxLines <= 0 
-																 ? _text.getTotalHeight()
-																 : _text.getHeight()) + _options.lineSpacing; 
+																 ? floor(_text.getTotalHeight())
+																 : floor(_text.getHeight()) + _options.lineSpacing); 
 	}	
 }
 
 function __scriptureApplyHAlign(_x, _line) {
 	switch(global.__scripOptions.hAlign) {
 		case fa_left: return _x;
-		case fa_center: return _x - _line.width / 2; break;
+		case fa_center: return floor(_x - _line.width / 2); break;
 		case fa_right: return _x - _line.width; break;
 	}	
 }
@@ -366,6 +417,7 @@ function draw_scripture(_x, _y, _string, _options) {
 	draw_set_valign(fa_middle);
 	
 	__scriptureGetCachedText(_string, _options)
+	
 	if(__scriptureIsTyping())
 		global.__scripText.progressType(_options.typeSpeed);
 		
@@ -382,9 +434,7 @@ function draw_scripture(_x, _y, _string, _options) {
 			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) return;
 			
 			_char = _text[_l].text[_c];
-			_drawX += _char.draw(_drawX,_drawY,_pos);
-			if(_char.height > _lineHeight) 
-				_lineHeight = _char.height;
+			_drawX += _char.draw(_drawX,_drawY,_pos,_lineHeight);
 			_pos++;
 		}
 		_drawY += _lineHeight + _options.lineSpacing;
