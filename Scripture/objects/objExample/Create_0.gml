@@ -24,6 +24,11 @@ scripture_add_style("color", {
 	}
 });
 
+scripture_add_style("slow down", {
+	font: fntDefault,
+	speedMod: .1
+});
+
 scripture_add_style("flyin", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		
@@ -38,6 +43,13 @@ scripture_add_style("flyin", {
 		_char.yScale = _percent;
 		_char.xOff = twerp(TwerpType.out_cubic,_char.startX,0,_percent);
 		_char.yOff = twerp(TwerpType.out_bounce,_char.startY,0,_percent);
+	}
+});
+
+scripture_add_style("shutter", {
+	onDraw: function(_x, _y, _char, _steps, _pos) {
+		var _percent = clamp(_steps / room_speed,0,1);
+		_char.xScale = twerp(TwerpType.out_expo,0,1,_percent);
 	}
 });
 
@@ -65,7 +77,7 @@ scripture_add_style("small", {
 	font: fntDefault
 });
 
-testString = "<color><flyin><bleep>Lorem ipsum DOLOR <squiggle> sit amet,\n consectetur<pink> adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+testString = "<color><shutter><bleep>Lorem ipsum DOLOR <squiggle> sit amet,\n consectetur<pink> adipiscing elit, <slow down>sed do eiusmod tempor</slow down> incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 defaultStyle = new __scriptureStyle();
 options = {

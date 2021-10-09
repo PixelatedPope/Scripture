@@ -27,12 +27,14 @@ function __scriptureStyle(_style = undefined) constructor {
 	if(_style == undefined) {
 			color = c_white;
 			font = -1;
+			speedMod = 1;
 			onDraw = function(){};
 			return;
 	}
 	//Return a duplicate of the given style with new key
 	color = _style.color;
 	font = _style.font;
+	speedMod = _style.speedMod;
 	onDraw = _style.onDraw;
 }
 
@@ -136,7 +138,7 @@ function __scriptureLine() constructor {
 function __scriptureText() constructor {
 	totalWidth = 0;
 	text = [];
-	typePos = 0;
+	typePos = 1;
 	getLength = function() { return array_length(text) }
 	//getTotalCharacters = function() {
 	//	var _count = 0;
@@ -421,9 +423,6 @@ function draw_scripture(_x, _y, _string, _options) {
 	
 	__scriptureGetCachedText(_string, _options)
 	
-	if(__scriptureIsTyping())
-		global.__scripText.progressType(_options.typeSpeed);
-		
 	global.__scripText.complete = false;
 	var	_drawX,
 			_text = global.__scripText.text,
@@ -434,13 +433,15 @@ function draw_scripture(_x, _y, _string, _options) {
 		_drawX = __scriptureApplyHAlign(_x, _text[_l]);
 		var _lineHeight = _text[_l].height;
 		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
+			
+			var _char = _text[_l].text[_c];
 			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) 
 			{
 				draw_set_alpha(1);
+				global.__scripText.progressType(_options.typeSpeed * _char.style.speedMod);
 				return;
-			}
+			} 
 			
-			_char = _text[_l].text[_c];
 			_drawX += _char.draw(_drawX,_drawY,_pos,_lineHeight);
 			_pos++;
 		}

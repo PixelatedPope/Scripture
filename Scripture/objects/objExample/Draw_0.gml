@@ -27,7 +27,7 @@ draw_set_font(fntDefault);
 draw_set_color(c_white);
 draw_set_halign(options.hAlign)
 draw_set_valign(options.vAlign);
-draw_text_ext(_x, _y, "Lorem ipsum DOLOR sit amet</spin>,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse",20, options.maxWidth);
+draw_text_ext(_x, _y, "Lorem ipsum DOLOR sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse",20, options.maxWidth);
 
 /*draw_scripture(_x, _y, 
 	"<bold>Single<pink>Line</bold>ThatIsToo-Long<bold>AndIsGoing-ToCauseMe</pink>Serious-Problems</bold>",

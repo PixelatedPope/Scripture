@@ -20,9 +20,9 @@ soundEffects DONE!!!
 
 
 Support Image "characters" DONE!
-Support "Event" "characters"
 Support Kerning
 Support Speed Adjustments
+Support "Event" "characters"
 
 Bonus?
 Test setting default style
