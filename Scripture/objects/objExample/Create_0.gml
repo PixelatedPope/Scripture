@@ -1,5 +1,7 @@
 show_debug_overlay(true)
 
+//scripture_set_default_style({})
+
 scripture_add_style("spin", {
 	onDraw: function(_char, _steps, _pos) {
 			var _dir = (_steps+_pos) * 5;
@@ -18,11 +20,17 @@ scripture_add_style("pink", {
 		}
 });
 
+scripture_add_style("bleep", {
+		onDraw: function(_char, _steps, _pos) {
+			if(_steps == 0) audio_play_sound_unique(sndBeep, 10, false, false, .5)	
+		}
+})
+
 scripture_add_style("bold", {
 	font: fntBold
 });
 
-testString = "<spin>Lorem ipsum <pink><bold>DOLOR</bold></pink> sit amet</spin>,\n consectetur<pink> adipiscing elit</pink>, sed do eiusmod tempor</bold> incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+testString = "<bleep><spin>Lorem ipsum <pink><bold>DOLOR</bold></pink> sit amet</spin>,\n consectetur<pink> adipiscing elit</pink>, sed do eiusmod tempor</bold> incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</bleep>"
 
 defaultStyle = new __scriptureStyle();
 options = {

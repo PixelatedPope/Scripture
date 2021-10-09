@@ -361,24 +361,6 @@ function __scriptureIsTyping(_options = global.__scripOptions) {
 
 #endregion
 
-function scripture_advance_page(_options) {
-	var _text = global.__scripCache[$ _options.cacheKey];
-	if(_text == undefined) return;
-
-	//finish typing this page
-	
-	if(__scriptureIsTyping(_options) && !_text.complete) { //_text.typePos < _text.getCharactersOnPage(_options)) {
-		_text.typePos = infinity;
-		return true;
-	} else if(_options.maxLines > 0 && _options.currentPage < __scriptureGetPageCount(_text,_options )){
-		_options.currentPage++;
-		_text.typePos = 0;
-		_text.complete = false;
-		return true;
-	}
-	return false;
-}
-
 function draw_scripture(_x, _y, _string, _options) {
 	draw_set_halign(fa_center);
 	draw_set_valign(fa_middle);
@@ -410,6 +392,24 @@ function draw_scripture(_x, _y, _string, _options) {
 	
 	global.__scripText.complete = true;
 	draw_set_alpha(1);
+}
+
+
+function scripture_advance_page(_options) {
+	var _text = global.__scripCache[$ _options.cacheKey];
+	if(_text == undefined) return;
+
+	//finish typing this page
+	if(__scriptureIsTyping(_options) && !_text.complete) {
+		_text.typePos = infinity;
+		return true;
+	} else if(_options.maxLines > 0 && _options.currentPage < __scriptureGetPageCount(_text,_options )){
+		_options.currentPage++;
+		_text.typePos = 0;
+		_text.complete = false;
+		return true;
+	}
+	return false;
 }
 	
 function scripture_add_style(_key, _style) {

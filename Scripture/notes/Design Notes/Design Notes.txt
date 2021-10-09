@@ -16,12 +16,12 @@ Time To Get Complicated
 consume tags DONE!
 consume closing tags DONE!
 onDraw Function DONE!!!
+soundEffects DONE!!!
 
 Set Step for all characters on page advance to something really high
 Support Image "characters"
-
-
-
+Support "Event" "characters"
 
 Bonus?
-allow escaped < characters ???
+Set default style
+Allow escaped < characters ???
