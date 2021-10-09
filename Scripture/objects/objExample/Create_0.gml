@@ -1,20 +1,16 @@
 show_debug_overlay(true)
 
-//scripture_set_default_style({})
+scripture_set_tag_characters("[","]");
 
 scripture_add_style("spin", {
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 			var _dir = (_steps+_pos) * 5;
-			//_char.xOff = lengthdir_x(5,	_dir);
-			//_char.yOff = lengthdir_y(5, _dir);
 			_char.angle = _dir;
-			//_char.alpha = lengthdir_x(1,	_dir);
-			
 		}
 });
 
 scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft);
-
+scripture_register_event("show message", function(){ show_message("Yup") });
 
 scripture_add_style("color", {
 	font: fntBold,
@@ -35,6 +31,8 @@ scripture_add_style("tight", {
 });
 
 scripture_add_style("flyin", {
+	font: fntBold,
+	color: c_yellow,
 	onDraw: function(_x, _y, _char, _steps, _pos) {
 		
 		if(_steps == 0) {
@@ -68,10 +66,10 @@ scripture_add_style("fireworks", {
 });
 
 scripture_add_style("bleep", {
-		onDraw: function(_x, _y, _char, _steps, _pos) {
-			if(_steps != 10 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
-			audio_play_sound_unique(sndBeep, 10, false, false, .25)	
-		}
+	onDraw: function(_x, _y, _char, _steps, _pos) {
+		if(_steps != 10 || (_char.type == SCRIPTURE_TYPE_CHAR && _char.char == " ")) return;
+		audio_play_sound_unique(sndBeep, 10, false, false, .25)	
+	}
 })
 
 scripture_add_style("bold", {
@@ -82,7 +80,9 @@ scripture_add_style("small", {
 	font: fntDefault
 });
 
-testString = "<bold><tight><bleep>Lorem ipsum DOLOR <spin><squiggle> <squiggle> <squiggle></spin> sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+scripture_set_default_style("flyin");
+
+testString = "Lorem ipsum DOLOR sit amet,\n consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 defaultStyle = new __scriptureStyle();
 options = {

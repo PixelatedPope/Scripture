@@ -14,6 +14,9 @@ global.__scripProtectedKeys = ["default", __SCRIPTURE_DEFULT_STYLE_KEY];
 global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
 
+global.__scripOpenTag = "<";
+global.__scripCloseTag = ">";
+
 #macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
 #macro SCRIPTURE_TYPE_STYLE 0
 #macro SCRIPTURE_TYPE_IMG 1
@@ -33,11 +36,11 @@ function __scriptureStyle(_style = undefined) constructor {
 			return;
 	}
 	//Return a duplicate of the given style with new key
-	color = _style.color;
-	font = _style.font;
-	speedMod = _style.speedMod;
-	kerning = _style.kerning;
-	onDraw = _style.onDraw;
+	color = _style[$ "color"] == undefined ? c_white : _style.color;
+	font = _style[$ "font"] == undefined ? -1 : _style.font;
+	speedMod = _style[$ "speedMod"] == undefined ? 1 : _style.speedMod;
+	kerning = _style[$ "kerning"] == undefined ? 0 : _style.kerning;
+	onDraw = _style[$ "onDraw"] == undefined ? function(){} : _style.onDraw;
 }
 
 function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
@@ -47,13 +50,10 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 	speed = sprite_get_speed_type(_spr) == spritespeed_framespergameframe ? sprite_get_speed(sprite) : sprite_get_speed(sprite) / room_speed;
 	style = _style;
 	steps = 0;
-	
 	width = sprite_get_width(sprite) + style.kerning;
 	height = sprite_get_height(sprite);
 	centerX = width/2;
 	centerY = height/2;
-	//originX = sprite_get_xoffset(sprite);
-	//originY = sprite_get_yoffset(sprite);
 	alpha = 1;
 	xScale = 1;
 	yScale = 1;
@@ -61,7 +61,7 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 	yOff = 0;
 	angle = 0;
 	
-	draw = function(_x, _y, _index, _lineHeight) {
+	draw = function(_x, _y, _index) {
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
 			style.onDraw[_i](_x, _y, self, steps, _index);	
 		}
@@ -74,6 +74,18 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 		image += speed;
 		return width;
 	} //:width
+}
+
+function __scriptureEvent(_func) constructor {
+	type = SCRIPTURE_TYPE_EVENT;
+	event = _func; 
+	ran = false;
+	draw = function(_x, _y, _index){
+		if(ran) return 0;
+		ran = true;
+		event();
+		return 0;
+	}
 }
 
 function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
@@ -93,7 +105,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	yOff = 0;
 	angle = 0;
 	
-	draw = function(_x, _y, _index, _lineHeight){
+	draw = function(_x, _y, _index){
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
 			style.onDraw[_i](_x, _y, self, steps, _index);	
 		}
@@ -128,6 +140,7 @@ function __scriptureLine() constructor {
 		width = 0;
 		for(var _i = 0; _i < array_length(text); _i++) {
 			var _char = text[_i];
+			if(_char.type == SCRIPTURE_TYPE_EVENT) continue;
 			width += _char.width;
 			if(_char.height > height) height = _char.height;
 		}
@@ -189,9 +202,12 @@ function __scriptureText() constructor {
 
 #region Scripture Interal Functions 
 
-function __scripture_style_name_is_protected(_key) {
+function __scriptureStyleNameIsProtected(_key) {
 	for(var _i = 0; _i < array_length(global.__scripProtectedKeys); _i++) {
-		if(_key == global.__scripProtectedKeys[_i]) return true;	
+		if(_key == global.__scripProtectedKeys[_i]) {
+			show_debug_message("Attempted to use a protected Scripture Tag.  Sorry.")
+			return true;	
+		}
 	}
 	return false;
 }
@@ -202,11 +218,11 @@ function __scriptureHandleTag(_string) {
 	if(_isClosingTag)
 		_string = string_delete(_string,1,1);
 		
-	while(string_char_at(_string,1) != ">") {
+	while(string_char_at(_string,1) != global.__scripCloseTag) {
 		_tagContent += string_char_at(_string,1);
 		_string = string_delete(_string,1,1);
 		
-		if(string_char_at(_string,1) == "<" || string_length(_string) == 0) {
+		if(string_char_at(_string,1) == global.__scripOpenTag || string_length(_string) == 0) {
 			show_message("Unclosed Tag Found/n Check your shit, yo.");	
 			game_end();
 		}
@@ -281,7 +297,7 @@ function __scriptureParseText(_string) {
 				_curLine = _newLine;
 				continue;
 			break;
-			case "<": 
+			case global.__scripOpenTag: 
 				var _tagResult = __scriptureHandleTag(_string);
 				_string = _tagResult.updatedString;
 
@@ -303,7 +319,8 @@ function __scriptureParseText(_string) {
 					break;
 					
 					case SCRIPTURE_TYPE_EVENT:
-						
+						var _newEvent = new __scriptureEvent(_style.event);
+						array_push(_curLine.text, _newEvent);
 					break;
 				}
 			break;
@@ -439,12 +456,18 @@ function draw_scripture(_x, _y, _string, _options) {
 			var _char = _text[_l].text[_c];
 			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) 
 			{
+				if(_char.type == SCRIPTURE_TYPE_EVENT) {
+					_char.draw();
+					global.__scripText.progressType(1);
+					return;
+				}
+				
 				draw_set_alpha(1);
-				global.__scripText.progressType(_options.typeSpeed * _char.style.speedMod);
+				global.__scripText.progressType( _options.typeSpeed *  _char.style.speedMod);
 				return;
 			} 
 			
-			_drawX += _char.draw(_drawX,_drawY,_pos,_lineHeight);
+			_drawX += _char.draw(_drawX,_drawY,_pos);
 			_pos++;
 		}
 		_drawY += _lineHeight + _options.lineSpacing;
@@ -473,20 +496,14 @@ function scripture_advance_page(_options) {
 }
 	
 function scripture_add_style(_key, _style) {
-	if(__scripture_style_name_is_protected(_key)) {
-		show_debug_message("Attempted to use a protected Scripture Tag.  Sorry.")
-		return;
-	}
+	if(__scriptureStyleNameIsProtected(_key)) return;
 	_style.key = _key;
 	_style.type = SCRIPTURE_TYPE_STYLE;
 	global.__scripStyles[$ _key] = _style;
 }
 
 function scripture_register_sprite(_key, _sprite) {
-	if(__scripture_style_name_is_protected(_key)) {
-		show_debug_message("Attempted to use a protected Scripture Tag.  Sorry.")
-		return;
-	}
+	if(__scriptureStyleNameIsProtected(_key)) return;
 	
 	if(!sprite_exists(_sprite)) {
 		show_debug_message("That's not a sprite, dude.")
@@ -494,21 +511,42 @@ function scripture_register_sprite(_key, _sprite) {
 	}
 	
 	global.__scripStyles[$ _key] = {
+		key: _key,
 		type: SCRIPTURE_TYPE_IMG,
-		sprite: _sprite,
-		key: _key
+		sprite: _sprite
 	}
 }
 
-function scripture_set_default_style(_style){
-	global.__scripStyles.defaultStyle = _style;
-	global.__scripStyles.defaultStyle.key = "defaultStyle";
+function scripture_register_event(_key, _func) {
+	global.__scripStyles[$ _key] = {
+		key: _key,
+		type: SCRIPTURE_TYPE_EVENT,
+		event: _func
+	}
 }
-scripture_set_default_style(new __scriptureStyle());
+
+function scripture_set_default_style(_key){
+	var _style = global.__scripStyles[$ _key];
+	if(_style == undefined) return;
+	
+	global.__scripStyles.defaultStyle = new __scriptureStyle(_style);
+	global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
+}
+global.__scripStyles.defaultStyle = new __scriptureStyle();
+global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 
 function scripture_clear_cache(_key = undefined) {
 	if(_key == undefined)
 		global.__scripCache = {}
 	else
 		variable_struct_remove(global.__scripCache, _key);
+}
+
+function scripture_set_tag_characters(_start, _end) {
+	if(_start == _end || string_length(_start) != 1 || string_length(_end) != 1) {
+		show_message("Invalid start or end tag character. \nCharacters must be different and only a single character");
+		game_end();
+	}
+	global.__scripOpenTag = _start;
+	global.__scripCloseTag = _end;
 }
