@@ -5,18 +5,21 @@ show_debug_overlay(true)
 scripture_add_style("spin", {
 	onDraw: function(_char, _steps, _pos) {
 			var _dir = (_steps+_pos) * 5;
-			//_char.xOff = lengthdir_x(5,	_dir);
-			//_char.yOff = lengthdir_y(5, _dir);
-			//_char.angle = _dir;
+			_char.xOff = lengthdir_x(5,	_dir);
+			_char.yOff = lengthdir_y(5, _dir);
+			_char.angle = _dir;
+			_char.alpha = lengthdir_x(1,	_dir);
 			
 		}
 });
+
+scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft);
 
 scripture_add_style("pink", {
 	color: make_color_rgb(255,180,180),
 	onDraw: function(_char, _steps, _pos) {
 			var _dir = (_steps+_pos) * 3;
-			//_char.alpha = lengthdir_x(1,	_dir);
+			_char.alpha = lengthdir_x(1,	_dir);
 			_char.angle = _dir * 1.5;
 		}
 });
@@ -35,7 +38,7 @@ scripture_add_style("small", {
 	font: fntDefault
 });
 
-testString = "<small><bleep><spin><img sprSquiggle24x24TopLeft>   Lorem ipsum <pink><bold>DOLOR</bold></pink> sit amet</spin>,\n consectetur<pink> adipiscing elit</pink>, sed do eiusmod tempor</bold> incididunt<img sprSquiggle24x24TopLeft> ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</bleep></small>"
+testString = "<small><bleep><spin><squiggle><squiggle><squiggle>Lorem ipsum <pink><bold>DOLOR</bold></pink> sit amet</spin>,\n consectetur<pink> adipiscing elit</pink>, sed do eiusmod tempor</bold> incididunt<img sprSquiggle24x24TopLeft> ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</bleep></small>"
 
 defaultStyle = new __scriptureStyle();
 options = {
@@ -46,7 +49,7 @@ options = {
 		typeSpeed: 1, //0 for instant
 		maxWidth: 0,
 		lineSpacing: 0,
-		maxLines: 10,
+		maxLines: 1,
 		currentPage: 0
 }
 

@@ -15,10 +15,14 @@ global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
 
 #macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
+#macro __SCRIPTURE_TYPE_STYLE 0
+#macro __SCRIPTURE_TYPE_IMG 1
+#macro __SCRIPTURE_TYPE_EVENT 2
+
 
 #region Scripture Constructors
 function __scriptureStyle(_style = undefined) constructor {
-	
+	type = __SCRIPTURE_TYPE_STYLE
 	if(_style == undefined) {
 			color = c_white;
 			font = -1;
@@ -32,6 +36,7 @@ function __scriptureStyle(_style = undefined) constructor {
 }
 
 function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
+	type = __SCRIPTURE_TYPE_IMG;
 	sprite = _spr;
 	image = 0;
 	speed = sprite_get_speed_type(_spr) == spritespeed_framespergameframe ? sprite_get_speed(sprite) : sprite_get_speed(sprite) / room_speed;
@@ -88,10 +93,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		}
 		
 		steps++;
-		if(global.__scripOptions.vAlign == fa_middle) {
-			var _height = height;
-			var _break = true;	
-		}
+
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(alpha);
@@ -191,19 +193,12 @@ function __scripture_style_name_is_protected(_key) {
 function __scriptureHandleTag(_string) {
 	var _tagContent = "";
 	var _isClosingTag = string_char_at(_string,1) == "/";
-	var _isImageTag = false;
 	if(_isClosingTag)
 		_string = string_delete(_string,1,1);
 		
 	while(string_char_at(_string,1) != ">") {
 		_tagContent += string_char_at(_string,1);
 		_string = string_delete(_string,1,1);
-		
-		if(string_char_at(_string,1) == " " && _tagContent == "img"){
-			_tagContent = "";	
-			_isImageTag = true;
-			_string = string_delete(_string,1,1);
-		}
 		
 		if(string_char_at(_string,1) == "<" || string_length(_string) == 0) {
 			show_message("Unclosed Tag Found/n Check your shit, yo.");	
@@ -212,7 +207,7 @@ function __scriptureHandleTag(_string) {
 	}
 	_string = string_delete(_string,1,1);
 
-	return {tag: _tagContent, updatedString: _string, isClosingTag: _isClosingTag, isImageTag: _isImageTag}
+	return {tag: _tagContent, updatedString: _string, isClosingTag: _isClosingTag}
 }
 
 function __scriptureRebuildActiveStyle() {
@@ -283,21 +278,27 @@ function __scriptureParseText(_string) {
 			case "<": 
 				var _tagResult = __scriptureHandleTag(_string);
 				_string = _tagResult.updatedString;
-				if(_tagResult.isImageTag) {
-					var _spr = asset_get_index(_tagResult.tag);
-					if(_spr == -1 || !sprite_exists(_spr)) continue;
-					var _newImg = new __scriptureImg(_spr, new __scriptureStyle(global.__scripActiveStyle));
-					_curWidth += _newImg.width;
-					array_push(_curLine.text, _newImg);
-				} else {
-					//Style
-					if(global.__scripStyles[$ _tagResult.tag] == undefined) continue;
+
+				var _style = global.__scripStyles[$ _tagResult.tag];
+				if(_style == undefined) continue;
+				switch(_style.type){
+					case __SCRIPTURE_TYPE_STYLE:
+						if(_tagResult.isClosingTag) {
+							__scriptureDequeueStyle(_tagResult.tag);
+						} else {
+							__scriptureEnqueueStyle(_tagResult.tag);
+						}
+					break;
 						
-					if(_tagResult.isClosingTag) {
-						__scriptureDequeueStyle(_tagResult.tag);
-					} else {
-						__scriptureEnqueueStyle(_tagResult.tag);
-					}
+					case __SCRIPTURE_TYPE_IMG:
+						var _newImg = new __scriptureImg(_style.sprite, new __scriptureStyle(global.__scripActiveStyle));
+						_curWidth += _newImg.width;
+						array_push(_curLine.text, _newImg);
+					break;
+					
+					case __SCRIPTURE_TYPE_EVENT:
+						
+					break;
 				}
 			break;
 			
@@ -387,7 +388,9 @@ function __scriptureGetCachedText(_string, _options) {
 }
 
 function __scriptureGetPageCount(_text = global.__scripText, _options = global.__scripOptions) {
-	return 	floor(_text.getLength() / _options.maxLines);
+	var _length = _text.getLength();
+	var _maxLines = _options.maxLines;
+	return 	ceil(_text.getLength() / _options.maxLines)-1;
 }
 
 function __scriptureGetCurrentLine(_text = global.__scripText, _options = global.__scripOptions) {
@@ -431,7 +434,11 @@ function draw_scripture(_x, _y, _string, _options) {
 		_drawX = __scriptureApplyHAlign(_x, _text[_l]);
 		var _lineHeight = _text[_l].height;
 		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
-			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) return;
+			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) 
+			{
+				draw_set_alpha(1);
+				return;
+			}
 			
 			_char = _text[_l].text[_c];
 			_drawX += _char.draw(_drawX,_drawY,_pos,_lineHeight);
@@ -450,6 +457,7 @@ function scripture_advance_page(_options) {
 	if(_text == undefined) return;
 
 	//finish typing this page
+	var _pageCount = __scriptureGetPageCount(_text, _options);
 	if(__scriptureIsTyping(_options) && !_text.complete) {
 		_text.typePos = infinity;
 		return true;
@@ -464,11 +472,30 @@ function scripture_advance_page(_options) {
 	
 function scripture_add_style(_key, _style) {
 	if(__scripture_style_name_is_protected(_key) || global.__scripStyles[$ _key] != undefined) {
-		show_debug_message("Style keys must be unique")
+		show_debug_message("Key must be unique")
 		return;
 	}
 	_style.key = _key;
+	_style.type = __SCRIPTURE_TYPE_STYLE;
 	global.__scripStyles[$ _key] = _style;
+}
+
+function scripture_register_sprite(_key, _sprite) {
+	if(__scripture_style_name_is_protected(_key) || global.__scripStyles[$ _key] != undefined) {
+		show_debug_message("Key must be unique")
+		return;
+	}
+	
+	if(!sprite_exists(_sprite)) {
+		show_debug_message("That's not a sprite, dude.")
+		return;
+	}
+	
+	global.__scripStyles[$ _key] = {
+		type: __SCRIPTURE_TYPE_IMG,
+		sprite: _sprite,
+		key: _key
+	}
 }
 
 function scripture_set_default_style(_style){
