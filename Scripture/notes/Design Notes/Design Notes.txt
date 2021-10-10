@@ -29,3 +29,4 @@ Set Step for all characters on page advance to something really high? !DONE
 Allow changing of open/close tag characters? DONE!
 
 TEST!
+Support New Line

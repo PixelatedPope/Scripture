@@ -277,6 +277,11 @@ function __scriptureParseText(_string) {
 		var _char = string_char_at(_string,0);
 		_string = string_delete(_string,1,1);
 		switch(_char) {
+			case "\b":
+				_lastSpace = array_length(_curLine.text);
+				_curWidth = global.__scripOptions.maxWidth + 1
+				
+			break;
 			case "\n": 
 				var _newLine = new __scriptureLine();
 				array_push(_result.text,_newLine);
