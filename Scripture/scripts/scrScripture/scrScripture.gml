@@ -15,7 +15,7 @@ global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
 global.__scripDelay = 0;
 
-global.__scripOpenTag = "<";
+global.__scripOpenTag = "<"; //You can change these here or use the available function.
 global.__scripCloseTag = ">";
 
 #macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
@@ -23,6 +23,9 @@ global.__scripCloseTag = ">";
 #macro SCRIPTURE_TYPE_IMG 1
 #macro SCRIPTURE_TYPE_EVENT 2
 #macro SCRIPTURE_TYPE_CHAR 3
+#macro SCRIPTURE_TYPE_LINE 4
+#macro SCRIPTURE_TYPE_PAGE 5
+#macro SCRIPTURE_TYPE_TEXT 6
 
 
 #region Scripture Constructors
@@ -43,6 +46,9 @@ function __scriptureStyle(_style = undefined) constructor {
 	kerning = _style[$ "kerning"] == undefined ? 0 : _style.kerning;
 	onDraw = _style[$ "onDraw"] == undefined ? function(){} : _style.onDraw;
 }
+
+global.__scripStyles.defaultStyle = new __scriptureStyle();
+global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 
 function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 	type = SCRIPTURE_TYPE_IMG;
@@ -74,7 +80,7 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 										xScale, yScale, angle, style.color, alpha);
 		image += speed;
 		return width;
-	} //:width
+	}
 }
 
 function __scriptureEvent(_func, _delay = 0) constructor {
@@ -100,8 +106,8 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	draw_set_font(style.font);
 	width = string_width(char) + style.kerning;
 	height = string_height(char);
-	centerX = width/2;
-	centerY = height/2;
+	centerX = width / 2;
+	centerY = height / 2;
 	alpha = 1;
 	xScale = 1;
 	yScale = 1;
@@ -109,7 +115,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	yOff = 0;
 	angle = 0;
 	
-	draw = function(_x, _y, _index){
+	draw = function(_x, _y, _index) {		
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
 			style.onDraw[_i](_x, _y, self, steps, _index);	
 		}
@@ -123,66 +129,266 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 													_y + centerY + yOff,
 													char, xScale, yScale, angle);
 		return width;
-	} //:width
+	}
 }
 
 function __scriptureLine() constructor {
+	type = SCRIPTURE_TYPE_LINE
 	width = 0;
 	height = 0;
-	text = [];
-	trimWhiteSpace = function(){
-		while(array_length(text) != 0 && (text[0].type == SCRIPTURE_TYPE_CHAR && text[0].char == " "))
-			array_delete(text[0],0,1);
-		
-		while(array_length(text) > 1 && (text[array_length(text)-1].type == SCRIPTURE_TYPE_CHAR && text[array_length(text)-1].char == " "))
-			array_delete(text,array_length(text)-1,1);
-			
+	characters = [];
+	isComplete = false;
+	lastSpace = undefined;
+	getLength = function() { return array_length(characters) };
+	typePos = 0;
+	draw = function(_x, _y, _page) {
+		for(var _c = 0; _c < getLength(); _c++) {
+			if(!isComplete && __scriptureIsTyping() && _c > typePos) {
+				typePos += global.__scripOptions.typeSpeed * characters[_c].style.speedMod;
+				return false;
+			}
+			_x += characters[_c].draw(_x, _y, typePos);
+		}
+		isComplete = true;
+		return true;
 	}
 	
-	calcDimensions = function(){
+	endAnimations = function() {
+		for(var _c = 0; _c < getLength(); _c++) {
+			characters[_c].steps = 100000;	
+		}
+	}
+	/*
+		if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) {
+			if(global.__scripDelay <= 0) {
+			if(type == SCRIPTURE_TYPE_EVENT) {
+				_char.draw();
+				global.__scripText.progressType(1);
+				return 0;
+			}
+				
+			draw_set_alpha(1);
+			global.__scripText.progressType( global.__scripOptions.typeSpeed * style.speedMod);
+			return 0;
+		} 
+	}
+	*/
+	
+	trimWhiteSpace = function(){
+		while(array_length(characters) != 0 && (characters[0].type == SCRIPTURE_TYPE_CHAR && characters[0].char == " "))
+			array_delete(characters[0],0,1);
+		
+		while(array_length(characters) > 1 && (characters[array_length(characters)-1].type == SCRIPTURE_TYPE_CHAR && characters[array_length(characters)-1].char == " "))
+			array_delete(characters,array_length(characters)-1,1);
+	}
+	
+	addElement = function(_newElement) {
+		if(_newElement.type != SCRIPTURE_TYPE_EVENT)
+			width += _newElement.width;
+		array_push(characters, _newElement);
+		return _newElement;
+	}
+	
+	addElements = function(_elements) {
+		for(var _i = 0; _i < array_length(_elements); _i++) {
+			array_push(characters, _elements[_i]);	
+		}
+		calcWidth();
+	}
+	
+	addHyphen = function(_hyphen){
+		array_push(characters,_hyphen);
+		width += _hyphen.width;
+		lastSpace = getLength();
+	}
+	
+	addSpace = function(){
+		if(getLength() == 0) return;
+		
+		var _space = new __scriptureChar(" ");
+		array_push(characters,_space);
+		width += _space.width;
+		lastSpace = getLength();
+	}
+	
+	calcWidth = function(){
 		trimWhiteSpace();
 		width = 0;
-		for(var _i = 0; _i < array_length(text); _i++) {
-			var _char = text[_i];
+		for(var _i = 0; _i < array_length(characters); _i++) {
+			var _char = characters[_i];
 			if(_char.type == SCRIPTURE_TYPE_EVENT) continue;
+			
 			width += _char.width;
-			if(_char.height > height) height = _char.height;
+		}
+		return width;
+	}
+	
+	calcHeight = function(){
+		trimWhiteSpace();	
+		height = 0;
+		for(var _i = 0; _i < array_length(characters); _i++) {
+			var _char = characters[_i];
+			if(_char.type == SCRIPTURE_TYPE_EVENT) continue;
+
+			if(_char.height > height) 
+				height = _char.height;
 		}
 		if(height == 0)
 			height = string_height("QWERTYUIOPASDFGHJKLZXCVBNM<>,./;'[]{}:\"?");
+		return height;
 	}
+	
+	calcDimensions = function(){
+		calcWidth();
+		calcHeight();
+	}
+	
+	checkForWrap = function() {
+		var _options = global.__scripOptions;
+		if(_options.maxWidth <= 0 || width <= _options.maxWidth) return {didWrap: false}
+		
+		if(lastSpace == undefined && _options.forceLineBreaks == false) return {didWrap: false}
+		var _length = getLength() - lastSpace;
+		var _leftover = [];
+		array_copy(_leftover, 0, characters, lastSpace, _length);
+		array_delete(characters, lastSpace, _length);
+			
+		return {didWrap: true, leftovers: _leftover}
+	}
+}
+
+function __scripturePage() constructor {
+	type = SCRIPTURE_TYPE_PAGE
+	width = 0;
+	height = 0;
+	linePos = 0;
+	isComplete = false;
+	lines = [];
+	draw = function(_x, _y) {
+		var	_drawX,
+		    _drawY = __scriptureApplyVAlign(_y);
+	
+		for(var _i = 0; _i < getLineCount(); _i++) {
+			if(!isComplete && __scriptureIsTyping() && _i > linePos) return false;
+			
+			var _curLine = lines[_i];
+			_drawX = __scriptureApplyHAlign(_x, _curLine);
+			var _lineFinished = _curLine.draw(_drawX, _drawY);
+			if(!_lineFinished) return false;
+			
+			if(linePos == _i) 
+				linePos++;
+			_drawY += _curLine.height + global.__scripOptions.lineSpacing;
+		}
+		isComplete = true;
+		return true;
+	}
+	
+	getLineCount = function() {return array_length(lines);}
+	
+	finishPage = function(_shortcutAnims) {
+		isComplete = true;
+		for(var _i = 0; _i < getLineCount(); _i++) {
+			lines[_i].isComplete = true;
+			if(_shortcutAnims) {
+				lines[_i].endAnimations();
+			}
+		}
+	}
+	
+	calcHeight = function() {
+		height = 0;
+		for(var _i = 0; _i < getLineCount(); _i++) {
+			height += lines[_i].calcHeight() + global.__scripOptions.lineSpacing;
+		}
+
+		return height;
+	}
+	
+	calcWidth = function() {
+		width = 0;
+		for(var _i = 0; _i < getLineCount(); _i++) {
+			var _width = lines[_i].calcWidth();
+			if(_width > width)
+				width = _width;
+		}
+		return _width;
+	}
+	
+	addLine = function() {
+		var _newLine = new __scriptureLine();
+		array_push(lines, _newLine)
+		return _newLine;
+	}
+	
 	
 }
 
 function __scriptureText() constructor {
-	totalWidth = 0;
-	text = [];
-	typePos = 1;
-	getLength = function() { return array_length(text) }
-	
-	getHeight = function() {
-		var _start = __scriptureGetCurrentLine(),
-				_count = global.__scripOptions.maxLines,
-				_height = 0;
-		for(var _i = _start; _i < _start + _count; _i++) {
-			if(_i >= array_length(text))
-				return _height;
-			_height += text[_i].height + global.__scripOptions.lineSpacing;
+	type = SCRIPTURE_TYPE_TEXT
+	width = 0;
+	height = 0;
+	pages = [];
+	curPage = 0;
+	getPageCount = function() { return array_length(pages) };
+	getCurrentPage = function() { return pages[curPage] };
+	calcHeight = function() {	
+		height = 0;
+		for(var _i = 0; _i < getPageCount(); _i++) {
+			var _height = pages[_i].calcHeight();
+			if(_height > height)
+				height = _height;
 		}
-		return _height;
+		return height;
 	}
 	
-	getTotalHeight = function() {	
-		var _height = 0;
-		for(var _i = 0; _i < array_length(text); _i++){
-			_height += text[_i].height + global.__scripOptions.lineSpacing;
+	calcWidth = function() {
+		width = 0; 
+		for(var _i = 0; _i < getPageCount(); _i++) {
+			var _width = pages[_i].calcWidth();
+			if(_width > width)
+				width = _width;
 		}
-		
-		return _height;
+		return width;
+	}
+	
+	calcDimensions = function() {
+		calcHeight();
+		calcWidth();
+	}
+	
+	getCurPageHeight = function() {
+		return pages[curPage].height;	
+	}
+	
+	getCurPageWidth = function() {
+		return pages[curPage].width;	
 	}
 	
 	progressType = function(_amount) {
 		typePos+=_amount;	
+	}
+	
+	setCurrentPage = function(_page) {
+		curPage = clamp(_page,0,getPageCount()-1);
+	}
+	
+	incPage = function() {
+		if(curPage+1 >= getPageCount()) return false;
+		setCurrentPage(curPage+1)
+		return true;
+	}
+	
+	decPage = function() {
+		if(curPage-1 < 0) return false;
+		setCurrentPage(curPage-1)	
+		return true;
+	}
+	
+	addPage = function() {
+		var _page = new __scripturePage();
+		array_push(pages, _page);
+		return _page;
 	}
 }
 
@@ -200,7 +406,7 @@ function __scriptureStyleNameIsProtected(_key) {
 	return false;
 }
 
-function __scriptureHandleTag(_string) {
+function __scriptureHandleTag(_string, _curLine) {
 	var _tagContent = "";
 	var _isClosingTag = string_char_at(_string,1) == "/";
 	if(_isClosingTag)
@@ -216,8 +422,34 @@ function __scriptureHandleTag(_string) {
 		}
 	}
 	_string = string_delete(_string,1,1);
+	
+	var _style = global.__scripStyles[$ _tagContent];
+	if(_style == undefined) {
+		try{
+			var _amount = abs(real(_tagContent));
+			if(_amount > 0) 
+				_curLine.addElement(new __scriptureEvent(function(){},_amount))
+		} catch(_ex){
+			show_debug_message(_ex);
+			show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
+		}
+		return;
+	}
+	switch(_style.type) {
+		case SCRIPTURE_TYPE_STYLE:
+			if(_isClosingTag) {
+				__scriptureDequeueStyle(_tagContent);
+				break;
+			}
+			__scriptureEnqueueStyle(_tagContent);
+		break;
+						
+		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style.sprite, new __scriptureStyle(global.__scripActiveStyle))); break;
+		case SCRIPTURE_TYPE_EVENT: _curLine.addElement(new __scriptureEvent(_style.event)); break;
+	}
+	
 
-	return {tag: _tagContent, updatedString: _string, isClosingTag: _isClosingTag}
+	return _string;
 }
 
 function __scriptureRebuildActiveStyle() {
@@ -265,117 +497,61 @@ function __scriptureEnqueueStyle(_key) {
 	__scriptureRebuildActiveStyle();
 }
 
+function __scriptureHandleWrapAndPagination(_curLine, _curPage) {
+	var _wrapResult = _curLine.checkForWrap();
+	if(_wrapResult.didWrap) {
+	
+		if(global.__scripOptions.maxLines > 0 && _curPage.getLineCount() >= global.__scripOptions.maxLines) {
+			_curPage = global.__scripText.addPage();
+		} 
+		
+		_curLine = _curPage.addLine();
+		_curLine.addElements(_wrapResult.leftovers);
+	}
+	
+	return {curLine: _curLine, curPage: _curPage};
+}
+
 function __scriptureParseText(_string) {
 	global.__scripStyleStack = [];
 	__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
-	var _result = new __scriptureText();
-	var _curWidth = 0;
-	var _curLine = new __scriptureLine();
-	_result.text[0] = _curLine;
-	var _lastSpace = undefined;
+	global.__scripText = new __scriptureText();
+	var _curPage = global.__scripText.addPage();
+	var _curLine = _curPage.addLine();
+	
 	while(string_length(_string) > 0) {
 		var _char = string_char_at(_string,0);
 		_string = string_delete(_string,1,1);
 		switch(_char) {
-			case "\b":
-				_lastSpace = array_length(_curLine.text);
-				_curWidth = global.__scripOptions.maxWidth + 1
+			//case "\b":
+			//	_lastSpace = array_length(_curLine.text);
+			//	_curWidth = global.__scripOptions.maxWidth + 1
 				
-			break;
-			case "\n": 
-				var _newLine = new __scriptureLine();
-				array_push(_result.text,_newLine);
-				_curLine.calcDimensions()
-				_curWidth = 0;
-				_curLine = _newLine;
-				continue;
-			break;
-			case global.__scripOpenTag: 
-				var _tagResult = __scriptureHandleTag(_string);
-				_string = _tagResult.updatedString;
-
-				var _style = global.__scripStyles[$ _tagResult.tag];
-				if(_style == undefined) {
-					try{
-						var _amount = abs(real(_tagResult.tag));
-						if(_amount > 0) {
-							var _newEvent = new __scriptureEvent(function(){},_amount);
-							array_push(_curLine.text, _newEvent);
-						}
-					} catch(_ex){
-						show_debug_message("Tag: "+_tagResult.tag+" not a valid style, doofus.");
-					}
-					continue;
-				}
-				switch(_style.type){
-					case SCRIPTURE_TYPE_STYLE:
-						if(_tagResult.isClosingTag) {
-							__scriptureDequeueStyle(_tagResult.tag);
-						} else {
-							__scriptureEnqueueStyle(_tagResult.tag);
-						}
-					break;
-						
-					case SCRIPTURE_TYPE_IMG:
-						var _newImg = new __scriptureImg(_style.sprite, new __scriptureStyle(global.__scripActiveStyle));
-						_curWidth += _newImg.width;
-						array_push(_curLine.text, _newImg);
-					break;
-					
-					case SCRIPTURE_TYPE_EVENT:
-						var _newEvent = new __scriptureEvent(_style.event);
-						array_push(_curLine.text, _newEvent);
-					break;
-				}
-			break;
+			//break;
 			
-			case "-":				
-				var _hyphen = new __scriptureChar(_char)
-				array_push(_curLine.text,_hyphen);
-				_curWidth += _hyphen.width;
-				_lastSpace = array_length(_curLine.text);
-			break;
-			
-			case " ":
-				var _currentLength = array_length(_curLine.text);
-				if(_currentLength == 0) continue;
-				
-				var _space = new __scriptureChar(_char)
-				array_push(_curLine.text,_space);
-				_curWidth += _space.width;
-				_lastSpace = _currentLength+1;
-			break;
-			
-			default: //Character
-				var _newChar = new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle));
-				_curWidth += _newChar.width;
-				array_push(_curLine.text, _newChar);
+			//case "\n":
+			//	_curLine = _curPage
+			//	var _newLine = new __scriptureLine();
+			//	array_push(_result.text,_newLine);
+			//	_curLine.calcDimensions()
+			//	_curWidth = 0;
+			//	_curLine = _newLine;
+			//	continue;
+			//break;
+			case global.__scripOpenTag: _string = __scriptureHandleTag(_string, _curLine); break;
+			case "-":	_curLine.addHyphen(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle))) break;
+			case " ": _curLine.addSpace() break;			
+			default: _curLine.addElement(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle)))
 		}
 		
 		//Handle Wrapping
-		if(_lastSpace != undefined && _curWidth > global.__scripOptions.maxWidth) {
-			var _newLine = new __scriptureLine();
-			array_push(_result.text,_newLine);
-			var _length = array_length(_curLine.text) - _lastSpace;
-			array_copy(_newLine.text, 0, _curLine.text, _lastSpace, _length);
-			array_delete(_curLine.text, _lastSpace, _length);
-			
-			_curLine.calcDimensions();
-			if(_result.totalWidth < _curLine.width) 
-				_result.totalWidth = _curLine.width;
-			
-			_lastSpace = undefined;
-			_curLine = _newLine;
-			_curLine.calcDimensions()
-			_curWidth = _curLine.width;
-		}
+		var _wrapResult = __scriptureHandleWrapAndPagination(_curLine, _curPage);
+		_curLine = _wrapResult.curLine;
+		_curPage = _wrapResult.curPage;
 	}
 	
-	_curLine.calcDimensions();
-	if(_result.totalWidth < _curLine.width) 
-		_result.totalWidth = _curLine.width;
-	
-	return _result;
+	global.__scripText.calcDimensions();
+	return global.__scripText;
 }
 
 function __scriptureApplyVAlign(_y) {
@@ -383,14 +559,8 @@ function __scriptureApplyVAlign(_y) {
 			_text = global.__scripText;
 	switch(_options.vAlign) {
 		case fa_top:    return _y;
-		
-		case fa_middle: return _y - (_options.maxLines <= 0 
-																 ? floor(_text.getTotalHeight() / 2 - _options.lineSpacing / 2)
-																 : floor(_text.getHeight() / 2  - _options.lineSpacing / 2)); 
-																 
-		case fa_bottom: return _y - (_options.maxLines <= 0 
-																 ? floor(_text.getTotalHeight())
-																 : floor(_text.getHeight()) + _options.lineSpacing); 
+		case fa_middle: return _y - floor(_text.getCurPageHeight() / 2 - _options.lineSpacing / 2)
+		case fa_bottom: return _y - floor(_text.getCurPageHeight()) + _options.lineSpacing; 
 	}	
 }
 
@@ -405,42 +575,18 @@ function __scriptureApplyHAlign(_x, _line) {
 function __scriptureGetCachedText(_string, _options) {
 	global.__scripString = _string;
 	global.__scripOptions = _options;
-	var _parsedText = global.__scripCache[$ _options.cacheKey];
+	var _parsedText = global.__scripCache[$ _options.key];
 	if(_parsedText == undefined) {
 		_parsedText = __scriptureParseText(_string)
-		global.__scripCache[$ _options.cacheKey] = _parsedText;
+		global.__scripCache[$ _options.key] = _parsedText;
 	}
 	
 	global.__scripText = _parsedText;
 }
 
-function __scriptureGetPageCount(_text = global.__scripText, _options = global.__scripOptions) {
-	return 	ceil(_text.getLength() / _options.maxLines)-1;
-}
-
-function __scriptureGetCurrentLine(_text = global.__scripText, _options = global.__scripOptions) {
-	return 	min( _options.currentPage, __scriptureGetPageCount(_text, _options)) * _options.maxLines;
-}
-
-function __scriptureIsPageFinished(_cur) {
-	//Be very sure when you clean up this logic, idiot.
-	var _length = global.__scripText.getLength();	
-	if(_length <= _cur) return true;
-	
-	var _isPaginated = global.__scripOptions.maxLines > 0;
-	var _curLineNum = _cur - __scriptureGetCurrentLine();
-	var _linePerPage = global.__scripOptions.maxLines;
-		
-	return _isPaginated ? _curLineNum >= _linePerPage : _length <= _cur;
-}
 
 function __scriptureIsTyping(_options = global.__scripOptions) {
 	return _options.typeSpeed > 0;	
-}
-
-function __scriptureValidateOptions(_options) {
-	if(_options.currentPage < 0)
-		_options.currentPage = 0;
 }
 
 #endregion
@@ -448,75 +594,24 @@ function __scriptureValidateOptions(_options) {
 function draw_scripture(_x, _y, _string, _options) {
 	draw_set_halign(fa_center);
 	draw_set_valign(fa_middle);
-	__scriptureValidateOptions(_options);
 	__scriptureGetCachedText(_string, _options)
 	
-	global.__scripText.complete = false;
-	var	_drawX,
-			_text = global.__scripText.text,
-			_pos = 0,
-		  _drawY = __scriptureApplyVAlign(_y);
+	var _currentPage = global.__scripText.getCurrentPage();
+	var _pageDone = _currentPage.draw(_x, _y);
 	
-	for(var _l = __scriptureGetCurrentLine(); !__scriptureIsPageFinished(_l); _l++) {
-		_drawX = __scriptureApplyHAlign(_x, _text[_l]);
-		var _lineHeight = _text[_l].height;
-		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
-			
-			var _char = _text[_l].text[_c];
-			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) {
-				if(global.__scripDelay <= 0) 
-				{
-					if(_char.type == SCRIPTURE_TYPE_EVENT) {
-						_char.draw();
-						global.__scripText.progressType(1);
-						return;
-					}
-				
-					draw_set_alpha(1);
-					global.__scripText.progressType( _options.typeSpeed *  _char.style.speedMod);
-					return;
-				} else {
-					global.__scripDelay -= (global.__scripDelay > 0)
-					return;
-				}
-			}
-			
-			_drawX += _char.draw(_drawX,_drawY,_pos);
-			_pos++;
-		}
-		_drawY += _lineHeight + _options.lineSpacing;
-	}
-	
-	global.__scripText.complete = true;
 	draw_set_alpha(1);
 }
 
 
 function scripture_advance_page(_options, _shortcutAnimations = true) {
-	var _text = global.__scripCache[$ _options.cacheKey];
-	if(_text == undefined) return;
+	var _text = global.__scripCache[$ _options.key];
+  if(_text == undefined) return;
+	var _curPage = _text.getCurrentPage();
+	
+	if(_curPage.isComplete) return _text.incPage();
 
-	//finish typing this page
-	if(__scriptureIsTyping(_options) && !_text.complete) {
-		_text.typePos = infinity;
-		if(_shortcutAnimations) {
-			var _start = _options.currentPage * _options.maxLines;
-			var _end = _start + _options.maxLines;
-			for(var _l = _start; _l < _end && _l < array_length(_text.text); _l++) {
-				for(var _c = 0; _c < array_length(_text.text[_l].text); _c++) {
-						var _char = _text.text[_l].text[_c];
-						_char.steps = 1000000;
-				}
-			}
-		}
-		return true;
-	} else if(_options.maxLines > 0 && _options.currentPage < __scriptureGetPageCount(_text,_options )){
-		_options.currentPage++;
-		_text.typePos = 0;
-		_text.complete = false;
-		return true;
-	}
-	return false;
+	_curPage.finishPage(_shortcutAnimations)   
+  return false;
 }
 	
 function scripture_register_style(_key, _style) {
@@ -556,21 +651,32 @@ function scripture_set_default_style(_key){
 	global.__scripStyles.defaultStyle = new __scriptureStyle(_style);
 	global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 }
-global.__scripStyles.defaultStyle = new __scriptureStyle();
-global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 
 function scripture_clear_cache(_key = undefined) {
 	if(_key == undefined)
 		global.__scripCache = {}
-	else
+	else if(variable_struct_exists(global.__scripCache, _key))
 		variable_struct_remove(global.__scripCache, _key);
 }
 
-function scripture_set_tag_characters(_start, _end) {
+function scripture_set_tag_characters(_start = "<", _end = ">") {
 	if(_start == _end || string_length(_start) != 1 || string_length(_end) != 1) {
 		show_message("Invalid start or end tag character. \nCharacters must be different and only a single character");
 		game_end();
 	}
 	global.__scripOpenTag = _start;
 	global.__scripCloseTag = _end;
+}
+
+function scripture_build_options(_key = id, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _maxWidth = 0, _lineSpacing = 0, _maxLines = 0, _forceLineBreaks = false){
+	return {
+		key: _key == undefined ? id : _key,
+		hAlign: _hAlign,
+		vAlign: _vAlign,
+		typeSpeed: _typeSpeed, 
+		maxWidth: _maxWidth,
+		lineSpacing: _lineSpacing,
+		maxLines: _maxLines,
+		forceLineBreaks: _forceLineBreaks
+	}
 }

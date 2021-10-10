@@ -4,29 +4,27 @@ It's capable of allowing for customized styles and effects similar to CSS
 Auto wrapping, spacing, kerning, etc.  It's a nightmare.
 
 
+--------------------- RETEST EVERYTHING ----------
 okay, so how do we do this.
-Basic text Features. DONE!
-Wrapping and alignment. DONE!
-forced line breaks. DONE!
-pagination DONE!
-typing DONE!
-Force Finish Typing / Advance Page DONE!
+Basic text Features.
+Wrapping and alignment.
+forced line breaks.
+pagination
+typing
+Force Finish Typing / Advance Page
+consume tags 
+consume closing tags
+onDraw Function
+soundEffects
 
-Time To Get Complicated
-consume tags DONE!
-consume closing tags DONE!
-onDraw Function DONE!!!
-soundEffects DONE!!!
+Support Image "characters"
+Support Kerning
+Support Speed Adjustments 
+Support "Event" "characters"
 
+Test setting default style
+Set Step for all characters on page advance to something really high?
+Allow changing of open/close tag characters?
 
-Support Image "characters" DONE!
-Support Kerning DONE!
-Support Speed Adjustments DONE!
-Support "Event" "characters" DONE!
-
-Test setting default style DONE!
-Set Step for all characters on page advance to something really high? !DONE
-Allow changing of open/close tag characters? DONE!
-
-TEST!
 Support New Line
+Sidecar a style with an image
