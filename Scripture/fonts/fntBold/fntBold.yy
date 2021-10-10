@@ -5,7 +5,7 @@
   "pointRounding": 0,
   "fontName": "Arial",
   "styleName": "Bold",
-  "size": 21.0,
+  "size": 22.0,
   "bold": true,
   "italic": false,
   "charset": 0,

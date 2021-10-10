@@ -81,7 +81,7 @@ scripture_register_style("small", {
 
 scripture_set_default_style("flyin");
 
-testString = "Lorem ipsum DOLOR sit amet,\n consectetur adipiscing[squiggle] elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+testString = "Lorem ipsum [30]D[30]O[30]L[30]O[30]R[30] sit amet,\n consectetur adipiscing[squiggle] elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 defaultStyle = new __scriptureStyle();
 options = {
@@ -89,7 +89,7 @@ options = {
 		hAlign: fa_center,
 		vAlign: fa_middle,
 		
-		typeSpeed: 1, // <= 0 for instant
+		typeSpeed: 0, // <= 0 for instant
 		maxWidth: 0,
 		lineSpacing: 0,
 		maxLines: 20, // <= 0 for all

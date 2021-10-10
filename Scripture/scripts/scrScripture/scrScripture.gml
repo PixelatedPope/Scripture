@@ -13,6 +13,7 @@ global.__scripStyles = {};
 global.__scripProtectedKeys = ["default", __SCRIPTURE_DEFULT_STYLE_KEY];
 global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
+global.__scripDelay = 0;
 
 global.__scripOpenTag = "<";
 global.__scripCloseTag = ">";
@@ -76,14 +77,17 @@ function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
 	} //:width
 }
 
-function __scriptureEvent(_func) constructor {
+function __scriptureEvent(_func, _delay = 0) constructor {
 	type = SCRIPTURE_TYPE_EVENT;
 	event = _func; 
 	ran = false;
+	delay = _delay;
 	draw = function(_x, _y, _index){
 		if(ran) return 0;
 		ran = true;
 		event();
+		if(delay > 0) 
+			global.__scripDelay = delay;
 		return 0;
 	}
 }
@@ -286,7 +290,18 @@ function __scriptureParseText(_string) {
 				_string = _tagResult.updatedString;
 
 				var _style = global.__scripStyles[$ _tagResult.tag];
-				if(_style == undefined) continue;
+				if(_style == undefined) {
+					try{
+						var _amount = abs(real(_tagResult.tag));
+						if(_amount > 0) {
+							var _newEvent = new __scriptureEvent(function(){},_amount);
+							array_push(_curLine.text, _newEvent);
+						}
+					} catch(_ex){
+						show_debug_message("Tag: "+_tagResult.tag+" not a valid style, doofus.");
+					}
+					continue;
+				}
 				switch(_style.type){
 					case SCRIPTURE_TYPE_STYLE:
 						if(_tagResult.isClosingTag) {
@@ -443,18 +458,23 @@ function draw_scripture(_x, _y, _string, _options) {
 		for(var _c = 0; _c < array_length(_text[_l].text); _c++) {
 			
 			var _char = _text[_l].text[_c];
-			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) 
-			{
-				if(_char.type == SCRIPTURE_TYPE_EVENT) {
-					_char.draw();
-					global.__scripText.progressType(1);
+			if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) {
+				if(global.__scripDelay <= 0) 
+				{
+					if(_char.type == SCRIPTURE_TYPE_EVENT) {
+						_char.draw();
+						global.__scripText.progressType(1);
+						return;
+					}
+				
+					draw_set_alpha(1);
+					global.__scripText.progressType( _options.typeSpeed *  _char.style.speedMod);
+					return;
+				} else {
+					global.__scripDelay -= (global.__scripDelay > 0)
 					return;
 				}
-				
-				draw_set_alpha(1);
-				global.__scripText.progressType( _options.typeSpeed *  _char.style.speedMod);
-				return;
-			} 
+			}
 			
 			_drawX += _char.draw(_drawX,_drawY,_pos);
 			_pos++;
