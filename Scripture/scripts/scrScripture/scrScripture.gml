@@ -155,22 +155,6 @@ function __scriptureText() constructor {
 	text = [];
 	typePos = 1;
 	getLength = function() { return array_length(text) }
-	//getTotalCharacters = function() {
-	//	var _count = 0;
-	//	for(var _i = 0; _i < getLength(); _i++) {
-	//		_count += array_length(text[_i].text);
-	//	}
-	//	return _count;
-	//}
-	
-	//getCharactersOnPage = function(_options) {
-	//	if(_options.maxLines <= 0) return getTotalCharacters();
-		
-	//	var _curPage = _options.currentPage;
-	//	var _maxLines = _options.maxLines;
-	//	var _cur = __scriptureGetCurrentLine(id, _options);
-	//	for(var _l = _cur; 
-	//}
 	
 	getHeight = function() {
 		var _start = __scriptureGetCurrentLine(),
@@ -434,12 +418,17 @@ function __scriptureIsTyping(_options = global.__scripOptions) {
 	return _options.typeSpeed > 0;	
 }
 
+function __scriptureValidateOptions(_options) {
+	if(_options.currentPage < 0)
+		_options.currentPage = 0;
+}
+
 #endregion
 
 function draw_scripture(_x, _y, _string, _options) {
 	draw_set_halign(fa_center);
 	draw_set_valign(fa_middle);
-	
+	__scriptureValidateOptions(_options);
 	__scriptureGetCachedText(_string, _options)
 	
 	global.__scripText.complete = false;
