@@ -1,5 +1,6 @@
 {
   "resources": [
+    {"id":{"name":"SCRATCH","path":"scripts/SCRATCH/SCRATCH.yy",},"order":16,},
     {"id":{"name":"Design Notes","path":"notes/Design Notes/Design Notes.yy",},"order":2,},
     {"id":{"name":"twerp","path":"scripts/twerp/twerp.yy",},"order":0,},
     {"id":{"name":"scrScripture","path":"scripts/scrScripture/scrScripture.yy",},"order":9,},

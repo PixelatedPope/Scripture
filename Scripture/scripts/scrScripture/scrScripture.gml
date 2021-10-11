@@ -183,21 +183,6 @@ function __scriptureLine() constructor {
 			characters[_c].steps = 100000;	
 		}
 	}
-	/*
-		if(__scriptureIsTyping() && _pos >= global.__scripText.typePos) {
-			if(global.__scripDelay <= 0) {
-			if(type == SCRIPTURE_TYPE_EVENT) {
-				_char.draw();
-				global.__scripText.progressType(1);
-				return 0;
-			}
-				
-			draw_set_alpha(1);
-			global.__scripText.progressType( global.__scripOptions.typeSpeed * style.speedMod);
-			return 0;
-		} 
-	}
-	*/
 	
 	trimWhiteSpace = function(){
 		while(array_length(characters) != 0 && (characters[0].type == SCRIPTURE_TYPE_CHAR && characters[0].char == " "))
@@ -270,15 +255,16 @@ function __scriptureLine() constructor {
 	
 	checkForWrap = function() {
 		var _options = global.__scripOptions;
-		if(_options.maxWidth <= 0 || width <= _options.maxWidth) return {didWrap: false}
+		var _result = {didWrap: false, leftovers: []};
+		if(_options.maxWidth <= 0 || width <= _options.maxWidth) return _result
 		
-		if(lastSpace == undefined && _options.forceLineBreaks == false) return {didWrap: false}
+		if(lastSpace == undefined && _options.forceLineBreaks == false) return _result
 		var _length = getLength() - lastSpace;
-		var _leftover = [];
-		array_copy(_leftover, 0, characters, lastSpace, _length);
+		_result.didWrap = true;
+		array_copy(_result.leftovers, 0, characters, lastSpace, _length);
 		array_delete(characters, lastSpace, _length);
-			
-		return {didWrap: true, leftovers: _leftover}
+		
+		return _result
 	}
 }
 
@@ -345,8 +331,6 @@ function __scripturePage() constructor {
 		array_push(lines, _newLine)
 		return _newLine;
 	}
-	
-	
 }
 
 function __scriptureText() constructor {
@@ -522,11 +506,11 @@ function __scriptureEnqueueStyle(_key) {
 	__scriptureRebuildActiveStyle();
 }
 
-function __scriptureHandleWrapAndPagination(_curLine, _curPage) {
+function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = false, _forceNewPage = false) {
 	var _wrapResult = _curLine.checkForWrap();
-	if(_wrapResult.didWrap) {
+	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
 	
-		if(global.__scripOptions.maxLines > 0 && _curPage.getLineCount() >= global.__scripOptions.maxLines) {
+		if(_forceNewPage || (global.__scripOptions.maxLines > 0 && _curPage.getLineCount() >= global.__scripOptions.maxLines)) {
 			_curPage = global.__scripText.addPage();
 		} 
 		
@@ -547,22 +531,13 @@ function __scriptureParseText(_string) {
 	while(string_length(_string) > 0) {
 		var _char = string_char_at(_string,0);
 		_string = string_delete(_string,1,1);
+		var _forceNewLine = false;
+		var _forceNewPage = false;
 		switch(_char) {
-			//case "\b":
-			//	_lastSpace = array_length(_curLine.text);
-			//	_curWidth = global.__scripOptions.maxWidth + 1
-				
-			//break;
-			
-			//case "\n":
-			//	_curLine = _curPage
-			//	var _newLine = new __scriptureLine();
-			//	array_push(_result.text,_newLine);
-			//	_curLine.calcDimensions()
-			//	_curWidth = 0;
-			//	_curLine = _newLine;
-			//	continue;
-			//break;
+			case "\b": 
+				_forceNewPage = true; 
+			break;			
+			case "\n": _forceNewLine = true;break;
 			case global.__scripOpenTag: _string = __scriptureHandleTag(_string, _curLine); break;
 			case "-":	_curLine.addHyphen(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle))) break;
 			case " ": _curLine.addSpace() break;			
@@ -570,7 +545,7 @@ function __scriptureParseText(_string) {
 		}
 		
 		//Handle Wrapping
-		var _wrapResult = __scriptureHandleWrapAndPagination(_curLine, _curPage);
+		var _wrapResult = __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine, _forceNewPage);
 		_curLine = _wrapResult.curLine;
 		_curPage = _wrapResult.curPage;
 	}

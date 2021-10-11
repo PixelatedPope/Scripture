@@ -5,7 +5,7 @@ Auto wrapping, spacing, kerning, etc.  It's a nightmare.
 
 
 --------------------- RETEST EVERYTHING ----------
-okay, so how do we do this.
+
 Basic text Features. -Done.  Again.
 Wrapping and alignment. -Done. Again.
 forced line breaks.
@@ -28,3 +28,12 @@ Allow changing of open/close tag characters?
 
 Support New Line
 Sidecar a style with an image
+Support Pausing.
+Look at text scaling and alpha and apply what we did for images?
+Am I getting Reliable Results?
+	is Page Finished?
+	Width and Height?
+	Total Page Count
+	Current Page
+	
+	What else we got?

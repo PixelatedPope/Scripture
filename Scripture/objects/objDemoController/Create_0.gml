@@ -4,7 +4,7 @@ scripture_build_example_styles();
 //scripture_set_tag_characters("[","]");
 scripture_set_default_style("bold");
 
-testString = "<colors><squiggle>Lorem ipsum<slow down> dolor</slow down> sit amet, consectetur adipiscing elit. Nullam finibus ante eu elementum malesuada. Duis nec diam sit amet nisl tempus lobortis nec a lorem. Aliquam erat volutpat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nulla sed sapien efficitur, posuere felis sed, vulputate arcu. Vestibulum nec turpis vel lacus laoreet posuere. Morbi id purus suscipit, ultrices erat non, suscipit quam. Phasellus sed neque risus. Nunc sed mollis metus, eu rhoncus leo. Curabitur sit amet ex in turpis maximus semper vel vel tellus. Donec quis lectus in ex efficitur egestas vel et nunc. Donec ac blandit massa. Sed semper purus elit, sed ultrices felis elementum a. ";
+testString = "Welcome to<slow down>\bSCRIPTURE\b</slow down> sit\n amet,\n consectetur adipiscing elit. Nullam finibus ante eu elementum malesuada. Duis nec diam sit amet nisl tempus lobortis nec a lorem. Aliquam erat volutpat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nulla sed sapien efficitur, posuere felis sed, vulputate arcu. Vestibulum nec turpis vel lacus laoreet posuere. Morbi id purus suscipit, ultrices erat non, suscipit quam. Phasellus sed neque risus. Nunc sed mollis metus, eu rhoncus leo. Curabitur sit amet ex in turpis maximus semper vel vel tellus. Donec quis lectus in ex efficitur egestas vel et nunc. Donec ac blandit massa. Sed semper purus elit, sed ultrices felis elementum a. ";
 width = 200
 height = 400
 
