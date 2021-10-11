@@ -12,6 +12,28 @@ function scripture_build_example_styles() {
 	scripture_register_event("show message", function(){ show_message("Yup") });
 	
 	//Styles
+	scripture_register_style("scaled up", {
+		xScale: 2,
+		yScale: 2,
+		font: fntBold,
+		onDraw: function(_x, _y, _style, _steps, _pos) {
+			with(_style) {
+				var _percent = clamp(_steps / room_speed, 0, 1);
+				alpha = _percent * 2;
+				xScale = lerp(4,1,_percent);
+				yScale = xScale;
+			}
+		}
+	});
+	scripture_register_style("alignTop", {
+		textAlign: fa_top
+	});
+	scripture_register_style("alignMid", {
+		textAlign: fa_middle
+	});
+	scripture_register_style("alignBot", {
+		textAlign: fa_bottom
+	});
 	scripture_register_style("colors", {
 		onDraw: function(_x, _y, _style, _steps, _pos) {
 			if(_steps == 0)
@@ -33,15 +55,13 @@ scripture_register_style("flyin", {
 	color: c_yellow,
 	onDraw: function(_x, _y, _style, _steps, _pos) {
 		with(_style) {
-			startX = -20;
-			startY = -100;
-				
+	
 			var _percent = clamp(_steps / room_speed, 0, 1);
 			alpha = _percent * 2;
 			xScale = _percent;
 			yScale = _percent;
-			xOff = twerp(TwerpType.out_cubic, startX, 0, _percent);
-			yOff = twerp(TwerpType.out_bounce, startY, 0, _percent);
+			xOff = twerp(TwerpType.out_cubic, -20, 0, _percent);
+			yOff = twerp(TwerpType.out_bounce, -100, 0, _percent);
 		}
 	}
 });

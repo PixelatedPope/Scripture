@@ -43,6 +43,7 @@ function __scriptureStyle(_style = undefined) constructor {
 		yOff = 1;
 		angle = 0;
 		alpha = 1;
+		textAlign = fa_bottom;
 		onDraw = function(){};
 		return;
 	}
@@ -58,6 +59,7 @@ function __scriptureStyle(_style = undefined) constructor {
 	yOff = _style[$ "yOff"] == undefined ? 0 : _style.yOff;
 	angle = _style[$ "angle"] == undefined ? 0 : _style.angle;
 	alpha = _style[$ "alpha"] == undefined ? 1 : _style.alpha;
+	textAlign = _style[$ "textAlign"] == undefined ? fa_bottom : _style.textAlign;
 	onDraw = _style[$ "onDraw"] == undefined ? function(){} : _style.onDraw;
 }
 
@@ -136,19 +138,20 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	centerX = width / 2;
 	centerY = height / 2;
 	
-	draw = function(_x, _y, _index) {		
+	draw = function(_x, _y, _index) {
+		var _drawX = _x + centerX;
+		var _drawY = _y + centerY;
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](_x, _y, style, steps, _index);	
+			style.onDraw[_i](_drawX, _drawY, style, steps, _index);	
 		}
 		steps++;
-		
+		_drawX += style.xOff;
+		_drawY += style.yOff;
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(style.alpha);
 
-		draw_text_transformed(_x + centerX + style.xOff, 
-													_y + centerY + style.yOff,
-													char, style.xScale, style.yScale, style.angle);
+		draw_text_transformed(_drawX, _drawY, char, style.xScale, style.yScale, style.angle);
 		return width;
 	}
 }
@@ -170,10 +173,11 @@ function __scriptureLine() constructor {
 					global.__scripDelay--;
 					return false;
 				}
-				typePos += global.__scripOptions.typeSpeed * characters[_c-1].style.speedMod;
+				if(!global.__scripOptions.isPaused)
+					typePos += global.__scripOptions.typeSpeed * characters[_c-1].style.speedMod;
 				return false;
 			}
-			_x += characters[_c].draw(_x, _y, typePos);
+			_x += characters[_c].draw(_x, _y, typePos, self);
 		}
 		if(delay > 0) {
 			delay-= characters[getLength()-1].style.speedMod;
@@ -681,6 +685,7 @@ function scripture_build_options(_key = id, _hAlign = fa_left, _vAlign = fa_top,
 		maxWidth: _maxWidth,
 		lineSpacing: _lineSpacing,
 		maxLines: _maxLines,
-		forceLineBreaks: _forceLineBreaks
+		forceLineBreaks: _forceLineBreaks,
+		isPaused: false
 	}
 }

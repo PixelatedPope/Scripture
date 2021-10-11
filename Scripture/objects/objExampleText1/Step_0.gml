@@ -6,6 +6,7 @@ if(keyboard_check_pressed(vk_space)) {
 		//scripture_set_page(options, 0);	
 	}
 }
+options.isPaused = keyboard_check(ord("P"));
 	
 if(keyboard_check(vk_right))
 	options.hAlign = fa_right;

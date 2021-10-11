@@ -27,10 +27,11 @@ Allow changing of open/close tag characters? DONE
 
 Support New Line DONE
 Sidecar a style with an image DONE
-DELAY
+DELAY DONE
 
-Support Pausing.
-Look at text scaling and alpha and apply what we did for images?
+Support Pausing. DONE
+Look at text scaling and alpha and apply what we did for images? Not a good idea.
+
 Am I getting Reliable Results?
 	is Page Finished?
 	Width and Height?
