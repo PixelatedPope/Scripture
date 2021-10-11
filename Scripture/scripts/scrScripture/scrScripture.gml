@@ -32,52 +32,76 @@ global.__scripCloseTag = ">";
 function __scriptureStyle(_style = undefined) constructor {
 	type = SCRIPTURE_TYPE_STYLE
 	if(_style == undefined) {
-			color = c_white;
-			font = -1;
-			speedMod = 1;
-			kerning = 0;
-			onDraw = function(){};
-			return;
+		sprite = undefined;
+		color = c_white;
+		font = -1;
+		speedMod = 1;
+		kerning = 0;
+		xScale = 1;
+		yScale = 1;
+		xOff = 1;
+		yOff = 1;
+		angle = 0;
+		alpha = 1;
+		onDraw = function(){};
+		return;
 	}
 	//Return a duplicate of the given style with new key
 	color = _style[$ "color"] == undefined ? c_white : _style.color;
+	sprite = _style[$ "sprite"] == undefined ? undefined: _style.sprite;
 	font = _style[$ "font"] == undefined ? -1 : _style.font;
 	speedMod = _style[$ "speedMod"] == undefined ? 1 : _style.speedMod;
 	kerning = _style[$ "kerning"] == undefined ? 0 : _style.kerning;
+	xScale = _style[$ "xScale"] == undefined ? 1 : _style.xScale;
+	yScale = _style[$ "yScale"] == undefined ? 1 : _style.yScale;
+	xOff = _style[$ "xOff"] == undefined ? 0 : _style.xOff;
+	yOff = _style[$ "yOff"] == undefined ? 0 : _style.yOff;
+	angle = _style[$ "angle"] == undefined ? 0 : _style.angle;
+	alpha = _style[$ "alpha"] == undefined ? 1 : _style.alpha;
 	onDraw = _style[$ "onDraw"] == undefined ? function(){} : _style.onDraw;
 }
 
 global.__scripStyles.defaultStyle = new __scriptureStyle();
 global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 
-function __scriptureImg(_spr, _style = new __scriptureStyle()) constructor {
+function __scriptureImg(_style) constructor {
+	
 	type = SCRIPTURE_TYPE_IMG;
-	sprite = _spr;
+	var _active = new __scriptureStyle(global.__scripActiveStyle)
+	var _keys = variable_struct_get_names(_style);
+	for(var _i = 0; _i < array_length(_keys); _i++) {
+		_active[$ _keys[_i]] = _style[$ _keys[_i]];	
+	}
+	
+	sprite = _active.sprite;
 	image = 0;
-	speed = sprite_get_speed_type(_spr) == spritespeed_framespergameframe ? sprite_get_speed(sprite) : sprite_get_speed(sprite) / room_speed;
-	style = _style;
+	speed = sprite_get_speed_type(sprite) == spritespeed_framespergameframe 
+																				 ? sprite_get_speed(sprite) 
+																				 : sprite_get_speed(sprite) / room_speed;
+	style = _active;
 	steps = 0;
-	width = sprite_get_width(sprite) + style.kerning;
-	height = sprite_get_height(sprite);
+	baseXScale = style.xScale;
+	baseYScale = style.yScale;
+	baseAlpha = style.alpha;
+	width = sprite_get_width(sprite) * style.xScale + style.kerning;
+	height = sprite_get_height(sprite) * style.yScale;
 	centerX = width/2;
 	centerY = height/2;
-	alpha = 1;
-	xScale = 1;
-	yScale = 1;
-	xOff = 0;
-	yOff = 0;
-	angle = 0;
 	
 	draw = function(_x, _y, _index) {
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](_x, _y, self, steps, _index);	
+			style.onDraw[_i](_x, _y, style, steps, _index);	
 		}
 		steps++;
 		
 		draw_sprite_ext(sprite, image, 
-										_x + centerX + xOff, 
-										_y + centerY + yOff, 
-										xScale, yScale, angle, style.color, alpha);
+										_x + style.xOff + centerX, 
+										_y + style.yOff + centerY, 
+										baseXScale * style.xScale, 
+										baseYScale * style.yScale, 
+										style.angle, 
+										style.color, 
+										baseAlpha * style.alpha);
 		image += speed;
 		return width;
 	}
@@ -108,26 +132,20 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	height = string_height(char);
 	centerX = width / 2;
 	centerY = height / 2;
-	alpha = 1;
-	xScale = 1;
-	yScale = 1;
-	xOff = 0;
-	yOff = 0;
-	angle = 0;
 	
 	draw = function(_x, _y, _index) {		
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](_x, _y, self, steps, _index);	
+			style.onDraw[_i](_x, _y, style, steps, _index);	
 		}
 		steps++;
 		
 		draw_set_font(style.font);
 		draw_set_color(style.color);
-		draw_set_alpha(alpha);
+		draw_set_alpha(style.alpha);
 
-		draw_text_transformed(_x + centerX + xOff, 
-													_y + centerY + yOff,
-													char, xScale, yScale, angle);
+		draw_text_transformed(_x + centerX + style.xOff, 
+													_y + centerY + style.yOff,
+													char, style.xScale, style.yScale, style.angle);
 		return width;
 	}
 }
@@ -444,7 +462,7 @@ function __scriptureHandleTag(_string, _curLine) {
 			__scriptureEnqueueStyle(_tagContent);
 		break;
 						
-		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style.sprite, new __scriptureStyle(global.__scripActiveStyle))); break;
+		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style)); break;
 		case SCRIPTURE_TYPE_EVENT: _curLine.addElement(new __scriptureEvent(_style.event)); break;
 	}
 	
@@ -597,7 +615,7 @@ function draw_scripture(_x, _y, _string, _options) {
 	__scriptureGetCachedText(_string, _options)
 	
 	var _currentPage = global.__scripText.getCurrentPage();
-	var _pageDone = _currentPage.draw(_x, _y);
+	_currentPage.draw(_x, _y);
 	
 	draw_set_alpha(1);
 }
@@ -621,19 +639,18 @@ function scripture_register_style(_key, _style) {
 	global.__scripStyles[$ _key] = _style;
 }
 
-function scripture_register_sprite(_key, _sprite) {
+function scripture_register_sprite(_key, _sprite, _style) {
 	if(__scriptureStyleNameIsProtected(_key)) return;
 	
 	if(!sprite_exists(_sprite)) {
 		show_debug_message("That's not a sprite, dude.")
 		return;
 	}
+	_style.key = _key;
+	_style.type = SCRIPTURE_TYPE_IMG;
+	_style.sprite = _sprite;
 	
-	global.__scripStyles[$ _key] = {
-		key: _key,
-		type: SCRIPTURE_TYPE_IMG,
-		sprite: _sprite
-	}
+	global.__scripStyles[$ _key] = _style;
 }
 
 function scripture_register_event(_key, _func) {

@@ -1,7 +1,13 @@
 function scripture_build_example_styles() {
 	//Images
-	scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft);
-	
+	scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft, {
+		//color: c_white,
+		kerning: 0,
+		alpha: .25,
+		angle: 0,
+		xScale: 5
+		//yScale: 1
+	});
 	//Events
 	scripture_register_event("show message", function(){ show_message("Yup") });
 	
@@ -34,18 +40,18 @@ function scripture_build_example_styles() {
 	scripture_register_style("flyin", {
 		font: fntBold,
 		color: c_yellow,
-		onDraw: function(_x, _y, _char, _steps, _pos) {
-		
-			_char.startX = -20;
-			_char.startY = -100;
-		
-		
-			var _percent = clamp(_steps / room_speed,0,1);
-			_char.alpha = _percent * 2;
-			_char.xScale = _percent;
-			_char.yScale = _percent;
-			_char.xOff = twerp(TwerpType.out_cubic,_char.startX,0,_percent);
-			_char.yOff = twerp(TwerpType.out_bounce,_char.startY,0,_percent);
+		onDraw: function(_x, _y, _style, _steps, _pos) {
+			with(_style) {
+				startX = -20;
+				startY = -100;
+				
+				var _percent = clamp(_steps / room_speed, 0, 1);
+				alpha = _percent * 2;
+				xScale = _percent;
+				yScale = _percent;
+				xOff = twerp(TwerpType.out_cubic, startX, 0, _percent);
+				yOff = twerp(TwerpType.out_bounce, startY, 0, _percent);
+			}
 		}
 	});
 

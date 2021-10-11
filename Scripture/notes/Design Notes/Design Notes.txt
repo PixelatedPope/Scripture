@@ -6,15 +6,15 @@ Auto wrapping, spacing, kerning, etc.  It's a nightmare.
 
 --------------------- RETEST EVERYTHING ----------
 okay, so how do we do this.
-Basic text Features.
-Wrapping and alignment.
+Basic text Features. -Done.  Again.
+Wrapping and alignment. -Done. Again.
 forced line breaks.
-pagination
-typing
-Force Finish Typing / Advance Page
-consume tags 
-consume closing tags
-onDraw Function
+pagination -Done. Again.
+typing -Done. Again.
+Force Finish Typing / Advance Page -Done. Again
+consume tags  -Done. Again.
+consume closing tags -Done. Again.
+onDraw Function -Done. Again.
 soundEffects
 
 Support Image "characters"
