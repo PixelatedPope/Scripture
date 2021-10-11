@@ -3,33 +3,24 @@ function scripture_build_example_styles() {
 	scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft, {
 		//color: c_white,
 		kerning: 0,
-		alpha: .25,
+		alpha: 1,
 		angle: 0,
-		xScale: 5
+		xScale: 2
 		//yScale: 1
 	});
 	//Events
 	scripture_register_event("show message", function(){ show_message("Yup") });
 	
 	//Styles
-	scripture_register_style("spin", {
-		onDraw: function(_x, _y, _char, _steps, _pos) {
-				var _dir = (_steps+_pos) * 5;
-				_char.angle = _dir;
-			}
-	});
-
-	scripture_register_style("color", {
-		font: fntBold,
-		onDraw: function(_x, _y, _char, _steps, _pos) {
+	scripture_register_style("colors", {
+		onDraw: function(_x, _y, _style, _steps, _pos) {
 			if(_steps == 0)
-				_char.style.color = make_color_hsv(irandom(255),165,255);
+				_style.color = make_color_hsv(irandom(255),165,255);
 		}
 	});
 
 	scripture_register_style("slow down", {
-		font: fntDefault,
-		speedMod: .1
+		speedMod: .05
 	});
 
 	scripture_register_style("tight", {

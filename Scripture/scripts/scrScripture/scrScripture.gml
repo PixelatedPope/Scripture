@@ -65,7 +65,6 @@ global.__scripStyles.defaultStyle = new __scriptureStyle();
 global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 
 function __scriptureImg(_style) constructor {
-	
 	type = SCRIPTURE_TYPE_IMG;
 	var _active = new __scriptureStyle(global.__scripActiveStyle)
 	var _keys = variable_struct_get_names(_style);
@@ -83,8 +82,11 @@ function __scriptureImg(_style) constructor {
 	baseXScale = style.xScale;
 	baseYScale = style.yScale;
 	baseAlpha = style.alpha;
-	width = sprite_get_width(sprite) * style.xScale + style.kerning;
-	height = sprite_get_height(sprite) * style.yScale;
+	style.xScale = 1;
+	style.yScale = 1;
+	style.alpha = 1;
+	width = sprite_get_width(sprite) * baseXScale + style.kerning;
+	height = sprite_get_height(sprite) * baseYScale;
 	centerX = width/2;
 	centerY = height/2;
 	
@@ -159,13 +161,18 @@ function __scriptureLine() constructor {
 	lastSpace = undefined;
 	getLength = function() { return array_length(characters) };
 	typePos = 0;
+	delay = 1;
 	draw = function(_x, _y, _page) {
 		for(var _c = 0; _c < getLength(); _c++) {
-			if(!isComplete && __scriptureIsTyping() && _c > typePos) {
-				typePos += global.__scripOptions.typeSpeed * characters[_c].style.speedMod;
+			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) {
+				typePos += global.__scripOptions.typeSpeed * characters[_c-1].style.speedMod;
 				return false;
 			}
 			_x += characters[_c].draw(_x, _y, typePos);
+		}
+		if(delay > 0) {
+			delay-= characters[getLength()-1].style.speedMod;
+			return false;	
 		}
 		isComplete = true;
 		return true;
@@ -223,7 +230,7 @@ function __scriptureLine() constructor {
 	addSpace = function(){
 		if(getLength() == 0) return;
 		
-		var _space = new __scriptureChar(" ");
+		var _space = new __scriptureChar(" ", global.__scripActiveStyle);
 		array_push(characters,_space);
 		width += _space.width;
 		lastSpace = getLength();
