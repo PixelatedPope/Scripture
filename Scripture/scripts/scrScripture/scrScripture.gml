@@ -111,7 +111,8 @@ function __scriptureImg(_style) constructor {
 
 function __scriptureEvent(_func, _delay = 0) constructor {
 	type = SCRIPTURE_TYPE_EVENT;
-	event = _func; 
+	event = _func;
+	style = {speedMod:1};
 	ran = false;
 	delay = _delay;
 	draw = function(_x, _y, _index){
@@ -165,6 +166,10 @@ function __scriptureLine() constructor {
 	draw = function(_x, _y, _page) {
 		for(var _c = 0; _c < getLength(); _c++) {
 			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) {
+				if(global.__scripDelay > 0) {
+					global.__scripDelay--;
+					return false;
+				}
 				typePos += global.__scripOptions.typeSpeed * characters[_c-1].style.speedMod;
 				return false;
 			}
@@ -442,7 +447,7 @@ function __scriptureHandleTag(_string, _curLine) {
 			show_debug_message(_ex);
 			show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
 		}
-		return;
+		return _string;
 	}
 	switch(_style.type) {
 		case SCRIPTURE_TYPE_STYLE:

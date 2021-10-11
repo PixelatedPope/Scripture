@@ -8,26 +8,27 @@ Auto wrapping, spacing, kerning, etc.  It's a nightmare.
 
 Basic text Features. -Done.  Again.
 Wrapping and alignment. -Done. Again.
-forced line breaks.
+forced line breaks. -Done. Again.
 pagination -Done. Again.
 typing -Done. Again.
 Force Finish Typing / Advance Page -Done. Again
 consume tags  -Done. Again.
 consume closing tags -Done. Again.
 onDraw Function -Done. Again.
-soundEffects
 
-Support Image "characters"
-Support Kerning
-Support Speed Adjustments 
-Support "Event" "characters"
+Support Image "characters" DONE
+Support Kerning DONE
+Support Speed Adjustments DONE
+Support "Event" "characters" DONE
 
-Test setting default style
-Set Step for all characters on page advance to something really high?
-Allow changing of open/close tag characters?
+Test setting default style DONE
+Set Step for all characters on page advance to something really high? DONE
+Allow changing of open/close tag characters? DONE
 
-Support New Line
-Sidecar a style with an image
+Support New Line DONE
+Sidecar a style with an image DONE
+DELAY
+
 Support Pausing.
 Look at text scaling and alpha and apply what we did for images?
 Am I getting Reliable Results?
@@ -37,3 +38,6 @@ Am I getting Reliable Results?
 	Current Page
 	
 	What else we got?
+	
+TEST
+soundEffects
