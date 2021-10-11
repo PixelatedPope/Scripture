@@ -130,6 +130,7 @@ function __scriptureEvent(_func, _delay = 0) constructor {
 function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	type = SCRIPTURE_TYPE_CHAR
 	char = _char;
+	isSpace = _char == " ";
 	style = _style; 
 	steps = 0;
 	draw_set_font(style.font);
@@ -138,19 +139,27 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	centerX = width / 2;
 	centerY = height / 2;
 	
-	draw = function(_x, _y, _index) {
+	draw = function(_x, _y, _index, _line) {
+		
+		if(isSpace) return width;
 		var _drawX = _x + centerX;
 		var _drawY = _y + centerY;
+		
+		switch(style.textAlign) {
+			case fa_top: break;
+			case fa_middle: _drawY += _line.height/2 - centerY break;
+			case fa_bottom: _drawY += _line.height - centerY * 2 break;
+		}
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
 			style.onDraw[_i](_drawX, _drawY, style, steps, _index);	
 		}
 		steps++;
 		_drawX += style.xOff;
 		_drawY += style.yOff;
+		
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(style.alpha);
-
 		draw_text_transformed(_drawX, _drawY, char, style.xScale, style.yScale, style.angle);
 		return width;
 	}

@@ -9,4 +9,4 @@ width = 200
 height = 400
 
 instance_create_depth(10,10,0,objExampleText1)
-.options = scripture_build_options(undefined,fa_center,fa_middle,1,width,0,5,false);
+.options = scripture_build_options(undefined,fa_center,fa_middle,0,width,0,5,false);
