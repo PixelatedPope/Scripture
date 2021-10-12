@@ -196,6 +196,24 @@ function __scriptureLine() constructor {
 		return true;
 	}
 	
+	reset = function(){
+		isComplete = false;
+		typePos = 0;
+		delay = __scriptureIsTyping();
+		for(var _i = 0; _i < getLength(); _i++) {
+			var _char = characters[_i];
+			_char.steps = 0;
+			switch(_char.type) {
+				case SCRIPTURE_TYPE_EVENT:
+					_char.ran = false;
+				break;
+				case SCRIPTURE_TYPE_IMG:
+					_char.image = 0;
+				break;
+			}
+		}
+	}
+	
 	endAnimations = function() {
 		for(var _c = 0; _c < getLength(); _c++) {
 			characters[_c].steps = 100000;	
@@ -324,6 +342,13 @@ function __scripturePage() constructor {
 		}
 	}
 	
+	reset = function() {
+		isComplete = false;
+		for(var _i = 0; _i < getLineCount(); _i++) {
+			lines[_i].reset();	
+		}
+	}
+	
 	calcHeight = function() {
 		height = 0;
 		for(var _i = 0; _i < getLineCount(); _i++) {
@@ -356,6 +381,7 @@ function __scriptureText() constructor {
 	height = 0;
 	pages = [];
 	curPage = 0;
+	//forceRerender = false;
 	getPageCount = function() { return array_length(pages) };
 	getCurrentPage = function() { return pages[curPage] };
 	calcHeight = function() {	
@@ -391,12 +417,17 @@ function __scriptureText() constructor {
 		return pages[curPage].width;	
 	}
 	
-	progressType = function(_amount) {
-		typePos+=_amount;	
+	resetFromPage = function(_page) {
+		for(var _i = max(0,_page); _i < getPageCount(); _i++) {
+			pages[_i].reset();	
+		}
 	}
 	
-	setCurrentPage = function(_page) {
+	setCurrentPage = function(_page, _reset = false) {
+		var _prevPage = curPage;
 		curPage = clamp(_page,0,getPageCount()-1);
+		if(_reset && _prevPage > curPage)
+			resetFromPage(curPage);
 	}
 	
 	incPage = function() {
@@ -405,7 +436,7 @@ function __scriptureText() constructor {
 		return true;
 	}
 	
-	decPage = function() {
+	decPage = function(_reset = false) {
 		if(curPage-1 < 0) return false;
 		setCurrentPage(curPage-1)	
 		return true;
@@ -618,8 +649,8 @@ function draw_scripture(_x, _y, _string, _options) {
 	
 	var _cur = global.__scripText;
 	return {
-		width: _currentPage.width,
-		height: _currentPage.height,
+		width: _cur.getCurPageWidth(),
+		height: _cur.getCurPageHeight(),
 		currentPage: _cur.curPage,
 		pageCount: _cur.getPageCount(),
 		nextPageReady: _currentPage.isComplete
@@ -627,7 +658,7 @@ function draw_scripture(_x, _y, _string, _options) {
 }
 
 
-function scripture_advance_page(_options, _shortcutAnimations = true) {
+function scripture_next_page(_options, _shortcutAnimations = true) {
 	var _text = global.__scripCache[$ _options.key];
   if(_text == undefined) return;
 	var _curPage = _text.getCurrentPage();
@@ -636,6 +667,20 @@ function scripture_advance_page(_options, _shortcutAnimations = true) {
 
 	_curPage.finishPage(_shortcutAnimations)   
   return false;
+}
+
+function scripture_prev_page(_options, _reset = true) {
+	var _text = global.__scripCache[$ _options.key];
+  if(_text == undefined || _page < 0) return;
+	
+	_text.decPage(_reset);
+}
+
+function scripture_jump_to_page(_options, _page, _reset = true) {
+	var _text = global.__scripCache[$ _options.key];
+  if(_text == undefined) return;
+	if(_page < 0 || _page >= _text.pageCount) return;
+	_text.setCurrentPage(_page,_reset);
 }
 	
 function scripture_register_style(_key, _style) {

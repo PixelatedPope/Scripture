@@ -30,15 +30,18 @@ Sidecar a style with an image DONE
 DELAY DONE
 
 Support Pausing. DONE
-Look at text scaling and alpha and apply what we did for images? Not a good idea.
+Am I getting Reliable Results? DONE
+Test Sprite Fonts
+Jump To Page
+Force Re-render
+Shaders? 
+Underline?
 
-Am I getting Reliable Results?
-	is Page Finished?
-	Width and Height?
-	Total Page Count
-	Current Page
-	
-	What else we got?
-	
+
 TEST
 soundEffects
+Jump to Page reset / no reset
+Dec Page reset / no reset
+
+
+Look at text scaling and alpha and apply what we did for images? Not a good idea.
