@@ -426,7 +426,7 @@ function __scriptureText() constructor {
 	setCurrentPage = function(_page, _reset = false) {
 		var _prevPage = curPage;
 		curPage = clamp(_page,0,getPageCount()-1);
-		if(_reset && _prevPage > curPage)
+		if(_reset && _prevPage >= curPage)
 			resetFromPage(curPage);
 	}
 	
@@ -747,9 +747,9 @@ function scripture_set_tag_characters(_start = "<", _end = ">") {
 	global.__scripCloseTag = _end;
 }
 
-function scripture_build_options(_key = id, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _maxWidth = 0, _lineSpacing = 0, _maxHeight = 0, _forceLineBreaks = false){
+function scripture_build_options(_maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){
 	return {
-		key: _key == undefined ? id : _key,
+		key: _cacheKey == undefined ? id : _cacheKey,
 		hAlign: _hAlign,
 		vAlign: _vAlign,
 		typeSpeed: _typeSpeed, 

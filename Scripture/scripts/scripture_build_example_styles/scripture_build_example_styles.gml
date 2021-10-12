@@ -65,7 +65,21 @@ function scripture_build_example_styles() {
 	
 	rainbow = scripture_register_style("rainbow", {
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
-			_style.color = make_color_hsv((_steps+_pos) % 255,165,255);
+			_style.color = make_color_hsv((_steps * 2 + _pos * 10) % 255,165,255);
+		}
+	});
+	
+	outline = scripture_register_style("outline", {
+		
+		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
+			draw_set_color(c_gray);
+			var _thick = 3;
+			for(var _i=0; _i<9; _i++) {
+				var _xPos = _x + _style.xOff + lengthdir_x(_thick, _i * 45);
+				var _yPos = _y + _style.yOff + lengthdir_y(_thick, _i * 45);
+				
+				draw_text(_xPos, _yPos,_element.char);
+			}
 		}
 	});
 

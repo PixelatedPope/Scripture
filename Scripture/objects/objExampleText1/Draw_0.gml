@@ -3,8 +3,10 @@
 //draw_rectangle(xstart, ystart, xstart + objDemoController.width, ystart + objDemoController.height, true);
 
 var _result = draw_scripture(x, y, objDemoController.testString, options);
-draw_set_color(c_red);
-draw_line(x,y - options.maxHeight/2, x, y + options.maxHeight/2);
+
+if(_result.nextPageReady) {
+	draw_sprite_ext(sprArrow,0, x + _result.width/2, y + _result.height/2 + sin_oscillate(0,10,1) ,1,1,270,c_gray,1);
+}
 
 if(options.isPaused) {
 	draw_set_halign(fa_center);
