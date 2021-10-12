@@ -141,7 +141,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	
 	draw = function(_x, _y, _index, _line) {
 		
-		if(isSpace) return width;
+		//if(isSpace) return width;
 		var _drawX = _x + centerX;
 		var _drawY = _y + centerY;
 		
@@ -158,7 +158,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
 			style.onDraw[_i](_drawX, _drawY, style, self, steps, _index);	
 		}
-		steps++;
+		steps += !global.__scripOptions.isPaused;
 		_drawX += style.xOff;
 		_drawY += style.yOff;
 		
@@ -673,7 +673,7 @@ function scripture_next_page(_options, _shortcutAnimations = true) {
 	if(_curPage.isComplete) return _text.incPage();
 
 	_curPage.finishPage(_shortcutAnimations)   
-  return false;
+  return true;
 }
 
 function scripture_prev_page(_options, _reset = true) {

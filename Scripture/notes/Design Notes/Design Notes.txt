@@ -36,7 +36,8 @@ Jump To Page DONEISH
 Force Line Break without Space
 
 BUGS=====
-Events shouldn't contribute to "pos"
+Space to complete isn't working right.
+Pausing isn't pausing animations.
 
 Future Features====
 Force Re-render
