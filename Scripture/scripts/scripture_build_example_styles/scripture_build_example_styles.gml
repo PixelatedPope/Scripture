@@ -61,10 +61,9 @@ scripture = scripture_register_style("scripture", {
 	});
 	
 	
-	colors = scripture_register_style("colors", {
+	rainbow = scripture_register_style("rainbow", {
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
-			if(_steps == 0)
-				_style.color = make_color_hsv(irandom(255),165,255);
+			_style.color = make_color_hsv((_steps+_pos) % 255,165,255);
 		}
 	});
 

@@ -33,14 +33,16 @@ Support Pausing. DONE
 Am I getting Reliable Results? DONE
 
 Jump To Page DONEISH
-Force Line Break without Space
+Underline DONE
+Force Line Break without Space DONE
+
 
 BUGS=====
 
 Future Features====
 Force Re-render
 Shaders? 
-Underline?
+
 Animation "finished" conditions
 End Page Animations
 
@@ -50,5 +52,6 @@ Test Sprite Fonts
 Jump to Page reset / no reset
 Dec Page reset / no reset
 
-
-Look at text scaling and alpha and apply what we did for images? Not a good idea.
+Ideas that may be bad========
+Look at text scaling and alpha and apply what we did for images?
+Support max height in pixels instead of lines?

@@ -8,8 +8,8 @@ scripture_build_example_styles();
 testString = 
 	wait(60)+welcomeTo.open+"WELCOME TO\n<60>"+welcomeTo.close + 
 	scripture.open + "SCRIPTURE" + scripture.close + 
-	flyIn.open +underline.open +  colors.open + "\nadvanced text rendering" + colors.close + underline.close + flyIn.close ;
+	flyIn.open +underline.open +  rainbow.open + "\nadvanced text rendering" + rainbow.close + underline.close + flyIn.close ;
 
 
 instance_create_depth(room_width / 2,room_height/ 2,0,objExampleText1)
-.options = scripture_build_options(undefined, fa_center, fa_middle, 1, 1000, -20, 5, false);
+.options = scripture_build_options(undefined, fa_center, fa_middle, 1, 1000, -20, 5);

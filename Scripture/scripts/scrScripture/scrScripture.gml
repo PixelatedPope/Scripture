@@ -196,7 +196,7 @@ function __scriptureLine() constructor {
 			_x += characters[_c].draw(_x, _y, _c - _eventCount, self);
 		}
 		if(delay > 0) {
-			delay-= characters[getLength()-1].style.speedMod;
+			delay -= getLength() == 0 ? 1 : characters[getLength()-1].style.speedMod;
 			return false;	
 		}
 		isComplete = true;
@@ -305,11 +305,12 @@ function __scriptureLine() constructor {
 		var _result = {didWrap: false, leftovers: []};
 		if(_options.maxWidth <= 0 || width <= _options.maxWidth) return _result
 		
+		var _lastSpace = _options.forceLineBreaks ? 0 : lastSpace;
 		if(lastSpace == undefined && _options.forceLineBreaks == false) return _result
-		var _length = getLength() - lastSpace;
+		var _length = _options.forceLineBreaks ? 0 : getLength() - lastSpace;
 		_result.didWrap = true;
-		array_copy(_result.leftovers, 0, characters, lastSpace, _length);
-		array_delete(characters, lastSpace, _length);
+		array_copy(_result.leftovers, 0, characters, _lastSpace, _length);
+		array_delete(characters, _lastSpace, _length);
 		
 		return _result
 	}
