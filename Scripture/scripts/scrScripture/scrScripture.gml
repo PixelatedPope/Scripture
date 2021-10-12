@@ -223,7 +223,11 @@ function __scriptureLine() constructor {
 	
 	endAnimations = function() {
 		for(var _c = 0; _c < getLength(); _c++) {
-			characters[_c].steps = 100000;	
+			var _char = characters[_c];
+			if(_char.type == SCRIPTURE_TYPE_EVENT) continue; //Skip events when completing drawing.
+			if(_char.steps == 0)
+				_char.draw(-100000,-10000, 0, self);
+			_char.steps = 100000;	
 		}
 	}
 	
@@ -341,8 +345,11 @@ function __scripturePage() constructor {
 	
 	finishPage = function(_shortcutAnims) {
 		isComplete = true;
+		linePos = getLineCount();
 		for(var _i = 0; _i < getLineCount(); _i++) {
 			lines[_i].isComplete = true;
+			lines[_i].typePos = 100000;
+			lines[_i].delay = 0;
 			if(_shortcutAnims) {
 				lines[_i].endAnimations();
 			}

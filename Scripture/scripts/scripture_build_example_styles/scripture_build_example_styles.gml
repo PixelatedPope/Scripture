@@ -54,7 +54,6 @@ scripture = scripture_register_style("scripture", {
 		yScale: .5,
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
 			var _length = room_speed;
-				if(_steps > _length) return;
 			var _prog = _steps / _length;
 			_style.yOff = twerp(TwerpType.out_back, 30, 0, _prog);
 			_style.alpha = lerp(0, 1, _prog);
