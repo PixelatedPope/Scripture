@@ -32,7 +32,7 @@ DELAY DONE
 Support Pausing. DONE
 Am I getting Reliable Results? DONE
 
-Jump To Page DONEISH
+Jump To Page DONE
 Underline DONE
 Force Line Break without Space DONE
 
@@ -47,7 +47,7 @@ Animation "finished" conditions
 End Page Animations
 
 TEST
-soundEffects
+soundEffects --issues in HTML5?
 Test Sprite Fonts
 Jump to Page reset / no reset
 Dec Page reset / no reset

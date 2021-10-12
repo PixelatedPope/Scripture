@@ -79,7 +79,7 @@ function __scriptureImg(_style) constructor {
 	
 	draw = function(_x, _y, _index) {
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](_x, _y, style, self, steps, _index);	
+			if(style.onDraw[_i](_x, _y, style, self, steps, _index)) break;
 		}
 		steps++;
 		
@@ -141,7 +141,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		draw_set_alpha(style.alpha);
 		
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](_drawX, _drawY, style, self, steps, _index);	
+			if(style.onDraw[_i](_drawX, _drawY, style, self, steps, _index)) break;	
 		}
 		steps += !global.__scripOptions.isPaused;
 		_drawX += style.xOff;
@@ -324,6 +324,7 @@ function __scripturePage() constructor {
 			_drawY += _curLine.height + global.__scripOptions.lineSpacing;
 		}
 		isComplete = true;
+		global.__scripDelay = 0;
 		return true;
 	}
 	

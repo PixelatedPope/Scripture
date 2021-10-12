@@ -1,7 +1,7 @@
 /// @description
 
 if(keyboard_check_pressed(vk_space)) {		
-	if(!scripture_next_page(options, true)) {
+ 	if(!scripture_next_page(options, true)) {
 		scripture_jump_to_page(options, 0, true);	
 	}
 }

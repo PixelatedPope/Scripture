@@ -16,7 +16,6 @@
     {"id":{"name":"sin_oscillate","path":"scripts/sin_oscillate/sin_oscillate.yy",},"order":1,},
     {"id":{"name":"objExampleText1","path":"objects/objExampleText1/objExampleText1.yy",},"order":13,},
     {"id":{"name":"sndBeep","path":"sounds/sndBeep/sndBeep.yy",},"order":10,},
-    {"id":{"name":"sprSquiggle24x24TopLeft","path":"sprites/sprSquiggle24x24TopLeft/sprSquiggle24x24TopLeft.yy",},"order":1,},
     {"id":{"name":"fntOpenSans","path":"fonts/fntOpenSans/fntOpenSans.yy",},"order":19,},
     {"id":{"name":"audio_play_sound_unique","path":"scripts/audio_play_sound_unique/audio_play_sound_unique.yy",},"order":2,},
     {"id":{"name":"rmExample","path":"rooms/rmExample/rmExample.yy",},"order":1,},

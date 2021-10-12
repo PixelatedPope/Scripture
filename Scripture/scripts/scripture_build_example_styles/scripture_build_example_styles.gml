@@ -2,14 +2,6 @@ function scripture_build_example_styles() {
 	//Events
 	showMessage = scripture_register_event("show message", function(){ show_message("Yup") });
 	
-	//Images
-	squiggle =  scripture_register_sprite("squiggle",sprSquiggle24x24TopLeft, {
-		kerning: 0,
-		alpha: 1,
-		angle: 0,
-		xScale: 2
-	});
-	
 	coin = scripture_register_sprite("arrowLeft",sprCoin, {
 		xScale: 1,
 		yScale: 1
@@ -17,6 +9,8 @@ function scripture_build_example_styles() {
 	
 	welcomeTo = scripture_register_style("welcome to", {
 		speedMod: .3,
+		kerning: 3,
+		color: c_black,
 		font: fntBold,
 		yOff: -10,
 	});
@@ -55,13 +49,20 @@ function scripture_build_example_styles() {
 		font: fntOpenSans,
 		speedMod: .5,
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
-			var _length = room_speed;
+			var _length = room_speed*1.5;
 			var _prog = _steps / _length;
-			_style.yOff = twerp(TwerpType.out_back, 30, 0, _prog);
+			_style.yOff = twerp(TwerpType.out_back, 100, 0, _prog);
 			_style.alpha = lerp(0, 1, _prog);
+			return _steps < _length;
 		}
 	});
 	
+	excite = scripture_register_style("excite", {
+		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
+			_style.yOff = random_range(-2,2);
+			_style.xOff = random_range(-2,2);
+		}
+	});
 	
 	rainbow = scripture_register_style("rainbow", {
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
@@ -72,26 +73,17 @@ function scripture_build_example_styles() {
 	outline = scripture_register_style("outline", {
 		
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
-			draw_set_color(c_gray);
-			var _thick = 3;
-			for(var _i=0; _i<9; _i++) {
-				var _xPos = _x + _style.xOff + lengthdir_x(_thick, _i * 45);
-				var _yPos = _y + _style.yOff + lengthdir_y(_thick, _i * 45);
+			draw_set_color(merge_color(_style.color,c_white,.75));
+			var _thick = 5;
+			for(var _i=0; _i<360; _i+= 22.5) {
+				var _xPos = _x + _style.xOff + lengthdir_x(_thick, _i);
+				var _yPos = _y + _style.yOff + lengthdir_y(_thick, _i);
 				
 				draw_text(_xPos, _yPos,_element.char);
 			}
 		}
 	});
 
-	scripture_register_style("slow down", {
-		speedMod: .05
-	});
-
-	scripture_register_style("tight", {
-		font: fntBold,
-		kerning: -5,	
-	});
-	
 	underline = scripture_register_style("underline", {
 		kerning: 10,
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
