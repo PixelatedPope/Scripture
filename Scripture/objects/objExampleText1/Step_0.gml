@@ -1,9 +1,9 @@
 /// @description
 
 if(keyboard_check_pressed(vk_space)) {		
-	if(!scripture_advance_page(options, true)) {
+	if(!scripture_next_page(options, true)) {
 		game_restart();
-		//scripture_set_page(options, 0);	
+		scripture_jump_to_page(options, 0, true);	
 	}
 }
 options.isPaused = keyboard_check(ord("P"));
@@ -22,7 +22,7 @@ else if(keyboard_check(vk_down))
 else
 	options.vAlign = fa_middle;
 		
-switch(options.hAlign){
+/*switch(options.hAlign){
 		case fa_left: x = xstart; break;
 		case fa_right: x = xstart + options.maxWidth; break;
 		case fa_center: x = xstart + options.maxWidth / 2; break;

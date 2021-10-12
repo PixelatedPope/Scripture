@@ -94,7 +94,7 @@ function __scriptureImg(_style) constructor {
 	
 	draw = function(_x, _y, _index) {
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](_x, _y, style, steps, _index);	
+			style.onDraw[_i](_x, _y, style, self, steps, _index);	
 		}
 		steps++;
 		
@@ -150,8 +150,13 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 			case fa_middle: _drawY += _line.height/2 - centerY break;
 			case fa_bottom: _drawY += _line.height - centerY * 2 break;
 		}
+		
+		draw_set_font(style.font);
+		draw_set_color(style.color);
+		draw_set_alpha(style.alpha);
+		
 		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			style.onDraw[_i](_drawX, _drawY, style, steps, _index);	
+			style.onDraw[_i](_drawX, _drawY, style, self, steps, _index);	
 		}
 		steps++;
 		_drawX += style.xOff;
@@ -176,6 +181,7 @@ function __scriptureLine() constructor {
 	typePos = 0;
 	delay = __scriptureIsTyping();
 	draw = function(_x, _y, _page) {
+		var _eventCount = 0;
 		for(var _c = 0; _c < getLength(); _c++) {
 			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) {
 				if(global.__scripDelay > 0) {
@@ -184,9 +190,10 @@ function __scriptureLine() constructor {
 				}
 				if(!global.__scripOptions.isPaused)
 					typePos += global.__scripOptions.typeSpeed * characters[_c-1].style.speedMod;
+					_eventCount += characters[_c].type = SCRIPTURE_TYPE_EVENT;
 				return false;
 			}
-			_x += characters[_c].draw(_x, _y, typePos, self);
+			_x += characters[_c].draw(_x, _y, _c - _eventCount, self);
 		}
 		if(delay > 0) {
 			delay-= characters[getLength()-1].style.speedMod;
@@ -679,7 +686,7 @@ function scripture_prev_page(_options, _reset = true) {
 function scripture_jump_to_page(_options, _page, _reset = true) {
 	var _text = global.__scripCache[$ _options.key];
   if(_text == undefined) return;
-	if(_page < 0 || _page >= _text.pageCount) return;
+	if(_page < 0 || _page >= _text.getPageCount()) return;
 	_text.setCurrentPage(_page,_reset);
 }
 	

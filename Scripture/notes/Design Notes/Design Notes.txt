@@ -31,15 +31,23 @@ DELAY DONE
 
 Support Pausing. DONE
 Am I getting Reliable Results? DONE
-Test Sprite Fonts
-Jump To Page
+
+Jump To Page DONEISH
+Force Line Break without Space
+
+BUGS=====
+Events shouldn't contribute to "pos"
+
+Future Features====
 Force Re-render
 Shaders? 
 Underline?
-
+Animation "finished" conditions
+End Page Animations
 
 TEST
 soundEffects
+Test Sprite Fonts
 Jump to Page reset / no reset
 Dec Page reset / no reset
 
