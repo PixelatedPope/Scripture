@@ -29,24 +29,9 @@ global.__scripCloseTag = ">";
 
 
 #region Scripture Constructors
-function __scriptureStyle(_style = undefined) constructor {
+function __scriptureStyle(_style = {}) constructor {
 	type = SCRIPTURE_TYPE_STYLE
-	if(_style == undefined) {
-		sprite = undefined;
-		color = c_white;
-		font = -1;
-		speedMod = 1;
-		kerning = 0;
-		xScale = 1;
-		yScale = 1;
-		xOff = 1;
-		yOff = 1;
-		angle = 0;
-		alpha = 1;
-		textAlign = fa_bottom;
-		onDraw = function(){};
-		return;
-	}
+
 	//Return a duplicate of the given style with new key
 	color = _style[$ "color"] == undefined ? c_white : _style.color;
 	sprite = _style[$ "sprite"] == undefined ? undefined: _style.sprite;
@@ -59,7 +44,7 @@ function __scriptureStyle(_style = undefined) constructor {
 	yOff = _style[$ "yOff"] == undefined ? 0 : _style.yOff;
 	angle = _style[$ "angle"] == undefined ? 0 : _style.angle;
 	alpha = _style[$ "alpha"] == undefined ? 1 : _style.alpha;
-	textAlign = _style[$ "textAlign"] == undefined ? fa_bottom : _style.textAlign;
+	textAlign = _style[$ "textAlign"] == undefined ? fa_middle : _style.textAlign;
 	onDraw = _style[$ "onDraw"] == undefined ? function(){} : _style.onDraw;
 }
 
@@ -142,13 +127,13 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	draw = function(_x, _y, _index, _line) {
 		
 		//if(isSpace) return width;
-		var _drawX = _x + centerX;
-		var _drawY = _y + centerY;
+		var _drawX = floor(_x + centerX);
+		var _drawY = floor(_y + centerY);
 		
 		switch(style.textAlign) {
 			case fa_top: break;
-			case fa_middle: _drawY += _line.height/2 - centerY break;
-			case fa_bottom: _drawY += _line.height - centerY * 2 break;
+			case fa_middle: _drawY += floor(_line.height/2 - centerY); break;
+			case fa_bottom: _drawY += floor(_line.height - centerY * 2); break;
 		}
 		
 		draw_set_font(style.font);
@@ -572,8 +557,8 @@ function __scriptureEnqueueStyle(_key) {
 function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = false, _forceNewPage = false) {
 	var _wrapResult = _curLine.checkForWrap();
 	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
-	
-		if(_forceNewPage || (global.__scripOptions.maxLines > 0 && _curPage.getLineCount() >= global.__scripOptions.maxLines)) {
+		_curPage.calcHeight();
+		if(_forceNewPage || (global.__scripOptions.maxHeight > 0 && _curPage.height >= global.__scripOptions.maxHeight)) {
 			_curPage = global.__scripText.addPage();
 		} 
 		
@@ -762,7 +747,7 @@ function scripture_set_tag_characters(_start = "<", _end = ">") {
 	global.__scripCloseTag = _end;
 }
 
-function scripture_build_options(_key = id, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _maxWidth = 0, _lineSpacing = 0, _maxLines = 0, _forceLineBreaks = false){
+function scripture_build_options(_key = id, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _maxWidth = 0, _lineSpacing = 0, _maxHeight = 0, _forceLineBreaks = false){
 	return {
 		key: _key == undefined ? id : _key,
 		hAlign: _hAlign,
@@ -770,7 +755,7 @@ function scripture_build_options(_key = id, _hAlign = fa_left, _vAlign = fa_top,
 		typeSpeed: _typeSpeed, 
 		maxWidth: _maxWidth,
 		lineSpacing: _lineSpacing,
-		maxLines: _maxLines,
+		maxHeight: _maxHeight,
 		forceLineBreaks: _forceLineBreaks,
 		isPaused: false
 	}

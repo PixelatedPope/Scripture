@@ -96,8 +96,8 @@
   ],
   "nineSlice": null,
   "parent": {
-    "name": "Scripture",
-    "path": "Scripture.yyp",
+    "name": "Sprites",
+    "path": "folders/Sprites.yy",
   },
   "resourceVersion": "1.0",
   "name": "sprSquiggle24x24TopLeft",
