@@ -20,23 +20,29 @@ function scripture_build_example_styles() {
 		font: fntScripture,
 		kerning: 20,
 		speedMod: .04,
+		color: make_color_rgb(255,234,163),
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
-			if(_steps == 0)
-				show_debug_message(_pos);
-				
 			var _length = room_speed;
-			if(_steps > _length) return;
-			var _prog = _steps / _length;
-			var _scale = twerp(TwerpType.out_cubic, 1, 1.5, _prog);
-			var _alpha = lerp(1, 0, _prog);
-			var _offDir = lerp(180,0,_pos / 8);
-			var _maxOff =  lengthdir_x(twerp(TwerpType.out_cubic,0,50,_prog), _offDir);
-			for(var _i = 1; _i < 10; _i++) {
-				var _xOff = lerp(0,_maxOff, _i/10);
-				draw_set_alpha(_alpha * (_i/15))
-				var _tempScale = twerp(TwerpType.out_quad,1, _scale, _i/10);
-				draw_text_transformed(_x + _xOff, _y, _element.char, _tempScale, _tempScale,0);
+			_style.alpha = 0;
+			if(_steps < _length) {
+				var _prog = _steps / _length;
+				var _scale = twerp(TwerpType.out_cubic, 1, 1.5, _prog);
+				var _alpha = lerp(1, 0, _prog);
+				var _offDir = lerp(180,0,_pos / 8);
+				var _maxOff =  lengthdir_x(twerp(TwerpType.out_cubic,0,50,_prog), _offDir);
+				gpu_set_blendmode(bm_add);
+				var _count = 20;
+				for(var _i = 1; _i < _count; _i++) {
+					var _xOff = lerp(0,_maxOff, _i/_count);
+					draw_set_alpha(_alpha * (_i/_count))
+					var _tempScale = twerp(TwerpType.out_quad,1, _scale, _i/_count);
+					//draw_set_color(merge_color(_style.color,c_white,_i/_count));
+					draw_text_transformed(_x + _xOff, _y, _element.char, _tempScale, _tempScale,0);
+				}
+				gpu_set_blendmode(bm_normal);
 			}
+			_style.alpha = lerp(0,1,(_steps-_length/2)/30);
+			
 		}
 	});
 	flyIn = scripture_register_style("flyIn", {
