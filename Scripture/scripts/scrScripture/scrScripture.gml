@@ -302,8 +302,7 @@ function __scripturePage() constructor {
 			
 			var _curLine = lines[_i];
 			_drawX = __scriptureApplyHAlign(_x, _curLine);
-			var _lineFinished = _curLine.draw(_drawX, _drawY);
-			if(!_lineFinished) return false;
+			if(!_curLine.draw(_drawX, _drawY)) return false;
 			
 			if(linePos == _i) 
 				linePos++;
@@ -328,7 +327,7 @@ function __scripturePage() constructor {
 	calcHeight = function() {
 		height = 0;
 		for(var _i = 0; _i < getLineCount(); _i++) {
-			height += lines[_i].calcHeight() + global.__scripOptions.lineSpacing;
+			height += lines[_i].calcHeight() + (_i > 0 ? global.__scripOptions.lineSpacing : 0);
 		}
 
 		return height;
@@ -602,7 +601,6 @@ function __scriptureGetCachedText(_string, _options) {
 	global.__scripText = _parsedText;
 }
 
-
 function __scriptureIsTyping(_options = global.__scripOptions) {
 	return _options.typeSpeed > 0;	
 }
@@ -616,8 +614,16 @@ function draw_scripture(_x, _y, _string, _options) {
 	
 	var _currentPage = global.__scripText.getCurrentPage();
 	_currentPage.draw(_x, _y);
-	
 	draw_set_alpha(1);
+	
+	var _cur = global.__scripText;
+	return {
+		width: _currentPage.width,
+		height: _currentPage.height,
+		currentPage: _cur.curPage,
+		pageCount: _cur.getPageCount(),
+		nextPageReady: _currentPage.isComplete
+	}
 }
 
 
@@ -637,6 +643,14 @@ function scripture_register_style(_key, _style) {
 	_style.key = _key;
 	_style.type = SCRIPTURE_TYPE_STYLE;
 	global.__scripStyles[$ _key] = _style;
+	return {
+		open: global.__scripOpenTag+_key+global.__scripCloseTag,
+		close: global.__scripOpenTag+"/"+_key+global.__scripCloseTag
+	}		
+}
+
+function wait(_steps) {
+	return global.__scripOpenTag+string(_steps)+global.__scripCloseTag;
 }
 
 function scripture_register_sprite(_key, _sprite, _style) {
@@ -651,6 +665,7 @@ function scripture_register_sprite(_key, _sprite, _style) {
 	_style.sprite = _sprite;
 	
 	global.__scripStyles[$ _key] = _style;
+	return global.__scripOpenTag + _key + global.__scripCloseTag;
 }
 
 function scripture_register_event(_key, _func) {
@@ -659,6 +674,7 @@ function scripture_register_event(_key, _func) {
 		type: SCRIPTURE_TYPE_EVENT,
 		event: _func
 	}
+	return global.__scripOpenTag + _key + global.__scripCloseTag;
 }
 
 function scripture_set_default_style(_key){
@@ -669,10 +685,11 @@ function scripture_set_default_style(_key){
 	global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 }
 
-function scripture_clear_cache(_key = undefined) {
-	if(_key == undefined)
+function scripture_clear_cache(_key = id) {
+	
+	if(global.__scripCache[$ _key] == undefined)
 		global.__scripCache = {}
-	else if(variable_struct_exists(global.__scripCache, _key))
+	else
 		variable_struct_remove(global.__scripCache, _key);
 }
 
