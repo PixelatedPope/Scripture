@@ -174,7 +174,7 @@ function __scriptureLine() constructor {
 	lastSpace = undefined;
 	getLength = function() { return array_length(characters) };
 	typePos = 0;
-	delay = 1;
+	delay = __scriptureIsTyping();
 	draw = function(_x, _y, _page) {
 		for(var _c = 0; _c < getLength(); _c++) {
 			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) {
