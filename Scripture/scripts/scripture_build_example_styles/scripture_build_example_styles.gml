@@ -89,7 +89,7 @@ function scripture_build_example_styles() {
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
 			draw_set_color(_style.color);
 			draw_set_alpha(_style.alpha);
-			var _lineY = _y+_element.height/2 + _style.yOff;
+			var _lineY = _y+_element.height/2 + _element.baseYOff + _style.yOff;
 			draw_line(_x+_style.xOff-_element.width/2, _lineY, _x+_style.xOff+_element.width/2+1,_lineY);
 			_lineY+=1;
 			draw_line(_x+_style.xOff-_element.width/2, _lineY, _x+_style.xOff+_element.width/2+1,_lineY);

@@ -15,9 +15,6 @@ global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
 global.__scripDelay = 0;
 
-global.__scripOpenTag = "<"; //You can change these here or use the available function.
-global.__scripCloseTag = ">";
-
 #macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
 #macro SCRIPTURE_TYPE_STYLE 0
 #macro SCRIPTURE_TYPE_IMG 1
@@ -27,11 +24,25 @@ global.__scripCloseTag = ">";
 #macro SCRIPTURE_TYPE_PAGE 5
 #macro SCRIPTURE_TYPE_TEXT 6
 
+//You can change these here or use the available function.
+global.__scripOpenTag = "<"
+global.__scripCloseTag = ">"
+global.__scripEndTag = "/"
+
+global.__scripColor = "#"
+global.__scripImage = "!"
+global.__scripFont = "*"
+global.__scripKerning = "_"
+global.__scripScale = "$"
+global.__scripOffStart = "{"
+global.__scripOffEnd = "}"
+global.__scripAngle = "~"
+global.__scripAlpha = "^"
+global.__scripAlign = "?"
 
 #region Scripture Constructors
 function __scriptureStyle(_style = {}) constructor {
 	type = SCRIPTURE_TYPE_STYLE
-
 	//Return a duplicate of the given style with new key
 	color = _style[$ "color"] == undefined ? c_white : _style.color;
 	sprite = _style[$ "sprite"] == undefined ? undefined: _style.sprite;
@@ -123,6 +134,8 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	height = string_height(char);
 	centerX = width / 2;
 	centerY = height / 2;
+	baseYOff = _style.yOff;
+	baseXOff = _style.xOff;
 	
 	draw = function(_x, _y, _index, _line) {
 		
@@ -144,8 +157,8 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 			if(style.onDraw[_i](_drawX, _drawY, style, self, steps, _index)) break;	
 		}
 		steps += !global.__scripOptions.isPaused;
-		_drawX += style.xOff;
-		_drawY += style.yOff;
+		_drawX += baseXOff + style.xOff;
+		_drawY += baseYOff + style.yOff;
 		
 		draw_set_font(style.font);
 		draw_set_color(style.color);
@@ -466,7 +479,7 @@ function __scriptureStyleNameIsProtected(_key) {
 
 function __scriptureHandleTag(_string, _curLine) {
 	var _tagContent = "";
-	var _isClosingTag = string_char_at(_string,1) == "/";
+	var _isClosingTag = string_char_at(_string,1) == global.__scripEndTag;
 	if(_isClosingTag)
 		_string = string_delete(_string,1,1);
 		
@@ -691,7 +704,7 @@ function scripture_register_style(_key, _style) {
 	global.__scripStyles[$ _key] = _style;
 	return {
 		open: global.__scripOpenTag+_key+global.__scripCloseTag,
-		close: global.__scripOpenTag+"/"+_key+global.__scripCloseTag
+		close: global.__scripOpenTag+global.__scripEndTag+_key+global.__scripCloseTag
 	}		
 }
 
@@ -739,13 +752,42 @@ function scripture_clear_cache(_key = id) {
 		variable_struct_remove(global.__scripCache, _key);
 }
 
-function scripture_set_tag_characters(_start = "<", _end = ">") {
-	if(_start == _end || string_length(_start) != 1 || string_length(_end) != 1) {
-		show_message("Invalid start or end tag character. \nCharacters must be different and only a single character");
-		game_end();
-	}
-	global.__scripOpenTag = _start;
-	global.__scripCloseTag = _end;
+function scripture_set_tag_characters(_start = global.__scripOpenTag, 
+	_end = global.__scripCloseTag,
+	_close = global.__scripEndTag,
+	_color = global.__scripColor,
+	_sprite = global.__scripImage,
+  _font = global.__scripFont,
+  _kerning = global.__scripKerning,
+	_scale = global.__scripScale,
+	_offStart = global.__scripOffStart,
+	_offEnd = global.__scripOffEnd,
+	_angle = global.__scripAngle,
+	_alpha = global.__scripAlpha,
+	_align = global.__scripAlign) {
+
+		for(var _i = 0; _i< argument_count; _i++) {
+			var _arg = argument[_i];
+			if(string_length(_arg) != 1) throw("Tags must be a single character only");
+			for(var _j = 0; _j < argument_count; _j++) {
+				if(_j == _i) continue;
+				if(argument[_j] == _arg) throw("Tags must be unique");
+			}
+		}
+	
+		global.__scripOpenTag = _start;
+		global.__scripCloseTag = _close;
+		global.__scripCloseTag = _end;
+		global.__scripColor = _color;
+		global.__scripImage = _sprite;
+		global.__scripFont = _font;
+		global.__scripKerning = _kerning;
+		global.__scripScale = _scale;
+		global.__scripOffStart = _offStart;
+		global.__scripOffEnd = _offEnd;
+		global.__scripAngle = _angle;
+		global.__scripAlpha = _alpha;
+		global.__scripAlign = _align;
 }
 
 function scripture_build_options(_maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){

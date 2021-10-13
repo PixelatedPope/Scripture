@@ -38,6 +38,7 @@ Force Line Break without Space DONE
 
 
 BUGS=====
+yPos doesn't work with textAlign top.
 
 Future Features====
 Force Re-render
