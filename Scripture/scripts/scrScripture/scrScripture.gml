@@ -72,6 +72,7 @@ function __scriptureImg(_style) constructor {
 	
 	sprite = _active.sprite;
 	image = 0;
+	isSpace = false;
 	speed = sprite_get_speed_type(sprite) == spritespeed_framespergameframe 
 																				 ? sprite_get_speed(sprite) 
 																				 : sprite_get_speed(sprite) / room_speed;
@@ -110,6 +111,7 @@ function __scriptureImg(_style) constructor {
 function __scriptureEvent(_func, _delay = 0) constructor {
 	type = SCRIPTURE_TYPE_EVENT;
 	event = _func;
+	isSpace = false;
 	style = {speedMod:1};
 	ran = false;
 	delay = _delay;
