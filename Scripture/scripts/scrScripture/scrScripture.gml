@@ -34,11 +34,11 @@ global.__scripImage = "!"
 global.__scripFont = "*"
 global.__scripKerning = "_"
 global.__scripScale = "$"
-global.__scripOffStart = "{"
-global.__scripOffEnd = "}"
+global.__scripOff = "@"
 global.__scripAngle = "~"
 global.__scripAlpha = "^"
 global.__scripAlign = "?"
+global.__scripSpeed = "+"
 
 #region Scripture Constructors
 function __scriptureStyle(_style = {}) constructor {
@@ -518,13 +518,30 @@ function __scriptureIsInlineSignifier(_tagContent) {
 		 _char == global.__scripFont ||
 		 _char == global.__scripKerning ||
 		 _char == global.__scripScale ||
-		 _char == global.__scripOffStart ||
-		 _char == global.__scripOffEnd ||
+		 _char == global.__scripOff ||
 		 _char == global.__scripAngle ||
 		 _char == global.__scripAlpha ||
 		 _char == global.__scripAlign ||
+		 _char == global.__scripSpeed ||
 		 _char == global.__scripColor) return true;
 	return false
+}
+
+function __scriptureOffsetParse(_tagContent) {
+	var _x = "";
+	while(string_char_at(_tagContent,1) != ",") {
+		_x+=string_char_at(_tagContent,1);
+		_tagContent = string_delete(_tagContent,1,1);
+	}
+	_tagContent = string_delete(_tagContent,1,1);
+	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
+	var _y = "";
+	while(_tagContent != "") {
+		_y+=string_char_at(_tagContent,1);
+		_tagContent = string_delete(_tagContent,1,1);
+	}
+	
+	return {x: real(_x), y: real(_y)};
 }
 
 function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
@@ -533,24 +550,57 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 	var _symbol = string_char_at(_tagContent,1);
 	_tagContent = string_delete(_tagContent,1,1);
 	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
+	var _active = global.__scripActiveStyle;
 	switch(_symbol) {
 		case global.__scripColor:
 			var _color = __scriptureHexToColor(_tagContent)
-			__scripturePushArrayToStyleStack(new __scriptureStyle({color: _color}));
+			_active.color = _color;
 			return true;
 		break;
 		case global.__scripImage:
-			var _sprite = asset_get_index(_tagContent);
-			_curLine.addElement(new __scriptureImg({sprite: _sprite}))
+			var _val = asset_get_index(_tagContent);
+			_curLine.addElement(new __scriptureImg({sprite: _val}))
 			return true;
 		case global.__scripFont:
-		case global.__scripKerning:
-		case global.__scripScale:
-		case global.__scripOffStart:
-		case global.__scripOffEnd:
+			var _val = asset_get_index(_tagContent);
+			_active.font = _val;
+			return true;
+		case global.__scripKerning: 
+			var _val = real(_tagContent);
+			_active.kerning = _val;
+			return true;
+		case global.__scripScale: 
+			var _val = real(_tagContent);
+			_active.xScale = _val;
+			_active.yScale = _val;
+			return true;
+		case global.__scripOff:
+			var _val = __scriptureOffsetParse(_tagContent);
+			_active.xOff = _val.x;
+			_active.yOff = _val.y;
+			return true;
 		case global.__scripAngle:
+			var _val = real(_tagContent);
+			_active.angle = _val;
+			return true;
 		case global.__scripAlpha:
+			var _val = real(_tagContent);
+			_active.alpha = _val;
+			return true;
 		case global.__scripAlign:
+			var _val;
+			switch(_tagContent) {
+				case "fa_top": _val = fa_top; break;
+				case "fa_middle":
+				case "fa_center": _val = fa_middle; break;
+				case "fa_bottom": _val = fa_bottom; break;
+			}
+			_active.textAlign = _val;
+			return true;
+		case global.__scripSpeed:
+			var _val = real(_tagContent);
+			_active.speedMod = _val;
+			return true;
 	}
 	
 	return false; //this should never happen...
@@ -848,11 +898,11 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
   _font = global.__scripFont,
   _kerning = global.__scripKerning,
 	_scale = global.__scripScale,
-	_offStart = global.__scripOffStart,
-	_offEnd = global.__scripOffEnd,
+	_offStart = global.__scripOff,
 	_angle = global.__scripAngle,
 	_alpha = global.__scripAlpha,
-	_align = global.__scripAlign) {
+	_align = global.__scripAlign,
+	_speedMod = global.__scripSpeed) {
 
 		for(var _i = 0; _i< argument_count; _i++) {
 			var _arg = argument[_i];
@@ -871,11 +921,11 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripFont = _font;
 		global.__scripKerning = _kerning;
 		global.__scripScale = _scale;
-		global.__scripOffStart = _offStart;
-		global.__scripOffEnd = _offEnd;
+		global.__scripOff = _offStart;
 		global.__scripAngle = _angle;
 		global.__scripAlpha = _alpha;
 		global.__scripAlign = _align;
+		global.__scripSpeed = _speedMod;
 }
 
 function scripture_build_options(_maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){
