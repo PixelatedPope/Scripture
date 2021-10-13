@@ -485,8 +485,80 @@ function __scriptureStyleNameIsProtected(_key) {
 	return false;
 }
 
+function __scriptureStringTrimWhiteSpace(_string) {
+	while(string_char_at(_string,1) == " ")
+		_string = string_delete(_string, 1, 1);
+		
+	while(string_char_at(_string, string_length(_string)) == " ")
+		_string = string_delete(_string, string_length(_string), 1)
+		
+	return _string;
+}
+
+function __scriptureHexToColor(_hex) {
+	///CONVERSION CODE BASED ON SCRIPTS FROM GMLscripts.com
+	///GMLscripts.com/license
+	///XOT is a GameMaker Community Legend.  Don't disrespect.
+	
+	var _dec = 0;
+ 
+  var _dig = "0123456789ABCDEF";
+  var _len = string_length(_hex);
+  for (var _pos = 1; _pos <= _len; _pos++) {
+      _dec = _dec << 4 | (string_pos(string_char_at(_hex, _pos), _dig) - 1);
+  }
+ 
+  var _col = (_dec & 16711680) >> 16 | (_dec & 65280) | (_dec & 255) << 16;
+  return _col;
+}
+
+function __scriptureIsInlineSignifier(_tagContent) {
+	var _char = string_char_at(_tagContent,1);
+	if(_char == global.__scripImage ||
+		 _char == global.__scripFont ||
+		 _char == global.__scripKerning ||
+		 _char == global.__scripScale ||
+		 _char == global.__scripOffStart ||
+		 _char == global.__scripOffEnd ||
+		 _char == global.__scripAngle ||
+		 _char == global.__scripAlpha ||
+		 _char == global.__scripAlign ||
+		 _char == global.__scripColor) return true;
+	return false
+}
+
+function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
+	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
+	if(!__scriptureIsInlineSignifier(_tagContent)) return false;
+	var _symbol = string_char_at(_tagContent,1);
+	_tagContent = string_delete(_tagContent,1,1);
+	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
+	switch(_symbol) {
+		case global.__scripColor:
+			var _color = __scriptureHexToColor(_tagContent)
+			__scripturePushArrayToStyleStack(new __scriptureStyle({color: _color}));
+			return true;
+		break;
+		case global.__scripImage:
+			var _sprite = asset_get_index(_tagContent);
+			_curLine.addElement(new __scriptureImg({sprite: _sprite}))
+			return true;
+		case global.__scripFont:
+		case global.__scripKerning:
+		case global.__scripScale:
+		case global.__scripOffStart:
+		case global.__scripOffEnd:
+		case global.__scripAngle:
+		case global.__scripAlpha:
+		case global.__scripAlign:
+	}
+	
+	return false; //this should never happen...
+}
+
 function __scriptureHandleTag(_string, _curLine) {
 	var _tagContent = "";
+	var _customStyle = {};
 	var _isClosingTag = string_char_at(_string,1) == global.__scripEndTag;
 	if(_isClosingTag)
 		_string = string_delete(_string,1,1);
@@ -504,13 +576,17 @@ function __scriptureHandleTag(_string, _curLine) {
 	
 	var _style = global.__scripStyles[$ _tagContent];
 	if(_style == undefined) {
-		try{
-			var _amount = abs(real(_tagContent));
-			if(_amount > 0) 
-				_curLine.addElement(new __scriptureEvent(function(){},_amount))
-		} catch(_ex){
-			show_debug_message(_ex);
-			show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
+		if(__scriptureCheckForInlineStyle(_tagContent, _curLine)) {
+			
+		} else {
+			try {
+				var _amount = abs(real(_tagContent));
+				if(_amount > 0) 
+					_curLine.addElement(new __scriptureEvent(function(){},_amount))
+			} catch(_ex){
+				show_debug_message(_ex);
+				show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
+			}
 		}
 		return _string;
 	}
@@ -565,6 +641,11 @@ function __scriptureDequeueStyle(_key) {
 	__scriptureRebuildActiveStyle();
 }
 
+function __scripturePushArrayToStyleStack(_style) {
+	array_push(global.__scripStyleStack,_style);
+	__scriptureRebuildActiveStyle();
+}
+
 function __scriptureEnqueueStyle(_key) {
   var _style = global.__scripStyles[$ _key];
   if(_style == undefined) return;
@@ -572,8 +653,7 @@ function __scriptureEnqueueStyle(_key) {
   var _index = __scriptureFindStyleIndex(_key);
   if(_index != -1) return;
 		
-  array_push(global.__scripStyleStack,_style);
-	__scriptureRebuildActiveStyle();
+  __scripturePushArrayToStyleStack(_style);
 }
 
 function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = false, _forceNewPage = false) {
