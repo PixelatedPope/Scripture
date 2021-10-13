@@ -130,18 +130,24 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	style = _style; 
 	steps = 0;
 	draw_set_font(style.font);
-	width = string_width(char) + style.kerning;
-	height = string_height(char);
+	baseXScale = _style.xScale;
+	baseYScale = _style.yScale;
+	width = string_width(char) * baseXScale + style.kerning;
+	height = string_height(char) * baseYScale;
 	centerX = width / 2;
 	centerY = height / 2;
-	baseYOff = _style.yOff;
 	baseXOff = _style.xOff;
+	baseYOff = _style.yOff;
+	_style.xOff = 0;
+	_style.yOff = 0;
+	_style.xScale = 1;
+	_style.yScale = 1;
 	
 	draw = function(_x, _y, _index, _line) {
 		
 		//if(isSpace) return width;
-		var _drawX = floor(_x + centerX);
-		var _drawY = floor(_y + centerY);
+		var _drawX = floor(_x + centerX) + baseXOff;
+		var _drawY = floor(_y + centerY) + baseYOff;
 		
 		switch(style.textAlign) {
 			case fa_top: break;
@@ -157,13 +163,13 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 			if(style.onDraw[_i](_drawX, _drawY, style, self, steps, _index)) break;	
 		}
 		steps += !global.__scripOptions.isPaused;
-		_drawX += baseXOff + style.xOff;
-		_drawY += baseYOff + style.yOff;
+		_drawX += style.xOff;
+		_drawY += style.yOff;
 		
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(style.alpha);
-		draw_text_transformed(_drawX, _drawY, char, style.xScale, style.yScale, style.angle);
+		draw_text_transformed(_drawX, _drawY, char, baseXScale * style.xScale, baseYScale * style.yScale, style.angle);
 		return width;
 	}
 }
@@ -260,7 +266,7 @@ function __scriptureLine() constructor {
 	addSpace = function(){
 		if(getLength() == 0) return;
 		
-		var _space = new __scriptureChar(" ", global.__scripActiveStyle);
+		var _space = new __scriptureChar(" ", new __scriptureStyle(global.__scripActiveStyle));
 		array_push(characters,_space);
 		width += _space.width;
 		lastSpace = getLength();

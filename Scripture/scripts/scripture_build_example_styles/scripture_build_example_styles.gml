@@ -12,7 +12,7 @@ function scripture_build_example_styles() {
 		kerning: 3,
 		color: c_black,
 		font: fntBold,
-		yOff: -10,
+		yOff: 0,
 	});
 	
 	//Styles
@@ -71,15 +71,18 @@ function scripture_build_example_styles() {
 	});
 	
 	outline = scripture_register_style("outline", {
-		
+		xScale: 1.,
+		yScale: 1.,
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
 			draw_set_color(merge_color(_style.color,c_white,.75));
-			var _thick = 5;
+			var _scaleMod = _element.baseXScale * _style.xScale;
+			var _thick = 5 * _element.baseXScale;
 			for(var _i=0; _i<360; _i+= 22.5) {
-				var _xPos = _x + _style.xOff + lengthdir_x(_thick, _i);
-				var _yPos = _y + _style.yOff + lengthdir_y(_thick, _i);
+				var _xPos = _x + _style.xOff + _scaleMod * lengthdir_x(_thick, _i);
+				var _yPos = _y + _style.yOff + _scaleMod * lengthdir_y(_thick, _i);
 				
-				draw_text(_xPos, _yPos,_element.char);
+				draw_text_transformed(_xPos, _yPos,_element.char,
+															_scaleMod, _scaleMod,0);
 			}
 		}
 	});
@@ -89,7 +92,7 @@ function scripture_build_example_styles() {
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
 			draw_set_color(_style.color);
 			draw_set_alpha(_style.alpha);
-			var _lineY = _y+_element.height/2 + _element.baseYOff + _style.yOff;
+			var _lineY = _y+_element.height/2 + _style.yOff;
 			draw_line(_x+_style.xOff-_element.width/2, _lineY, _x+_style.xOff+_element.width/2+1,_lineY);
 			_lineY+=1;
 			draw_line(_x+_style.xOff-_element.width/2, _lineY, _x+_style.xOff+_element.width/2+1,_lineY);
@@ -98,7 +101,7 @@ function scripture_build_example_styles() {
 
 	bleep = scripture_register_style("bleep", {
 		onDraw: function(_x, _y, _style, _element, _steps, _pos) {
-			if(_steps != 10 || (_element.type == SCRIPTURE_TYPE_CHAR && _element.char == " ")) return;
+			if(_steps != 1 || _element.isSpace) return;
 			audio_play_sound_unique(sndBeep, 10, false, false, .25)	
 		}
 	})
