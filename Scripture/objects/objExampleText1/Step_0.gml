@@ -1,33 +1,33 @@
 /// @description
 
 if(keyboard_check_pressed(vk_space)) {		
- 	if(!scripture_next_page(options, true)) {
-		scripture_jump_to_page(options, 0, true);	
+ 	if(!scripture_next_page(textbox, true)) {
+		scripture_jump_to_page(textbox, 0, true);	
 	}
 }
-options.isPaused = keyboard_check(ord("P"));
+textbox.isPaused = keyboard_check(ord("P"));
 	
 if(keyboard_check(vk_right))
-	options.hAlign = fa_right;
+	textbox.hAlign = fa_right;
 else if(keyboard_check(vk_left))
-	options.hAlign = fa_left;
+	textbox.hAlign = fa_left;
 else
-	options.hAlign = fa_center;
+	textbox.hAlign = fa_center;
 	
 if(keyboard_check(vk_up))
-	options.vAlign = fa_top;
+	textbox.vAlign = fa_top;
 else if(keyboard_check(vk_down))
-	options.vAlign = fa_bottom;
+	textbox.vAlign = fa_bottom;
 else
-	options.vAlign = fa_middle;
+	textbox.vAlign = fa_middle;
 		
-/*switch(options.hAlign){
+/*switch(textbox.hAlign){
 		case fa_left: x = xstart; break;
-		case fa_right: x = xstart + options.maxWidth; break;
-		case fa_center: x = xstart + options.maxWidth / 2; break;
+		case fa_right: x = xstart + textbox.maxWidth; break;
+		case fa_center: x = xstart + textbox.maxWidth / 2; break;
 }
 
-switch(options.vAlign){
+switch(textbox.vAlign){
 		case fa_top: y = ystart; break;
 		case fa_right: y = ystart + height; break;
 		case fa_middle: y = ystart + height/2; break;
