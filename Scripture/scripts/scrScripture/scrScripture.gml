@@ -30,15 +30,15 @@ global.__scripCloseTag = ">"
 global.__scripEndTag = "/"
 
 global.__scripColor = "#"
-global.__scripImage = "!"
-global.__scripFont = "*"
-global.__scripKerning = "_"
-global.__scripScale = "$"
-global.__scripOff = "@"
-global.__scripAngle = "~"
-global.__scripAlpha = "^"
-global.__scripAlign = "?"
-global.__scripSpeed = "+"
+global.__scripImage = "I"
+global.__scripFont = "F"
+global.__scripKerning = "K"
+global.__scripScale = "S"
+global.__scripOff = "O"
+global.__scripAngle = "a"
+global.__scripAlpha = "A"
+global.__scripAlign = "L"
+global.__scripSpeed = "s"
 
 #region Scripture Constructors
 function __scriptureStyle(_style = {}) constructor {
@@ -496,23 +496,6 @@ function __scriptureStringTrimWhiteSpace(_string) {
 	return _string;
 }
 
-function __scriptureHexToColor(_hex) {
-	///CONVERSION CODE BASED ON SCRIPTS FROM GMLscripts.com
-	///GMLscripts.com/license
-	///XOT is a GameMaker Community Legend.  Don't disrespect.
-	_hex = string_lower(_hex);
-	var _dec = 0;
- 
-  var _dig = "0123456789abcdef";
-  var _len = string_length(_hex);
-  for (var _pos = 1; _pos <= _len; _pos++) {
-      _dec = _dec << 4 | (string_pos(string_char_at(_hex, _pos), _dig) - 1);
-  }
- 
-  var _col = (_dec & 16711680) >> 16 | (_dec & 65280) | (_dec & 255) << 16;
-  return _col;
-}
-
 function __scriptureIsInlineSignifier(_tagContent) {
 	var _char = string_char_at(_tagContent,1);
 	if(_char == global.__scripImage ||
@@ -528,7 +511,7 @@ function __scriptureIsInlineSignifier(_tagContent) {
 	return false
 }
 
-function __scriptureOffsetParse(_tagContent) {
+function __scriptureMultiParse(_tagContent) {
 	var _x = "";
 	while(string_char_at(_tagContent,1) != ",") {
 		_x+=string_char_at(_tagContent,1);
@@ -554,7 +537,7 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 	var _active = global.__scripActiveStyle;
 	switch(_symbol) {
 		case global.__scripColor:
-			var _color = __scriptureHexToColor(_tagContent)
+			var _color = scripture_hex_to_color(_tagContent)
 			_active.color = _color;
 			return true;
 		break;
@@ -571,12 +554,12 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 			_active.kerning = _val;
 			return true;
 		case global.__scripScale: 
-			var _val = real(_tagContent);
-			_active.xScale = _val;
-			_active.yScale = _val;
+			var _val = __scriptureMultiParse(_tagContent);
+			_active.xScale = _val.x;
+			_active.yScale = _val.y;
 			return true;
 		case global.__scripOff:
-			var _val = __scriptureOffsetParse(_tagContent);
+			var _val = __scriptureMultiParse(_tagContent);
 			_active.xOff = _val.x;
 			_active.yOff = _val.y;
 			return true;
@@ -600,7 +583,7 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 			return true;
 		case global.__scripSpeed:
 			var _val = real(_tagContent);
-			_active.speedMod = _val;
+			_active.speedMod = max(.0001, _val);
 			return true;
 	}
 	
@@ -942,4 +925,21 @@ function scripture_build_textbox(_maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_lef
 		forceLineBreaks: _forceLineBreaks,
 		isPaused: false
 	}
+}
+
+function scripture_hex_to_color(_hexString) {
+	///CONVERSION CODE BASED ON SCRIPTS FROM GMLscripts.com
+	///GMLscripts.com/license
+	///XOT is a GameMaker Community Legend.  Don't disrespect.
+	_hexString = string_lower(_hexString);
+	var _dec = 0;
+ 
+  var _dig = "0123456789abcdef";
+  var _len = string_length(_hexString);
+  for (var _pos = 1; _pos <= _len; _pos++) {
+      _dec = _dec << 4 | (string_pos(string_char_at(_hexString, _pos), _dig) - 1);
+  }
+ 
+  var _col = (_dec & 16711680) >> 16 | (_dec & 65280) | (_dec & 255) << 16;
+  return _col;
 }

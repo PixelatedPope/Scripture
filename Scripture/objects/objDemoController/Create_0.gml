@@ -2,12 +2,21 @@ show_debug_overlay(true)
 randomize();
 scripture_build_example_styles();
 
-//scripture_set_tag_characters("[","]");
-//scripture_set_default_style("bold");
+global.__scripColor = "#"
+global.__scripImage = "I"
+global.__scripFont = "F"
+global.__scripKerning = "K"
+global.__scripScale = "S"
+global.__scripOff = "O"
+global.__scripAngle = "a"
+global.__scripAlpha = "A"
+global.__scripAlign = "L"
+global.__scripSpeed = "s"
 
-//testString = "<bold>consectetur adipiscing elit. Nullam finibus ante eu elementum malesuada. Duis nec diam sit amet nisl tempus lobortis nec a lorem. Aliquam erat volutpat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nulla sed sapien efficitur, posuere felis sed, vulputate arcu. Vestibulum nec turpis vel lacus laoreet posuere. Morbi id purus suscipit, ultrices erat non, suscipit quam. Phasellus sed neque risus. Nunc sed mollis metus, eu rhoncus leo. Curabitur sit amet ex in turpis maximus semper vel vel tellus. Donec quis lectus in ex efficitur egestas vel et nunc. Donec ac blandit massa. Sed semper purus elit, sed ultrices felis elementum a. ";
-testString = //"<* fntBold><# 00FF00> <@ 0  ,  -25> This <@0  ,-15> is <@0, 0> Green<#FFFFFF>\n<+ .01>And this <^.25>is <^0.1>white<+1>\n<#FF0000><^1><? fa_top>And this is<$ 5> <! sprCoin ><$1> red."
-	wait(60) + 
+
+testString = "<#00FF00>Green<#FFFFFF> <I sprCoin> <F fntBold>Bold<F fntDefault> <S 1,3>Scaled Up Y<S 3,1> Scaled Up X<S 1,1> <O -20,-20>up 20, left 20<O 0,0>"
+testString += "<a 45>Skewed <arrow> <a 0>  <A .25>barely visible<A 1> <L fa_bottom>bottom aligned<L fa_middle> <K 20>This Text Is Super Spaced Out<K 0> <s .1>this text types very slowly."
+/*	wait(60) + 
 		welcomeTo.open +
 			outline.open + 
 				"WELCOME TO\n" + wait(60) +
@@ -19,7 +28,7 @@ testString = //"<* fntBold><# 00FF00> <@ 0  ,  -25> This <@0  ,-15> is <@0, 0> G
 	wait(30) +
 	rainbow.open + 
 		flyIn.open  +  
-			coin +" "+ underline.open + "SIMPLY HEAVENLY TEXT" + underline.close + " " + coin + 
+			coin +" "+ underline.open + "SIMPLE, HEAVENLY TEXT" + underline.close + " " + coin + 
 		flyIn.close + 
 	rainbow.close + "\b" +
 	welcomeTo.open + 
@@ -28,7 +37,7 @@ testString = //"<* fntBold><# 00FF00> <@ 0  ,  -25> This <@0  ,-15> is <@0, 0> G
 				rainbow.open +
 					excite.open + 
 						"Coming Soon...";
-						
+						*/
 
 
 

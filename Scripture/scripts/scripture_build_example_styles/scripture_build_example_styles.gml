@@ -2,7 +2,12 @@ function scripture_build_example_styles() {
 	//Events
 	showMessage = scripture_register_event("show message", function(){ show_message("Yup") });
 	
-	coin = scripture_register_sprite("arrowLeft",sprCoin, {
+	coin = scripture_register_sprite("coin",sprCoin, {
+		xScale: 1,
+		yScale: 1
+	});
+	
+	arrow = scripture_register_sprite("arrow",sprArrow, {
 		xScale: 1,
 		yScale: 1
 	});
@@ -10,7 +15,7 @@ function scripture_build_example_styles() {
 	welcomeTo = scripture_register_style("welcome to", {
 		speedMod: .3,
 		kerning: 3,
-		color: c_black,
+		color: $354838,
 		font: fntBold,
 		yOff: 0,
 	});
