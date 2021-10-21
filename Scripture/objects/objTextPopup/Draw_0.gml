@@ -1,2 +1,2 @@
 /// @description 
-draw_scripture(x,y,textbox)
+textbox.draw(x,y)

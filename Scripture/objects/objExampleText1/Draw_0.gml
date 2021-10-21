@@ -13,7 +13,7 @@ var _pageHeight = textbox.getCurrentPageSize().height / 2;
 draw_rectangle(x - _pageWidth, y - _pageHeight, x + _pageWidth, y + _pageHeight, true);
 
 
-draw_scripture(x, y, textbox);
+textbox.draw(x, y);
 
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);

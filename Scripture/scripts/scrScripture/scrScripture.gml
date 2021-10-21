@@ -5,7 +5,6 @@
 // - Pixelated Pope
 //*************************************************************************
 
-global.__scripCache = {};
 global.__scripText = {};
 global.__scripTextbox = {};
 global.__scripString = "";
@@ -705,7 +704,8 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 	return {curLine: _curLine, curPage: _curPage};
 }
 
-function __scriptureParseText(_string) {
+function __scriptureParseText(_string, _textbox) {
+	global.__scripTextbox = _textbox;
 	global.__scripStyleStack = [];
 	__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
 	global.__scripText = new __scriptureText();
@@ -755,39 +755,12 @@ function __scriptureApplyHAlign(_x, _line) {
 		case fa_right: return _x - _line.width; break;
 	}	
 }
-function ___scriptureSetActiveTextbox(_textbox) {
-	global.__scripTextbox = _textbox;
-	global.__scripText = _textbox.text;
-}
-function __scriptureGetCachedText(_string, _textbox) {
-	global.__scripString = _string;
-	global.__scripTextbox = _textbox;
-	var _parsedText = global.__scripCache[$ _textbox.key];
-	if(_parsedText == undefined || variable_struct_names_count(_parsedText) == 0) {
-		_parsedText = __scriptureParseText(_string)
-		global.__scripCache[$ _textbox.key] = _parsedText;
-	}
-	
-	global.__scripText = _parsedText;
-}
 
 function __scriptureIsTyping(_textbox = global.__scripTextbox) {
 	return _textbox.typeSpeed > 0;	
 }
 
 #endregion
-
-function draw_scripture(_x, _y, _textbox) {
-	draw_set_halign(fa_center);
-	draw_set_valign(fa_middle);
-	___scriptureSetActiveTextbox(_textbox)
-	var _currentPage = global.__scripText.getCurrentPage();
-	_currentPage.draw(_x, _y);
-	draw_set_alpha(1);
-	
-	var _cur = global.__scripText;
-	_textbox.nextPageReady = _currentPage.isComplete;
-}
 
 	
 function scripture_register_style(_key, _style) {
@@ -837,15 +810,6 @@ function scripture_set_default_style(_key){
 	global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 }
 
-function scripture_clear_cache(_textbox = undefined) {
-	if(_textbox == undefined)  {
-		global.__scripCache = {}
-		return;	
-	}
-	if(global.__scripCache[$ _textbox.key] != undefined)
-		variable_struct_remove(global.__scripCache, _textbox.key);
-}
-
 function scripture_set_tag_characters(_start = global.__scripOpenTag, 
 	_end = global.__scripCloseTag,
 	_close = global.__scripEndTag,
@@ -884,8 +848,7 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripSpeed = _speedMod;
 }
 
-function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks, _cacheKey) constructor {
-	key = _cacheKey == undefined ? id : _cacheKey;
+function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks) constructor {
 	hAlign = _hAlign;
 	vAlign = _vAlign;
 	typeSpeed = _typeSpeed;
@@ -896,10 +859,7 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	isPaused = false;
 	nextPageReady = false;
 	
-	scripture_clear_cache({key: _cacheKey});	
-	__scriptureGetCachedText(_string, self);
-	
-	var _text = global.__scripText;
+	var _text = __scriptureParseText(_string, self);
 	var _pageDimensions = []
 	var _widestPageWidth = 0;
 	var _tallestPageHeight = 0;
@@ -941,6 +901,18 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	gotoPage = function(_page, _reset = true) {
 		if(_page < 0 || _page >= pageCount) return;
 		text.setCurrentPage(_page,_reset);
+	}
+	
+	draw = function(_x, _y) {
+		draw_set_halign(fa_center);
+		draw_set_valign(fa_middle);
+		global.__scripTextbox = self;
+		global.__scripText = text;
+		var _currentPage = text.getCurrentPage();
+		_currentPage.draw(_x, _y);
+		draw_set_alpha(1);
+	
+		nextPageReady = _currentPage.isComplete;
 	}
 }
 
