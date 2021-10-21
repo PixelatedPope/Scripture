@@ -786,40 +786,9 @@ function draw_scripture(_x, _y, _textbox) {
 	draw_set_alpha(1);
 	
 	var _cur = global.__scripText;
-	return {
-		width: _cur.getCurPageWidth(),
-		height: _cur.getCurPageHeight(),
-		currentPage: _cur.curPage,
-		pageCount: _cur.getPageCount(),
-		nextPageReady: _currentPage.isComplete
-	}
+	_textbox.nextPageReady = _currentPage.isComplete;
 }
 
-
-function scripture_next_page(_textbox, _shortcutAnimations = true) {
-	var _text = global.__scripCache[$ _textbox.key];
-  if(_text == undefined) return;
-	var _curPage = _text.getCurrentPage();
-	
-	if(_curPage.isComplete) return _text.incPage();
-
-	_curPage.finishPage(_shortcutAnimations)   
-  return true;
-}
-
-function scripture_prev_page(_textbox, _reset = true) {
-	var _text = global.__scripCache[$ _textbox.key];
-  if(_text == undefined || _page < 0) return;
-	
-	_text.decPage(_reset);
-}
-
-function scripture_jump_to_page(_textbox, _page, _reset = true) {
-	var _text = global.__scripCache[$ _textbox.key];
-  if(_text == undefined) return;
-	if(_page < 0 || _page >= _text.getPageCount()) return;
-	_text.setCurrentPage(_page,_reset);
-}
 	
 function scripture_register_style(_key, _style) {
 	if(__scriptureStyleNameIsProtected(_key)) return;
@@ -869,8 +838,10 @@ function scripture_set_default_style(_key){
 }
 
 function scripture_clear_cache(_textbox = undefined) {
-	if(_textbox == undefined) 
+	if(_textbox == undefined)  {
 		global.__scripCache = {}
+		return;	
+	}
 	if(global.__scripCache[$ _textbox.key] != undefined)
 		variable_struct_remove(global.__scripCache, _textbox.key);
 }
@@ -913,30 +884,68 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripSpeed = _speedMod;
 }
 
-function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){
-	scripture_clear_cache({key: _cacheKey});
-	var _textBox = {
-		key: _cacheKey == undefined ? id : _cacheKey,
-		hAlign: _hAlign,
-		vAlign: _vAlign,
-		typeSpeed: _typeSpeed, 
-		maxWidth: _maxWidth,
-		lineSpacing: _lineSpacing,
-		maxHeight: _maxHeight,
-		forceLineBreaks: _forceLineBreaks,
-		isPaused: false
-	}
+function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks, _cacheKey) constructor {
+	key = _cacheKey == undefined ? id : _cacheKey;
+	hAlign = _hAlign;
+	vAlign = _vAlign;
+	typeSpeed = _typeSpeed;
+	maxWidth = _maxWidth;
+	lineSpacing = _lineSpacing;
+	maxHeight = _maxHeight;
+	forceLineBreaks = _forceLineBreaks;
+	isPaused = false;
+	nextPageReady = false;
 	
-	__scriptureGetCachedText(_string, _textBox);
+	scripture_clear_cache({key: _cacheKey});	
+	__scriptureGetCachedText(_string, self);
+	
 	var _text = global.__scripText;
 	var _pageDimensions = []
+	var _widestPageWidth = 0;
+	var _tallestPageHeight = 0;
 	for(var _i = 0; _i < _text.getPageCount(); _i++){
-		array_push(_pageDimensions, {width: _text.pages[_i].width, height: _text.pages[_i].height});
+		var _width = _text.pages[_i].width;
+		var _height = _text.pages[_i].height;
+		if(_width > _widestPageWidth)
+			_widestPageWidth = _width;
+		if(_height > _tallestPageHeight)
+			_tallestPageHeight = _height;
+		array_push(_pageDimensions, {width: _width, height: _height});
 	}
-	_textBox.pageDimensions = _pageDimensions;
-	_textBox.pageCount = _text.getPageCount();
-	_textBox.text = _text;
-	return _textBox;
+	
+	maxPageWidth = _widestPageWidth;
+	maxPageHeight = _tallestPageHeight;
+	pageDimensions = _pageDimensions;
+	pageCount = _text.getPageCount();
+	text = _text;
+	
+	getCurrentPageSize = function() {
+		return pageDimensions[text.curPage];
+	}
+	getCurrentPage = function() {
+		return text.curPage+1;	
+	}
+	
+	gotoPageNext = function(_shortcutAnimations = true) {
+		var _curPage = text.getCurrentPage();
+		if(_curPage.isComplete) return text.incPage();
+
+		_curPage.finishPage(_shortcutAnimations)   
+		return true;
+	}
+
+	gotoPagePrev = function(_reset = true) {
+		text.decPage(_reset);
+	}
+
+	gotoPage = function(_page, _reset = true) {
+		if(_page < 0 || _page >= pageCount) return;
+		text.setCurrentPage(_page,_reset);
+	}
+}
+
+function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){
+	return new __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks, _cacheKey)
 }
 
 function scripture_hex_to_color(_hexString) {

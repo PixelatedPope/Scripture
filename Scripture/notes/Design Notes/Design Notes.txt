@@ -38,21 +38,16 @@ Force Line Break without Space DONE
 
 
 BUGS=====
-yPos doesn't work with textAlign top.
 
-Future Features====
+Future Features?====
 Force Re-render
-Shaders? 
+Shaders
 
 Animation "finished" conditions
 End Page Animations
 
 TEST
-soundEffects --issues in HTML5?
 Test Sprite Fonts
-Jump to Page reset / no reset
-Dec Page reset / no reset
 
 Ideas that may be bad========
 Look at text scaling and alpha and apply what we did for images?
-Support max height in pixels instead of lines?
