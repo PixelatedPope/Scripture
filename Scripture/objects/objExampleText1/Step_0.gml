@@ -6,7 +6,7 @@ if(keyboard_check_pressed(vk_space)) {
 		textbox.gotoPage(0, true);	
 	}
 }
-textbox.isPaused = keyboard_check(ord("P"));
+textbox.setPaused(keyboard_check(ord("P")));
 	
 if(keyboard_check(vk_right))
 	textbox.hAlign = fa_right;

@@ -882,8 +882,9 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	getCurrentPageSize = function() {
 		return pageDimensions[text.curPage];
 	}
+	
 	getCurrentPage = function() {
-		return text.curPage+1;	
+		return text.curPage;	
 	}
 	
 	gotoPageNext = function(_shortcutAnimations = true) {
@@ -901,6 +902,10 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	gotoPage = function(_page, _reset = true) {
 		if(_page < 0 || _page >= pageCount) return;
 		text.setCurrentPage(_page,_reset);
+	}
+	
+	setPaused = function(_isPaused) {
+		isPaused = _isPaused;	
 	}
 	
 	draw = function(_x, _y) {

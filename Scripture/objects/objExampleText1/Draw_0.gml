@@ -20,7 +20,7 @@ draw_set_valign(fa_top);
 draw_set_font(fntDefault);
 draw_set_color(c_gray);
 draw_text(x - _maxWidth, y + _maxHeight + 10, 
-					string(textbox.getCurrentPage()) + " / " + string(textbox.pageCount));
+					string(textbox.getCurrentPage()+1) + " / " + string(textbox.pageCount));
 
 if(textbox.nextPageReady) {
 	draw_sprite_ext(sprArrow,0, x + _maxWidth, y + _maxHeight + sin_oscillate(0,10,1) ,1,1,270,c_gray,1);
