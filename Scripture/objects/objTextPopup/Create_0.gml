@@ -1,9 +1,9 @@
 /// @description 
-textbox = scripture_build_textbox(0,0,fa_center, fa_bottom,.5);
+textbox = undefined;
 visible = false;
-text = "";
 setText = function(_text, _color) {
-	text = flash.open + flyIn.open + outline.open + fadeOut.open + "<#"+_color+">" + string(_text);
+	var _string = flash.open + flyIn.open + outline.open + fadeOut.open + "<#"+_color+">" + string(_text);
+	textbox = scripture_build_textbox(_string, 0,0,fa_center, fa_bottom,.5);
 	visible = true;
 }
 

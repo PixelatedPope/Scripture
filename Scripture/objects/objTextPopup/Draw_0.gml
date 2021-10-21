@@ -1,2 +1,2 @@
 /// @description 
-draw_scripture(x,y,text,textbox)
+draw_scripture(x,y,textbox)

@@ -755,7 +755,10 @@ function __scriptureApplyHAlign(_x, _line) {
 		case fa_right: return _x - _line.width; break;
 	}	
 }
-
+function ___scriptureSetActiveTextbox(_textbox) {
+	global.__scripTextbox = _textbox;
+	global.__scripText = _textbox.text;
+}
 function __scriptureGetCachedText(_string, _textbox) {
 	global.__scripString = _string;
 	global.__scripTextbox = _textbox;
@@ -774,11 +777,10 @@ function __scriptureIsTyping(_textbox = global.__scripTextbox) {
 
 #endregion
 
-function draw_scripture(_x, _y, _string, _textbox) {
+function draw_scripture(_x, _y, _textbox) {
 	draw_set_halign(fa_center);
 	draw_set_valign(fa_middle);
-	__scriptureGetCachedText(_string, _textbox)
-	
+	___scriptureSetActiveTextbox(_textbox)
 	var _currentPage = global.__scripText.getCurrentPage();
 	_currentPage.draw(_x, _y);
 	draw_set_alpha(1);
@@ -866,12 +868,11 @@ function scripture_set_default_style(_key){
 	global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 }
 
-function scripture_clear_cache(_key = id) {
-	
-	if(global.__scripCache[$ _key] == undefined)
+function scripture_clear_cache(_textbox = undefined) {
+	if(_textbox == undefined) 
 		global.__scripCache = {}
-	else
-		variable_struct_remove(global.__scripCache, _key);
+	if(global.__scripCache[$ _textbox.key] != undefined)
+		variable_struct_remove(global.__scripCache, _textbox.key);
 }
 
 function scripture_set_tag_characters(_start = global.__scripOpenTag, 
@@ -912,9 +913,9 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripSpeed = _speedMod;
 }
 
-function scripture_build_textbox(_maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){
-	global.__scripCache[$ _cacheKey] = {};
-	return {
+function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){
+	scripture_clear_cache({key: _cacheKey});
+	var _textBox = {
 		key: _cacheKey == undefined ? id : _cacheKey,
 		hAlign: _hAlign,
 		vAlign: _vAlign,
@@ -925,6 +926,17 @@ function scripture_build_textbox(_maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_lef
 		forceLineBreaks: _forceLineBreaks,
 		isPaused: false
 	}
+	
+	__scriptureGetCachedText(_string, _textBox);
+	var _text = global.__scripText;
+	var _pageDimensions = []
+	for(var _i = 0; _i < _text.getPageCount(); _i++){
+		array_push(_pageDimensions, {width: _text.pages[_i].width, height: _text.pages[_i].height});
+	}
+	_textBox.pageDimensions = _pageDimensions;
+	_textBox.pageCount = _text.getPageCount();
+	_textBox.text = _text;
+	return _textBox;
 }
 
 function scripture_hex_to_color(_hexString) {

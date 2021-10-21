@@ -14,9 +14,10 @@ global.__scripAlign = "L"
 global.__scripSpeed = "s"
 
 
-testString = "<#00FF00>Green<#FFFFFF> <I sprCoin> <F fntBold>Bold<F fntDefault> <S 1,3>Scaled Up Y<S 3,1> Scaled Up X<S 1,1> <O -20,-20>up 20, left 20<O 0,0>"
-testString += "<a 45>Skewed <arrow> <a 0>  <A .25>barely visible<A 1> <L fa_bottom>bottom aligned<L fa_middle> <K 20>This Text Is Super Spaced Out<K 0> <s .1>this text types very slowly."
-/*	wait(60) + 
+//testString = "<#00FF00>Green<#FFFFFF> <I sprCoin> <F fntBold>Bold<F fntDefault> <S 1,3>Scaled Up Y<S 3,1> Scaled Up X<S 1,1> <O -20,-20>up 20, left 20<O 0,0>"
+//testString += "<a 45>Skewed <arrow> <a 0>  <A .25>barely visible<A 1> <L fa_bottom>bottom aligned<L fa_middle> <K 20>This Text Is Super Spaced Out<K 0> <s .1>this text types very slowly."
+testString = 
+	wait(60) + 
 		welcomeTo.open +
 			outline.open + 
 				"WELCOME TO\n" + wait(60) +
@@ -37,9 +38,6 @@ testString += "<a 45>Skewed <arrow> <a 0>  <A .25>barely visible<A 1> <L fa_bott
 				rainbow.open +
 					excite.open + 
 						"Coming Soon...";
-						*/
-
-
-
+						
 instance_create_depth(room_width / 2,room_height/ 2,0,objExampleText1)
-.textbox = scripture_build_textbox(1000, 0, fa_center, fa_middle, 1, 0);
+.textbox = scripture_build_textbox(testString, 1000, 0, fa_center, fa_middle, 1, 0);

@@ -1,2 +1,2 @@
 /// @description 
-scripture_clear_cache()
+scripture_clear_cache(textbox)
