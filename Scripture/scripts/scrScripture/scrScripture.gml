@@ -91,6 +91,23 @@ function __scriptureBuildElement(_style) {
 		onDrawEndSteps = [];
 		draw(-100000,-100000, 0, _line);
 	}
+	executeOnDrawBegin = function(_x, _y,  _index) {
+		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
+			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = style.onDrawBegin[_i](_x, _y, style, self, onDrawBeginSteps[_i], _index)
+			onDrawBeginSteps[_i] += !global.__scripTextbox.isPaused;
+			if(_breakChain)	break;
+		}
+	}
+	
+	executeOnDrawEnd = function(_x, _y,  _index) {
+		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
+			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = style.onDrawEnd[_i](_x, _y, style, self, onDrawEndSteps[_i], _index)
+			onDrawEndSteps[_i] += !global.__scripTextbox.isPaused;
+			if(_breakChain)	break;
+		}
+	}
 }
 
 function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
@@ -119,12 +136,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		draw_set_color(style.color);
 		draw_set_alpha(alpha * style.alpha);
 		
-		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
-			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
-			var _breakChain = style.onDrawBegin[_i](_drawX, _drawY, style, self, onDrawBeginSteps[_i], _index)
-			onDrawBeginSteps[_i]+= !global.__scripTextbox.isPaused;
-			if(_breakChain)	break;
-		}
+		executeOnDrawBegin(_drawX, _drawY, _index);
 		
 		_drawX += style.xOff;
 		_drawY += style.yOff;
@@ -134,12 +146,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		draw_set_alpha(alpha * style.alpha);
 		draw_text_transformed(_drawX, _drawY, char, xScale * style.xScale, yScale * style.yScale, style.angle);
 		
-		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
-			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
-			var _breakChain = style.onDrawEnd[_i](_drawX, _drawY, style, self, onDrawEndSteps[_i], _index)
-			onDrawEndSteps[_i]+= !global.__scripTextbox.isPaused;
-			if(_breakChain)	break;
-		}
+		executeOnDrawEnd(_drawX, _drawY, _index);
 
 		return width;
 	}
@@ -167,28 +174,14 @@ function __scriptureImg(_style) constructor {
 	centerY = height/2;
 	
 	draw = function(_drawX, _drawY, _index) {
-		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
-			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
-			var _breakChain = style.onDrawBegin[_i](_drawX, _drawY, style, self, onDrawBeginSteps[_i], _index)
-			onDrawBeginSteps[_i]+= !global.__scripTextbox.isPaused;
-			if(_breakChain)	break;
-		}
+		executeOnDrawBegin(_drawX, _drawY, _index);
 
 		draw_sprite_ext(sprite, image, 
-										_drawX + style.xOff + centerX, 
-										_drawY + style.yOff + centerY, 
-										xScale * style.xScale, 
-										yScale * style.yScale, 
-										style.angle, 
-										style.color, 
-										alpha * style.alpha);
+										_drawX + style.xOff + centerX, _drawY + style.yOff + centerY, 
+										xScale * style.xScale, yScale * style.yScale, 
+										style.angle, style.color, alpha * style.alpha);
 		
-		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
-			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
-			var _breakChain = style.onDrawEnd[_i](_drawX, _drawY, style, self, onDrawEndSteps[_i], _index)
-			onDrawEndSteps[_i]+= !global.__scripTextbox.isPaused;
-			if(_breakChain)	break;
-		}
+		executeOnDrawEnd(_drawX, _drawY, _index);
 		
 		image += speed * !global.__scripTextbox.isPaused;
 		return width;
