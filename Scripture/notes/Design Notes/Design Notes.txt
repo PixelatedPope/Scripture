@@ -1,53 +1,37 @@
-Awesome Text System that supports a wide variety of customizable effects.
-It's not too slow?  It's cool.  it's easy to use?
-It's capable of allowing for customized styles and effects similar to CSS
-Auto wrapping, spacing, kerning, etc.  It's a nightmare.
+==Demo Design Document==
+-Dimensions: 1280 x 720
 
+-Opening
+ "Welcome to Scripture, Simple, Heavently Text"
+ -Need a better sprite to swap the coin out for.
+ -Put the scripture graffic behind it.
+ -Bring in toolbar.
+-Toolbar
+ -Allows the user to jump between any demo.  Has a mute button.
+ -Can be clicked on with the mouse, or navigated with a controller by pressing up and down to swap between the demo and the toolbar.
+ -Cool transitions when swapping demos.
+-Demo 1: Visual Novel
+-Demo 2: RPG Speech Bubbles
+-Demo 3: Bundled Styles and Effects
 
---------------------- RETEST EVERYTHING ----------
+==Credits
+https://sutemo.itch.io/female-character
+https://sutemo.itch.io/male-character-sprite-for-visual-novel
 
-Basic text Features. -Done.  Again.
-Wrapping and alignment. -Done. Again.
-forced line breaks. -Done. Again.
-pagination -Done. Again.
-typing -Done. Again.
-Force Finish Typing / Advance Page -Done. Again
-consume tags  -Done. Again.
-consume closing tags -Done. Again.
-onDrawBegin Function -Done. Again.
-
-Support Image "characters" DONE
-Support Kerning DONE
-Support Speed Adjustments DONE
-Support "Event" "characters" DONE
-
-Test setting default style DONE
-Set Step for all characters on page advance to something really high? DONE
-Allow changing of open/close tag characters? DONE
-
-Support New Line DONE
-Sidecar a style with an image DONE
-DELAY DONE
-
-Support Pausing. DONE
-Am I getting Reliable Results? DONE
-
-Jump To Page DONE
-Underline DONE
-Force Line Break without Space DONE
-
-
-BUGS=====
-
-Future Features?====
-Force Re-render
+==Future Features?==
+Force Re-parse
 Shaders
-
 Animation "finished" conditions
 End Page Animations
 
-TEST
-Test Sprite Fonts
+==Untested==
+Sprite Fonts
 
-Ideas that may be bad========
-Look at text scaling and alpha and apply what we did for images?
+Emotions
+1 - normal
+2 - smile
+3 - shocked
+4 - Sad
+5 - Angry
+6 - Smug
+7 - annoyed
