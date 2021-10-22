@@ -80,10 +80,8 @@ function __scriptureBuildElement(_style) {
 	wasSkipped = false;
 	resetSteps = function(){
 		wasSkipped = false;
-		for(var _i=0; _i < array_length(onDrawBeginSteps); _i++) {
-			onDrawBeginSteps[_i] = 0;
-			onDrawEndSteps[_i] = 0;
-		}
+		onDrawBeginSteps = [];
+			onDrawEndSteps = [];
 	}
 	skip = function(_line){
 		wasSkipped = true;
