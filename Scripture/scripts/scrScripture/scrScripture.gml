@@ -22,6 +22,7 @@ global.__scripDelay = 0;
 #macro SCRIPTURE_TYPE_LINE 4
 #macro SCRIPTURE_TYPE_PAGE 5
 #macro SCRIPTURE_TYPE_TEXT 6
+#macro SCRIPTURE_SKIP_VAL 10000
 
 //You can change these here or use the available function.
 global.__scripOpenTag = "<"
@@ -62,74 +63,33 @@ function __scriptureStyle(_style = {}) constructor {
 global.__scripStyles.defaultStyle = new __scriptureStyle();
 global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 
-function __scriptureImg(_style) constructor {
-	type = SCRIPTURE_TYPE_IMG;
-	var _active = new __scriptureStyle(global.__scripActiveStyle)
-	var _keys = variable_struct_get_names(_style);
-	for(var _i = 0; _i < array_length(_keys); _i++) {
-		_active[$ _keys[_i]] = _style[$ _keys[_i]];	
-	}
-	
-	sprite = _active.sprite;
-	image = 0;
-	isSpace = false;
-	speed = sprite_get_speed_type(sprite) == spritespeed_framespergameframe 
-																				 ? sprite_get_speed(sprite) 
-																				 : sprite_get_speed(sprite) / room_speed;
-	style = _active;
-	steps = 0;
-	xScale = style.xScale;
-	yScale = style.yScale;
-	alpha = style.alpha;
-	style.xScale = 1;
-	style.yScale = 1;
-	style.alpha = 1;
-	width = sprite_get_width(sprite) * xScale + style.kerning;
-	height = sprite_get_height(sprite) * yScale;
-	centerX = width/2;
-	centerY = height/2;
-	
-	draw = function(_x, _y, _index) {
-		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
-			if(style.onDrawBegin[_i](_x, _y, style, self, steps, _index)) break;
+function __scriptureBuildElement(_style) {
+	style = _style;
+	xScale = _style.xScale;
+	yScale = _style.yScale;
+	xOff = _style.xOff;
+	yOff = _style.yOff;
+	alpha = _style.alpha;
+	_style.xScale = 1;
+	_style.yScale = 1;
+	_style.xOff = 0;
+	_style.yOff = 0;
+	_style.alpha = 1;
+	onDrawBeginSteps = [];
+	onDrawEndSteps = [];
+	wasSkipped = false;
+	resetSteps = function(){
+		wasSkipped = false;
+		for(var _i=0; _i < array_length(onDrawBeginSteps); _i++) {
+			onDrawBeginSteps[_i] = 0;
+			onDrawEndSteps[_i] = 0;
 		}
-
-		draw_sprite_ext(sprite, image, 
-										_x + style.xOff + centerX, 
-										_y + style.yOff + centerY, 
-										xScale * style.xScale, 
-										yScale * style.yScale, 
-										style.angle, 
-										style.color, 
-										alpha * style.alpha);
-		
-		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
-			if(style.onDrawEnd[_i](_x, _y, style, self, steps, _index)) break;
-		}
-		
-		steps += !global.__scripTextbox.isPaused;
-		image += speed * !global.__scripTextbox.isPaused;;
-		return width;
 	}
-}
-
-function __scriptureEvent(_func, _delay = 0, _canSkip = true, _arguments = []) constructor {
-	type = SCRIPTURE_TYPE_EVENT;
-	event = _func;
-	steps = 0;
-	arguments = _arguments;
-	isSpace = false;
-	style = {speedMod:1};
-	ran = false;
-	canSkip = _canSkip;
-	delay = _delay;
-	draw = function(_x, _y, _index){
-		if(ran) return 0;
-		ran = true;
-		event(arguments);
-		if(delay > 0) 
-			global.__scripDelay = delay;
-		return 0;
+	skip = function(_line){
+		wasSkipped = true;
+		onDrawBeginSteps = [];
+		onDrawEndSteps = [];
+		draw(-100000,-100000, 0, _line);
 	}
 }
 
@@ -137,21 +97,12 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	type = SCRIPTURE_TYPE_CHAR
 	char = _char;
 	isSpace = _char == " ";
-	style = _style; 
-	steps = 0;
+	__scriptureBuildElement(_style);
 	draw_set_font(style.font);
-	xScale = _style.xScale;
-	yScale = _style.yScale;
 	width = string_width(char) * xScale + style.kerning;
 	height = string_height(char) * yScale;
 	centerX = width / 2;
 	centerY = height / 2;
-	xOff = style.xOff;
-	yOff = style.yOff;
-	style.xOff = 0;
-	style.yOff = 0;
-	style.xScale = 1;
-	style.yScale = 1;
 	color = style.color;
 	
 	draw = function(_x, _y, _index, _line) {
@@ -166,26 +117,108 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		
 		draw_set_font(style.font);
 		draw_set_color(style.color);
-		draw_set_alpha(style.alpha);
+		draw_set_alpha(alpha * style.alpha);
 		
 		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
-			if(style.onDrawBegin[_i](_drawX, _drawY, style, self, steps, _index)) break;	
+			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = style.onDrawBegin[_i](_drawX, _drawY, style, self, onDrawBeginSteps[_i], _index)
+			onDrawBeginSteps[_i]+= !global.__scripTextbox.isPaused;
+			if(_breakChain)	break;
 		}
+		
 		_drawX += style.xOff;
 		_drawY += style.yOff;
 		
 		draw_set_font(style.font);
 		draw_set_color(style.color);
-		draw_set_alpha(style.alpha);
+		draw_set_alpha(alpha * style.alpha);
 		draw_text_transformed(_drawX, _drawY, char, xScale * style.xScale, yScale * style.yScale, style.angle);
 		
 		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
-			if(style.onDrawEnd[_i](_drawX, _drawY, style, self, steps, _index)) break;	
+			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = style.onDrawEnd[_i](_drawX, _drawY, style, self, onDrawEndSteps[_i], _index)
+			onDrawEndSteps[_i]+= !global.__scripTextbox.isPaused;
+			if(_breakChain)	break;
 		}
-		steps += !global.__scripTextbox.isPaused;
+
 		return width;
 	}
 }
+
+function __scriptureImg(_style) constructor {
+	type = SCRIPTURE_TYPE_IMG;
+	var _active = new __scriptureStyle(global.__scripActiveStyle)
+	var _keys = variable_struct_get_names(_style);
+	for(var _i = 0; _i < array_length(_keys); _i++) {
+		_active[$ _keys[_i]] = _style[$ _keys[_i]];	
+	}
+	
+	sprite = _active.sprite;
+	image = 0;
+	isSpace = false;
+	speed = sprite_get_speed_type(sprite) == spritespeed_framespergameframe 
+																				 ? sprite_get_speed(sprite) 
+																				 : sprite_get_speed(sprite) / room_speed;
+	__scriptureBuildElement(_active)
+	style = _active;
+	width = sprite_get_width(sprite) * xScale + style.kerning;
+	height = sprite_get_height(sprite) * yScale;
+	centerX = width/2;
+	centerY = height/2;
+	
+	draw = function(_drawX, _drawY, _index) {
+		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
+			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = style.onDrawBegin[_i](_drawX, _drawY, style, self, onDrawBeginSteps[_i], _index)
+			onDrawBeginSteps[_i]+= !global.__scripTextbox.isPaused;
+			if(_breakChain)	break;
+		}
+
+		draw_sprite_ext(sprite, image, 
+										_drawX + style.xOff + centerX, 
+										_drawY + style.yOff + centerY, 
+										xScale * style.xScale, 
+										yScale * style.yScale, 
+										style.angle, 
+										style.color, 
+										alpha * style.alpha);
+		
+		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
+			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = style.onDrawEnd[_i](_drawX, _drawY, style, self, onDrawEndSteps[_i], _index)
+			onDrawEndSteps[_i]+= !global.__scripTextbox.isPaused;
+			if(_breakChain)	break;
+		}
+		
+		image += speed * !global.__scripTextbox.isPaused;
+		return width;
+	}
+}
+
+function __scriptureEvent(_func, _delay = 0, _canSkip = true, _arguments = []) constructor {
+	type = SCRIPTURE_TYPE_EVENT;
+	event = _func;
+	arguments = _arguments;
+	isSpace = false;
+	style = {speedMod:1};
+	ran = false;
+	wasSkipped = false;
+	canSkip = _canSkip;
+	delay = _delay;
+	skip = function(_line){
+		wasSkipped = true;	
+		draw();
+	}
+	draw = function(){
+		if(ran) return 0;
+		ran = true;
+		event(arguments);
+		if(delay > 0) 
+			global.__scripDelay = delay;
+		return 0;
+	}
+}
+
 
 function __scriptureLine() constructor {
 	type = SCRIPTURE_TYPE_LINE
@@ -227,14 +260,15 @@ function __scriptureLine() constructor {
 		delay = __scriptureIsTyping();
 		for(var _i = 0; _i < getLength(); _i++) {
 			var _char = characters[_i];
-			_char.steps = 0;
+			
 			switch(_char.type) {
 				case SCRIPTURE_TYPE_EVENT:
 					_char.ran = false;
 				break;
 				case SCRIPTURE_TYPE_IMG:
 					_char.image = 0;
-				break;
+				default:
+					_char.resetSteps();
 			}
 		}
 	}
@@ -246,9 +280,7 @@ function __scriptureLine() constructor {
 				_char.ran = true;
 				continue; 
 			}
-			if(_char.steps == 0)
-				_char.draw(-100000,-10000, 0, self);
-			_char.steps = 100000;	
+			_char.skip(self)
 		}
 	}
 	
@@ -850,7 +882,7 @@ function scripture_register_event(_key, _func, _canSkip = true) {
 	}
 	return {
 		key: _key,
-		build: function() {
+		event: function() {
 			var _string = global.__scripOpenTag + key +" ";
 			for(var _i = 0; _i < argument_count; _i++) {
 				_string += argument[_i] + (_i == argument_count -1 ? "" : ",")

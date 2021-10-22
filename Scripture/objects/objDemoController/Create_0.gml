@@ -17,7 +17,7 @@ testString =
 	wait(30) +
 	rainbow.open + 
 		flyIn.open  +  
-			coin +" "+ underline.open + "SIMPLE, HEAVENLY TEXT" + underline.close + " " + coin + 
+			coin + " " + underline.open + "SIMPLE, HEAVENLY TEXT" + underline.close + " " + coin + 
 		flyIn.close + 
 	rainbow.close + "\r" +
 	welcomeTo.open + 
