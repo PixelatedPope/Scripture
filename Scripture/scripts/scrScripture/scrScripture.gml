@@ -107,10 +107,11 @@ function __scriptureImg(_style) constructor {
 	}
 }
 
-function __scriptureEvent(_func, _delay = 0, _canSkip = true) constructor {
+function __scriptureEvent(_func, _delay = 0, _canSkip = true, _arguments = []) constructor {
 	type = SCRIPTURE_TYPE_EVENT;
 	event = _func;
 	steps = 0;
+	arguments = _arguments;
 	isSpace = false;
 	style = {speedMod:1};
 	ran = false;
@@ -119,7 +120,7 @@ function __scriptureEvent(_func, _delay = 0, _canSkip = true) constructor {
 	draw = function(_x, _y, _index){
 		if(ran) return 0;
 		ran = true;
-		event();
+		event(arguments);
 		if(delay > 0) 
 			global.__scripDelay = delay;
 		return 0;
@@ -483,11 +484,9 @@ function __scriptureText() constructor {
 function __scriptureStyleNameIsProtected(_key) {
 	for(var _i = 0; _i < array_length(global.__scripProtectedKeys); _i++) {
 		if(_key == global.__scripProtectedKeys[_i]) {
-			show_debug_message("Attempted to use a protected Scripture Tag.  Sorry.")
-			return true;	
+			throw("Attempted to use a protected Scripture Tag.  Sorry.")
 		}
 	}
-	return false;
 }
 
 function __scriptureStringTrimWhiteSpace(_string) {
@@ -515,7 +514,7 @@ function __scriptureIsInlineSignifier(_tagContent) {
 	return false
 }
 
-function __scriptureMultiParse(_tagContent) {
+function __scriptureXYParse(_tagContent) {
 	var _x = "";
 	while(string_char_at(_tagContent,1) != ",") {
 		_x+=string_char_at(_tagContent,1);
@@ -530,6 +529,24 @@ function __scriptureMultiParse(_tagContent) {
 	}
 	
 	return {x: real(_x), y: real(_y)};
+}
+
+function __scriptureMultiParse(_tagContent) {
+	var _space = string_pos(" ", _tagContent);
+	if(_space == 0) return [];
+	var _arguments = string_delete(_tagContent,1,_space);
+	var _array = [];
+	while(_arguments != "") {
+		var _arg = "";
+		_arguments = __scriptureStringTrimWhiteSpace(_arguments);
+		while(string_char_at(_arguments,1) != "," && _arguments != ""){
+			_arg+=string_char_at(_arguments,1);
+			_arguments = string_delete(_arguments,1,1);
+		}
+		_arguments = string_delete(_arguments,1,1);
+		array_push(_array,_arg);
+	}
+	return _array;
 }
 
 function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
@@ -558,12 +575,12 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 			_active.kerning = _val;
 			return true;
 		case global.__scripScale: 
-			var _val = __scriptureMultiParse(_tagContent);
+			var _val = __scriptureXYParse(_tagContent);
 			_active.xScale = _val.x;
 			_active.yScale = _val.y;
 			return true;
 		case global.__scripOff:
-			var _val = __scriptureMultiParse(_tagContent);
+			var _val = __scriptureXYParse(_tagContent);
 			_active.xOff = _val.x;
 			_active.yOff = _val.y;
 			return true;
@@ -594,6 +611,13 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 	return false; //this should never happen...
 }
 
+function __scriptureGetTagKey(_tag) {
+	var _space = string_pos(" ", _tag);
+	if(_space == 0) return _tag;
+	var _key = string_delete(_tag,_space,1000);
+	return _key;
+}
+
 function __scriptureHandleTag(_string, _curLine) {
 	var _tagContent = "";
 	var _customStyle = {};
@@ -605,14 +629,14 @@ function __scriptureHandleTag(_string, _curLine) {
 		_tagContent += string_char_at(_string,1);
 		_string = string_delete(_string,1,1);
 		
-		if(string_char_at(_string,1) == global.__scripOpenTag || string_length(_string) == 0) {
-			show_message("Unclosed Tag Found/n Check your shit, yo.");	
-			game_end();
-		}
+		if(string_char_at(_string,1) == global.__scripOpenTag || string_length(_string) == 0)
+			throw("Unclosed Tag Found/n Check your shit, yo.");	
 	}
 	_string = string_delete(_string,1,1);
 	
-	var _style = global.__scripStyles[$ _tagContent];
+	var _key = __scriptureGetTagKey(_tagContent)
+	
+	var _style = global.__scripStyles[$ _key];
 	if(_style == undefined) {
 		if(__scriptureCheckForInlineStyle(_tagContent, _curLine)) {
 			
@@ -638,7 +662,10 @@ function __scriptureHandleTag(_string, _curLine) {
 		break;
 						
 		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style)); break;
-		case SCRIPTURE_TYPE_EVENT: _curLine.addElement(new __scriptureEvent(_style.event, 0, _style.canSkip)); break;
+		case SCRIPTURE_TYPE_EVENT: 
+			var _arguments = __scriptureMultiParse(_tagContent)
+			_curLine.addElement(new __scriptureEvent(_style.event, 0, _style.canSkip, _arguments)); 
+		break;
 	}
 	
 
@@ -769,7 +796,10 @@ function __scriptureIsTyping(_textbox = global.__scripTextbox) {
 
 	
 function scripture_register_style(_key, _style) {
-	if(__scriptureStyleNameIsProtected(_key)) return;
+	if(string_count(" ", _key) >= 1) 
+		throw("Style Keys cannot contains spaces");
+	__scriptureStyleNameIsProtected(_key)
+	
 	_style.key = _key;
 	_style.type = SCRIPTURE_TYPE_STYLE;
 	global.__scripStyles[$ _key] = _style;
@@ -780,7 +810,9 @@ function scripture_register_style(_key, _style) {
 }
 
 function scripture_register_sprite(_key, _sprite, _style) {
-	if(__scriptureStyleNameIsProtected(_key)) return;
+	if(string_count(" ", _key) >= 1) 
+		throw("Sprite Keys cannot contains spaces");
+	__scriptureStyleNameIsProtected(_key)
 	
 	if(!sprite_exists(_sprite)) {
 		show_debug_message("That's not a sprite, dude.")
@@ -795,13 +827,27 @@ function scripture_register_sprite(_key, _sprite, _style) {
 }
 
 function scripture_register_event(_key, _func, _canSkip = true) {
+	if(string_count(" ",_key) >= 1) 
+		throw("Event Keys cannot contains spaces");
+		
+	
 	global.__scripStyles[$ _key] = {
 		key: _key,
 		type: SCRIPTURE_TYPE_EVENT,
 		event: _func,
 		canSkip: _canSkip
 	}
-	return global.__scripOpenTag + _key + global.__scripCloseTag;
+	return {
+		key: _key,
+		build: function() {
+			var _string = global.__scripOpenTag + key +" ";
+			for(var _i = 0; _i < argument_count; _i++) {
+				_string += argument[_i] + (_i == argument_count -1 ? "" : ",")
+			}
+			_string +=  global.__scripCloseTag
+			return _string;
+		}
+	}
 }
 
 function scripture_set_default_style(_key){

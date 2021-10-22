@@ -1,18 +1,18 @@
 function scripture_build_example_styles() {
 	//Events
-	showMessage = scripture_register_event("show message", function(){ show_message("Yup") }, true);
+	showMessage = scripture_register_event("ShowMessage", function(_arguments){ show_message(_arguments[0] +"\n" +_arguments[1]) }, true);
 	
 	coin = scripture_register_sprite("coin",sprCoin, {
 		xScale: 1,
 		yScale: 1
 	});
 	
-	arrow = scripture_register_sprite("arrow",sprArrow, {
+	arrow = scripture_register_sprite("Arrow",sprArrow, {
 		xScale: 1,
 		yScale: 1
 	});
 	
-	welcomeTo = scripture_register_style("welcome to", {
+	welcomeTo = scripture_register_style("WelcomeTo", {
 		speedMod: .3,
 		kerning: 3,
 		color: $354838,
@@ -21,7 +21,7 @@ function scripture_build_example_styles() {
 	});
 	
 	//Styles
-	scripture = scripture_register_style("scripture", {
+	scripture = scripture_register_style("Scripture", {
 		font: fntScripture,
 		kerning: 20,
 		speedMod: .1,
@@ -50,7 +50,7 @@ function scripture_build_example_styles() {
 		}
 	});
 	
-	flyIn = scripture_register_style("flyIn", {
+	flyIn = scripture_register_style("FlyIn", {
 		font: fntOpenSans,
 		speedMod: .5,
 		onDraw: function(_x, _y, _style, _base, _steps, _pos) {
@@ -62,20 +62,20 @@ function scripture_build_example_styles() {
 		}
 	});
 	
-	excite = scripture_register_style("excite", {
+	excite = scripture_register_style("Excite", {
 		onDraw: function(_x, _y, _style, _base, _steps, _pos) {
 			_style.yOff = random_range(-2,2);
 			_style.xOff = random_range(-2,2);
 		}
 	});
 	
-	rainbow = scripture_register_style("rainbow", {
+	rainbow = scripture_register_style("Rainbow", {
 		onDraw: function(_x, _y, _style, _base, _steps, _pos) {
 			_style.color = make_color_hsv((_steps * 2 + _pos * 10) % 255,165,255);
 		}
 	});
 	
-	outline = scripture_register_style("outline", {
+	outline = scripture_register_style("Outline", {
 		xScale: 1.,
 		yScale: 1.,
 		onDraw: function(_x, _y, _style, _base, _steps, _pos) {
@@ -92,7 +92,7 @@ function scripture_build_example_styles() {
 		}
 	});
 
-	underline = scripture_register_style("underline", {
+	underline = scripture_register_style("Underline", {
 		kerning: 10,
 		onDraw: function(_x, _y, _style, _base, _steps, _pos) {
 			draw_set_color(_style.color);
@@ -104,18 +104,18 @@ function scripture_build_example_styles() {
 		}
 	});
 
-	bleep = scripture_register_style("bleep", {
+	bleep = scripture_register_style("Bleep", {
 		onDraw: function(_x, _y, _style, _base, _steps, _pos) {
 			if(_steps != 1 || _base.isSpace) return;
 			audio_play_sound_unique(sndBeep, 10, false, false, .25)	
 		}
 	})
 
-	bold = scripture_register_style("bold", {
+	bold = scripture_register_style("Bold", {
 		font: fntBold
 	});
 
-	small = scripture_register_style("small", {
+	small = scripture_register_style("Small", {
 		font: fntDefault
 	});
 

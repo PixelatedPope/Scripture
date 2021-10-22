@@ -17,7 +17,7 @@ testString =
 	wait(30) +
 	rainbow.open + 
 		flyIn.open  +  
-			coin +" "+ underline.open + "SIMPLE,"+showMessage+" HEAVENLY TEXT" + underline.close + " " + coin + 
+			coin +" "+ underline.open + "SIMPLE,"+showMessage.build("test1","test2")+" HEAVENLY TEXT" + underline.close + " " + coin + 
 		flyIn.close + 
 	rainbow.close + "\b" +
 	welcomeTo.open + 
@@ -26,7 +26,7 @@ testString =
 				rainbow.open +
 					excite.open + 
 						"Coming Soon...";
-						
+testString = "Test"+showMessage.build("test1","test2")+"Test";					
 //testString = "short page\b" + "wide page a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a\b" + "Tall Page \n1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
 instance_create_depth(room_width / 2,room_height/ 2,0,objExampleText1)
 .textbox = scripture_build_textbox(testString, 500, 150, fa_center, fa_middle, 1, 0);
