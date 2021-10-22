@@ -34,8 +34,8 @@ fadeOut = scripture_register_style("DamagefadeOut", {
 outline = scripture_register_style("DamageOutline", {
 	onDraw: function(_x, _y, _style, _base, _steps, _pos) {
 		draw_set_color(merge_color(_style.color,c_black,.75));
-		var _scaleMod = _base.baseXScale * _style.xScale;
-		var _thick = 2 * _base.baseXScale;
+		var _scaleMod = _base.xScale * _style.xScale;
+		var _thick = 2 * _base.xScale;
 		for(var _i=0; _i<360; _i+= 22.5) {
 			var _xPos = _x + _style.xOff + _scaleMod * lengthdir_x(_thick, _i);
 			var _yPos = _y + _style.yOff + _scaleMod * lengthdir_y(_thick, _i);

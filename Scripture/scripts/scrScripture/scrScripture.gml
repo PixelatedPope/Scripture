@@ -77,14 +77,14 @@ function __scriptureImg(_style) constructor {
 																				 : sprite_get_speed(sprite) / room_speed;
 	style = _active;
 	steps = 0;
-	baseXScale = style.xScale;
-	baseYScale = style.yScale;
-	baseAlpha = style.alpha;
+	xScale = style.xScale;
+	yScale = style.yScale;
+	alpha = style.alpha;
 	style.xScale = 1;
 	style.yScale = 1;
 	style.alpha = 1;
-	width = sprite_get_width(sprite) * baseXScale + style.kerning;
-	height = sprite_get_height(sprite) * baseYScale;
+	width = sprite_get_width(sprite) * xScale + style.kerning;
+	height = sprite_get_height(sprite) * yScale;
 	centerX = width/2;
 	centerY = height/2;
 	
@@ -97,11 +97,11 @@ function __scriptureImg(_style) constructor {
 		draw_sprite_ext(sprite, image, 
 										_x + style.xOff + centerX, 
 										_y + style.yOff + centerY, 
-										baseXScale * style.xScale, 
-										baseYScale * style.yScale, 
+										xScale * style.xScale, 
+										yScale * style.yScale, 
 										style.angle, 
 										style.color, 
-										baseAlpha * style.alpha);
+										alpha * style.alpha);
 		image += speed;
 		return width;
 	}
@@ -134,14 +134,14 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	style = _style; 
 	steps = 0;
 	draw_set_font(style.font);
-	baseXScale = _style.xScale;
-	baseYScale = _style.yScale;
-	width = string_width(char) * baseXScale + style.kerning;
-	height = string_height(char) * baseYScale;
+	xScale = _style.xScale;
+	yScale = _style.yScale;
+	width = string_width(char) * xScale + style.kerning;
+	height = string_height(char) * yScale;
 	centerX = width / 2;
 	centerY = height / 2;
-	baseXOff = _style.xOff;
-	baseYOff = _style.yOff;
+	xOff = _style.xOff;
+	yOff = _style.yOff;
 	_style.xOff = 0;
 	_style.yOff = 0;
 	_style.xScale = 1;
@@ -151,8 +151,8 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	draw = function(_x, _y, _index, _line) {
 		
 		//if(isSpace) return width;
-		var _drawX = floor(_x + centerX) + baseXOff;
-		var _drawY = floor(_y + centerY) + baseYOff;
+		var _drawX = floor(_x + centerX) + xOff;
+		var _drawY = floor(_y + centerY) + yOff;
 		
 		switch(style.textAlign) {
 			case fa_top: break;
@@ -174,7 +174,7 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		draw_set_font(style.font);
 		draw_set_color(style.color);
 		draw_set_alpha(style.alpha);
-		draw_text_transformed(_drawX, _drawY, char, baseXScale * style.xScale, baseYScale * style.yScale, style.angle);
+		draw_text_transformed(_drawX, _drawY, char, xScale * style.xScale, yScale * style.yScale, style.angle);
 		return width;
 	}
 }
@@ -750,7 +750,7 @@ function __scriptureParseText(_string, _textbox) {
 		var _forceNewLine = false;
 		var _forceNewPage = false;
 		switch(_char) {
-			case "\b": 
+			case "\r": 
 				_forceNewPage = true; 
 			break;			
 			case "\n": _forceNewLine = true;break;

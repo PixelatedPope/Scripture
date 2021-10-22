@@ -1,13 +1,15 @@
 function scripture_build_example_styles() {
 	//Events
-	showMessage = scripture_register_event("ShowMessage", function(_arguments){ show_message(_arguments[0] +"\n" +_arguments[1]) }, true);
+	showMessage = scripture_register_event("ShowMessage", function(_arguments){ 
+		show_message(_arguments[0] +"\n" +_arguments[1]) 
+	}, true);
 	
-	coin = scripture_register_sprite("coin",sprCoin, {
+	coin = scripture_register_sprite("coin", sprCoin, {
 		xScale: 1,
 		yScale: 1
 	});
 	
-	arrow = scripture_register_sprite("Arrow",sprArrow, {
+	arrow = scripture_register_sprite("Arrow", sprArrow, {
 		xScale: 1,
 		yScale: 1
 	});
@@ -80,8 +82,8 @@ function scripture_build_example_styles() {
 		yScale: 1.,
 		onDraw: function(_x, _y, _style, _base, _steps, _pos) {
 			draw_set_color(merge_color(_style.color,c_white,.75));
-			var _scaleMod = _base.baseXScale * _style.xScale;
-			var _thick = 5 * _base.baseXScale;
+			var _scaleMod = _base.xScale * _style.xScale;
+			var _thick = 5 * _base.xScale;
 			for(var _i=0; _i<360; _i+= 22.5) {
 				var _xPos = _x + _style.xOff + _scaleMod * lengthdir_x(_thick, _i);
 				var _yPos = _y + _style.yOff + _scaleMod * lengthdir_y(_thick, _i);
