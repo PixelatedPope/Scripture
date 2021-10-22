@@ -24,6 +24,7 @@ global.__scripDelay = 0;
 #macro SCRIPTURE_TYPE_TEXT 6
 #macro SCRIPTURE_SKIP_VAL 10000
 
+//Global Tag Definitions
 //You can change these here or use the available function.
 global.__scripOpenTag = "<"
 global.__scripCloseTag = ">"
@@ -41,6 +42,78 @@ global.__scripAlign = "L"
 global.__scripSpeed = "s"
 
 #region Scripture Constructors
+function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks) constructor {
+	hAlign = _hAlign;
+	vAlign = _vAlign;
+	typeSpeed = _typeSpeed;
+	maxWidth = _maxWidth;
+	lineSpacing = _lineSpacing;
+	maxHeight = _maxHeight;
+	forceLineBreaks = _forceLineBreaks;
+	isPaused = false;
+	nextPageReady = false;
+	
+	var _text = __scriptureParseText(_string, self);
+	var _pageDimensions = []
+	var _widestPageWidth = 0;
+	var _tallestPageHeight = 0;
+	for(var _i = 0; _i < _text.getPageCount(); _i++){
+		var _width = _text.pages[_i].width;
+		var _height = _text.pages[_i].height;
+		if(_width > _widestPageWidth)
+			_widestPageWidth = _width;
+		if(_height > _tallestPageHeight)
+			_tallestPageHeight = _height;
+		array_push(_pageDimensions, {width: _width, height: _height});
+	}
+	
+	maxPageWidth = _widestPageWidth;
+	maxPageHeight = _tallestPageHeight;
+	pageDimensions = _pageDimensions;
+	pageCount = _text.getPageCount();
+	text = _text;
+	
+	getCurrentPageSize = function() {
+		return pageDimensions[text.curPage];
+	}
+	
+	getCurrentPage = function() {
+		return text.curPage;	
+	}
+	
+	gotoPageNext = function(_shortcutAnimations = true) {
+		var _curPage = text.getCurrentPage();
+		if(_curPage.isComplete) return text.incPage();
+
+		_curPage.finishPage(_shortcutAnimations)   
+		return true;
+	}
+
+	gotoPagePrev = function(_reset = true) {
+		text.decPage(_reset);
+	}
+
+	gotoPage = function(_page, _reset = true) {
+		if(_page < 0 || _page >= pageCount) return;
+		text.setCurrentPage(_page,_reset);
+	}
+	
+	setPaused = function(_isPaused) {
+		isPaused = _isPaused;	
+	}
+	
+	draw = function(_x, _y) {
+		draw_set_halign(fa_center);
+		draw_set_valign(fa_middle);
+		global.__scripTextbox = self;
+		global.__scripText = text;
+		var _currentPage = text.getCurrentPage();
+		_currentPage.draw(_x, _y);
+		draw_set_alpha(1);
+	
+		nextPageReady = _currentPage.isComplete;
+	}
+}
 function __scriptureStyle(_style = {}) constructor {
 	type = SCRIPTURE_TYPE_STYLE
 	//Return a duplicate of the given style with new key
@@ -652,7 +725,6 @@ function __scriptureGetTagKey(_tag) {
 
 function __scriptureHandleTag(_string, _curLine) {
 	var _tagContent = "";
-	var _customStyle = {};
 	var _isClosingTag = string_char_at(_string,1) == global.__scripEndTag;
 	if(_isClosingTag)
 		_string = string_delete(_string,1,1);
@@ -896,7 +968,7 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 	_end = global.__scripCloseTag,
 	_close = global.__scripEndTag,
 	_color = global.__scripColor,
-	_sprite = global.__scripImage,
+	_image = global.__scripImage,
   _font = global.__scripFont,
   _kerning = global.__scripKerning,
 	_scale = global.__scripScale,
@@ -919,7 +991,7 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripCloseTag = _close;
 		global.__scripCloseTag = _end;
 		global.__scripColor = _color;
-		global.__scripImage = _sprite;
+		global.__scripImage = _image;
 		global.__scripFont = _font;
 		global.__scripKerning = _kerning;
 		global.__scripScale = _scale;
@@ -930,81 +1002,8 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripSpeed = _speedMod;
 }
 
-function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks) constructor {
-	hAlign = _hAlign;
-	vAlign = _vAlign;
-	typeSpeed = _typeSpeed;
-	maxWidth = _maxWidth;
-	lineSpacing = _lineSpacing;
-	maxHeight = _maxHeight;
-	forceLineBreaks = _forceLineBreaks;
-	isPaused = false;
-	nextPageReady = false;
-	
-	var _text = __scriptureParseText(_string, self);
-	var _pageDimensions = []
-	var _widestPageWidth = 0;
-	var _tallestPageHeight = 0;
-	for(var _i = 0; _i < _text.getPageCount(); _i++){
-		var _width = _text.pages[_i].width;
-		var _height = _text.pages[_i].height;
-		if(_width > _widestPageWidth)
-			_widestPageWidth = _width;
-		if(_height > _tallestPageHeight)
-			_tallestPageHeight = _height;
-		array_push(_pageDimensions, {width: _width, height: _height});
-	}
-	
-	maxPageWidth = _widestPageWidth;
-	maxPageHeight = _tallestPageHeight;
-	pageDimensions = _pageDimensions;
-	pageCount = _text.getPageCount();
-	text = _text;
-	
-	getCurrentPageSize = function() {
-		return pageDimensions[text.curPage];
-	}
-	
-	getCurrentPage = function() {
-		return text.curPage;	
-	}
-	
-	gotoPageNext = function(_shortcutAnimations = true) {
-		var _curPage = text.getCurrentPage();
-		if(_curPage.isComplete) return text.incPage();
-
-		_curPage.finishPage(_shortcutAnimations)   
-		return true;
-	}
-
-	gotoPagePrev = function(_reset = true) {
-		text.decPage(_reset);
-	}
-
-	gotoPage = function(_page, _reset = true) {
-		if(_page < 0 || _page >= pageCount) return;
-		text.setCurrentPage(_page,_reset);
-	}
-	
-	setPaused = function(_isPaused) {
-		isPaused = _isPaused;	
-	}
-	
-	draw = function(_x, _y) {
-		draw_set_halign(fa_center);
-		draw_set_valign(fa_middle);
-		global.__scripTextbox = self;
-		global.__scripText = text;
-		var _currentPage = text.getCurrentPage();
-		_currentPage.draw(_x, _y);
-		draw_set_alpha(1);
-	
-		nextPageReady = _currentPage.isComplete;
-	}
-}
-
-function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false, _cacheKey = id){
-	return new __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks, _cacheKey)
+function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false){
+	return new __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks)
 }
 
 function scripture_hex_to_color(_hexString) {
