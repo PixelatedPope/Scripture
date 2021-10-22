@@ -1,6 +1,6 @@
 function scripture_build_example_styles() {
 	//Events
-	showMessage = scripture_register_event("show message", function(){ show_message("Yup") });
+	showMessage = scripture_register_event("show message", function(){ show_message("Yup") }, true);
 	
 	coin = scripture_register_sprite("coin",sprCoin, {
 		xScale: 1,
@@ -119,4 +119,8 @@ function scripture_build_example_styles() {
 		font: fntDefault
 	});
 
+}
+
+function wait(_steps) {
+	return global.__scripOpenTag+string(_steps)+global.__scripCloseTag;
 }

@@ -107,12 +107,14 @@ function __scriptureImg(_style) constructor {
 	}
 }
 
-function __scriptureEvent(_func, _delay = 0) constructor {
+function __scriptureEvent(_func, _delay = 0, _canSkip = true) constructor {
 	type = SCRIPTURE_TYPE_EVENT;
 	event = _func;
+	steps = 0;
 	isSpace = false;
 	style = {speedMod:1};
 	ran = false;
+	canSkip = _canSkip;
 	delay = _delay;
 	draw = function(_x, _y, _index){
 		if(ran) return 0;
@@ -230,7 +232,10 @@ function __scriptureLine() constructor {
 	endAnimations = function() {
 		for(var _c = 0; _c < getLength(); _c++) {
 			var _char = characters[_c];
-			if(_char.type == SCRIPTURE_TYPE_EVENT) continue; //Skip events when completing drawing.
+			if(_char.type == SCRIPTURE_TYPE_EVENT && _char.canSkip) {
+				_char.ran = true;
+				continue; 
+			}
 			if(_char.steps == 0)
 				_char.draw(-100000,-10000, 0, self);
 			_char.steps = 100000;	
@@ -615,7 +620,7 @@ function __scriptureHandleTag(_string, _curLine) {
 			try {
 				var _amount = abs(real(_tagContent));
 				if(_amount > 0) 
-					_curLine.addElement(new __scriptureEvent(function(){},_amount))
+					_curLine.addElement(new __scriptureEvent(function(){},_amount, false))
 			} catch(_ex){
 				show_debug_message(_ex);
 				show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
@@ -633,7 +638,7 @@ function __scriptureHandleTag(_string, _curLine) {
 		break;
 						
 		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style)); break;
-		case SCRIPTURE_TYPE_EVENT: _curLine.addElement(new __scriptureEvent(_style.event)); break;
+		case SCRIPTURE_TYPE_EVENT: _curLine.addElement(new __scriptureEvent(_style.event, 0, _style.canSkip)); break;
 	}
 	
 
@@ -774,10 +779,6 @@ function scripture_register_style(_key, _style) {
 	}		
 }
 
-function wait(_steps) {
-	return global.__scripOpenTag+string(_steps)+global.__scripCloseTag;
-}
-
 function scripture_register_sprite(_key, _sprite, _style) {
 	if(__scriptureStyleNameIsProtected(_key)) return;
 	
@@ -793,11 +794,12 @@ function scripture_register_sprite(_key, _sprite, _style) {
 	return global.__scripOpenTag + _key + global.__scripCloseTag;
 }
 
-function scripture_register_event(_key, _func) {
+function scripture_register_event(_key, _func, _canSkip = true) {
 	global.__scripStyles[$ _key] = {
 		key: _key,
 		type: SCRIPTURE_TYPE_EVENT,
-		event: _func
+		event: _func,
+		canSkip: _canSkip
 	}
 	return global.__scripOpenTag + _key + global.__scripCloseTag;
 }
