@@ -14,7 +14,7 @@ typing -Done. Again.
 Force Finish Typing / Advance Page -Done. Again
 consume tags  -Done. Again.
 consume closing tags -Done. Again.
-onDraw Function -Done. Again.
+onDrawBegin Function -Done. Again.
 
 Support Image "characters" DONE
 Support Kerning DONE

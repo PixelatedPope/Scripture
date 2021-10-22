@@ -12,7 +12,7 @@ life = room_speed * 3;
 flyIn = scripture_register_style("DamageFlyIn", {
 	font: fntBold,
 	speedMod: .5,
-	onDraw: function(_x, _y, _style, _base, _steps, _pos) {
+	onDrawBegin: function(_x, _y, _style, _base, _steps, _pos) {
 		var _length = room_speed*.25;
 		var _prog = _steps / _length;
 		_style.yOff = twerp(TwerpType.out_back, 100, 0, _prog);
@@ -22,7 +22,7 @@ flyIn = scripture_register_style("DamageFlyIn", {
 });
 
 fadeOut = scripture_register_style("DamagefadeOut", {
-	onDraw: function(_x, _y, _style, _base, _steps, _pos) {
+	onDrawBegin: function(_x, _y, _style, _base, _steps, _pos) {
 		var _length = room_speed / 2;
 		var _prog = (_steps - 30) / _length;
 		_style.xScale = twerp(TwerpType.in_quad,1,.5,_prog);
@@ -32,7 +32,7 @@ fadeOut = scripture_register_style("DamagefadeOut", {
 });
 
 outline = scripture_register_style("DamageOutline", {
-	onDraw: function(_x, _y, _style, _base, _steps, _pos) {
+	onDrawBegin: function(_x, _y, _style, _base, _steps, _pos) {
 		draw_set_color(merge_color(_style.color,c_black,.75));
 		var _scaleMod = _base.xScale * _style.xScale;
 		var _thick = 2 * _base.xScale;
@@ -49,7 +49,7 @@ outline = scripture_register_style("DamageOutline", {
 });
 
 flash = scripture_register_style("DamageFlash", {
-	onDraw: function(_x, _y, _style, _base, _steps, _pos) {
+	onDrawBegin: function(_x, _y, _style, _base, _steps, _pos) {
 		_style.color = blink(.1) ? merge_color(_base.color,c_white,.75) : _base.color;
 	}
 });

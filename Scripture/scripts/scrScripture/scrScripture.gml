@@ -55,7 +55,8 @@ function __scriptureStyle(_style = {}) constructor {
 	angle = _style[$ "angle"] == undefined ? 0 : _style.angle;
 	alpha = _style[$ "alpha"] == undefined ? 1 : _style.alpha;
 	textAlign = _style[$ "textAlign"] == undefined ? fa_middle : _style.textAlign;
-	onDraw = _style[$ "onDraw"] == undefined ? function(){} : _style.onDraw;
+	onDrawBegin = _style[$ "onDrawBegin"] == undefined ? function(){} : _style.onDrawBegin;
+	onDrawEnd = _style[$ "onDrawEnd"] == undefined ? function(){} : _style.onDrawEnd;
 }
 
 global.__scripStyles.defaultStyle = new __scriptureStyle();
@@ -89,11 +90,10 @@ function __scriptureImg(_style) constructor {
 	centerY = height/2;
 	
 	draw = function(_x, _y, _index) {
-		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			if(style.onDraw[_i](_x, _y, style, self, steps, _index)) break;
+		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
+			if(style.onDrawBegin[_i](_x, _y, style, self, steps, _index)) break;
 		}
-		steps++;
-		
+
 		draw_sprite_ext(sprite, image, 
 										_x + style.xOff + centerX, 
 										_y + style.yOff + centerY, 
@@ -102,7 +102,13 @@ function __scriptureImg(_style) constructor {
 										style.angle, 
 										style.color, 
 										alpha * style.alpha);
-		image += speed;
+		
+		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
+			if(style.onDrawEnd[_i](_x, _y, style, self, steps, _index)) break;
+		}
+		
+		steps += !global.__scripTextbox.isPaused;
+		image += speed * !global.__scripTextbox.isPaused;;
 		return width;
 	}
 }
@@ -164,10 +170,9 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		draw_set_color(style.color);
 		draw_set_alpha(style.alpha);
 		
-		for(var _i = 0; _i < array_length(style.onDraw); _i++) {
-			if(style.onDraw[_i](_drawX, _drawY, style, self, steps, _index)) break;	
+		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
+			if(style.onDrawBegin[_i](_drawX, _drawY, style, self, steps, _index)) break;	
 		}
-		steps += !global.__scripTextbox.isPaused;
 		_drawX += style.xOff;
 		_drawY += style.yOff;
 		
@@ -175,6 +180,11 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 		draw_set_color(style.color);
 		draw_set_alpha(style.alpha);
 		draw_text_transformed(_drawX, _drawY, char, xScale * style.xScale, yScale * style.yScale, style.angle);
+		
+		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
+			if(style.onDrawEnd[_i](_drawX, _drawY, style, self, steps, _index)) break;	
+		}
+		steps += !global.__scripTextbox.isPaused;
 		return width;
 	}
 }
@@ -673,15 +683,17 @@ function __scriptureHandleTag(_string, _curLine) {
 }
 
 function __scriptureRebuildActiveStyle() {
-	var _style = {onDraw: []};
+	var _style = {onDrawBegin: [], onDrawEnd: []};
 	for(var _i = 0; _i < array_length(global.__scripStyleStack); _i++) {
 		var _stackStyle = global.__scripStyleStack[_i];
 		var _props = variable_struct_get_names(_stackStyle)
     for(var _j = 0; _j < array_length(_props); _j++) {
       var _prop = _props[_j];
       if(_prop == "key") continue;
-			if(_prop == "onDraw") {
-				array_push(_style.onDraw,_stackStyle.onDraw);
+			if(_prop == "onDrawBegin") {
+				array_push(_style.onDrawBegin, _stackStyle.onDrawBegin);
+			} else if(_prop == "onDrawEnd") {
+				array_push(_style.onDrawEnd, _stackStyle.onDrawEnd);
 			} else {
 				_style[$ _prop] = _stackStyle[$ _prop];
 			}
