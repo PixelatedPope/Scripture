@@ -146,17 +146,15 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	height = string_height(char) * yScale;
 	centerX = width / 2;
 	centerY = height / 2;
-	xOff = _style.xOff;
-	yOff = _style.yOff;
-	_style.xOff = 0;
-	_style.yOff = 0;
-	_style.xScale = 1;
-	_style.yScale = 1;
-	color = _style.color;
+	xOff = style.xOff;
+	yOff = style.yOff;
+	style.xOff = 0;
+	style.yOff = 0;
+	style.xScale = 1;
+	style.yScale = 1;
+	color = style.color;
 	
 	draw = function(_x, _y, _index, _line) {
-		
-		//if(isSpace) return width;
 		var _drawX = floor(_x + centerX) + xOff;
 		var _drawY = floor(_y + centerY) + yOff;
 		
@@ -209,9 +207,10 @@ function __scriptureLine() constructor {
 				}
 				if(!global.__scripTextbox.isPaused)
 					typePos += global.__scripTextbox.typeSpeed * characters[_c-1].style.speedMod;
-					_eventCount += characters[_c].type = SCRIPTURE_TYPE_EVENT;
+					_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
 				return false;
 			}
+			_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
 			_x += characters[_c].draw(_x, _y, _c - _eventCount, self);
 		}
 		if(delay > 0) {
