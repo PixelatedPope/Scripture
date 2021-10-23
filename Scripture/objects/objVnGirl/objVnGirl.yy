@@ -1,7 +1,7 @@
 {
   "spriteId": {
-    "name": "sprVnBoy",
-    "path": "sprites/sprVnBoy/sprVnBoy.yy",
+    "name": "sprVnGirl",
+    "path": "sprites/sprVnGirl/sprVnGirl.yy",
   },
   "solid": false,
   "visible": true,
@@ -33,7 +33,7 @@
     "path": "folders/VN.yy",
   },
   "resourceVersion": "1.0",
-  "name": "objBoy",
+  "name": "objVnGirl",
   "tags": [],
   "resourceType": "GMObject",
 }

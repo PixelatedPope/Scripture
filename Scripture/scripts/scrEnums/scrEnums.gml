@@ -13,5 +13,7 @@ enum Event {
 	transitionRoomEnd,
 	changeEmotion,
 	slideInDone,
+	girlTalking,
+	boyTalking,
 }
 

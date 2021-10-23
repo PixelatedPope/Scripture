@@ -2,8 +2,8 @@
 
 
 draw_set_color(c_gray)
-var _maxWidth = textbox.maxPageWidth / 2;
-var _maxHeight = textbox.maxPageHeight / 2;
+var _maxWidth = textbox.maxWidth / 2;
+var _maxHeight = textbox.maxHeight / 2;
 draw_rectangle(x - _maxWidth, y - _maxHeight, x + _maxWidth, y + _maxHeight, true);
 
 

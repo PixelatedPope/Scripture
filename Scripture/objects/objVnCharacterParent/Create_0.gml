@@ -3,6 +3,7 @@ currentEmotion = Emotion.normal;
 emotionTimer = 0;
 startXOff = 0;
 key = "";
+depth = VN_CHARACTER_DEPTH;
 emotionOffReset = function() {
 	emotionOff = {x: 0, y: 0, angle: 0, color: c_white};
 }

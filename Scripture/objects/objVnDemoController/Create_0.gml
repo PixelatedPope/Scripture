@@ -1,10 +1,17 @@
 /// @description 
-#macro VN_TEXTBOX_DEPTH (-20)
-#macro VN_PART_SYSTEM_DEPTH (-10)
+#macro VN_PART_SYSTEM_UPPER (-300)
+#macro VN_TEXTBOX_DEPTH (-200)
+#macro VN_PART_SYSTEM_LOWER (-100)
 #macro VN_CHARACTER_DEPTH 0
+#macro VN_BOY_COLOR $3c2214
+#macro VN_GIRL_COLOR $3c1427
 
-global.ps = part_system_create()
-part_system_depth(global.ps,VN_PART_SYSTEM_DEPTH)
+global.vnPartSystemLower = part_system_create()
+part_system_depth(global.vnPartSystemLower,VN_PART_SYSTEM_LOWER)
+global.vnPartSystemUpper = part_system_create()
+part_system_depth(global.vnPartSystemUpper,VN_PART_SYSTEM_UPPER)
+
+
 global.fireCounterClockwise =  part_type_create();
 part_type_shape(global.fireCounterClockwise, pt_shape_smoke);
 part_type_size(global.fireCounterClockwise, 0.50, 1, 0.10, 0);

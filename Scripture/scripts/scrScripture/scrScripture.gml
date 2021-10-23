@@ -46,9 +46,9 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	hAlign = _hAlign;
 	vAlign = _vAlign;
 	typeSpeed = _typeSpeed;
-	maxWidth = _maxWidth;
-	lineSpacing = _lineSpacing;
-	maxHeight = _maxHeight;
+	__lineBreakWidth = _maxWidth;
+	__pageBreakHeight = _maxHeight;
+	__lineSpacing = _lineSpacing;
 	forceLineBreaks = _forceLineBreaks;
 	isPaused = false;
 	nextPageReady = false;
@@ -67,8 +67,8 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 		array_push(_pageDimensions, {width: _width, height: _height});
 	}
 	
-	maxPageWidth = _widestPageWidth;
-	maxPageHeight = _tallestPageHeight;
+	maxWidth = _widestPageWidth;
+	maxHeight = _tallestPageHeight;
 	pageDimensions = _pageDimensions;
 	pageCount = _text.getPageCount();
 	text = _text;
@@ -102,6 +102,7 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 		isPaused = _isPaused;	
 	}
 	
+	///@func draw(x,y)
 	draw = function(_x, _y) {
 		draw_set_halign(fa_center);
 		draw_set_valign(fa_middle);
@@ -420,10 +421,10 @@ function __scriptureLine() constructor {
 	checkForWrap = function() {
 		var _textbox = global.__scripTextbox;
 		var _result = {didWrap: false, leftovers: []};
-		if(_textbox.maxWidth <= 0 || width <= _textbox.maxWidth) return _result
+		if(_textbox.__lineBreakWidth <= 0 || width <= _textbox.__lineBreakWidth) return _result
 		
-		var _lastSpace = _textbox.forceLineBreaks ? 0 : lastSpace;
-		if(lastSpace == undefined && _textbox.forceLineBreaks == false) return _result
+		var _lastSpace = _textbox.__forceLineBreaks ? 0 : lastSpace;
+		if(lastSpace == undefined && _textbox.__forceLineBreaks == false) return _result
 		var _length = _textbox.forceLineBreaks ? 0 : getLength() - lastSpace;
 		_result.didWrap = true;
 		array_copy(_result.leftovers, 0, characters, _lastSpace, _length);
@@ -453,7 +454,7 @@ function __scripturePage() constructor {
 			
 			if(linePos == _i) 
 				linePos++;
-			_drawY += _curLine.height + global.__scripTextbox.lineSpacing;
+			_drawY += _curLine.height + global.__scripTextbox.__lineSpacing;
 		}
 		isComplete = true;
 		global.__scripDelay = 0;
@@ -485,7 +486,7 @@ function __scripturePage() constructor {
 	calcHeight = function() {
 		height = 0;
 		for(var _i = 0; _i < getLineCount(); _i++) {
-			height += lines[_i].calcHeight() + (_i > 0 ? global.__scripTextbox.lineSpacing : 0);
+			height += lines[_i].calcHeight() + (_i > 0 ? global.__scripTextbox.__lineSpacing : 0);
 		}
 
 		return height;
@@ -831,7 +832,7 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 	var _wrapResult = _curLine.checkForWrap();
 	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
 		_curPage.calcHeight();
-		if(_forceNewPage || (global.__scripTextbox.maxHeight > 0 && _curPage.height >= global.__scripTextbox.maxHeight)) {
+		if(_forceNewPage || (global.__scripTextbox.__pageBreakHeight > 0 && _curPage.height >= global.__scripTextbox.__pageBreakHeight)) {
 			_curPage = global.__scripText.addPage();
 		} 
 		
@@ -881,8 +882,8 @@ function __scriptureApplyVAlign(_y) {
 			_text = global.__scripText;
 	switch(_textbox.vAlign) {
 		case fa_top:    return _y;
-		case fa_middle: return _y - floor(_text.getCurPageHeight() / 2 - _textbox.lineSpacing / 2)
-		case fa_bottom: return _y - floor(_text.getCurPageHeight()) + _textbox.lineSpacing; 
+		case fa_middle: return _y - floor(_text.getCurPageHeight() / 2 - _textbox.__lineSpacing / 2)
+		case fa_bottom: return _y - floor(_text.getCurPageHeight()) + _textbox.__lineSpacing; 
 	}	
 }
 
