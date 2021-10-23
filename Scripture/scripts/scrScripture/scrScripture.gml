@@ -46,10 +46,10 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	hAlign = _hAlign;
 	vAlign = _vAlign;
 	__typeSpeed = _typeSpeed;
-	__lineBreakWidth = _maxWidth;
-	__pageBreakHeight = _maxHeight;
+	lineBreakWidth = _maxWidth;
+	pageBreakHeight = _maxHeight;
 	__lineSpacing = _lineSpacing;
-	__forceLineBreaksk = _forceLineBreaks;
+	__forceLineBreaks = _forceLineBreaks;
 	isPaused = false;
 	nextPageReady = false;
 	
@@ -421,7 +421,7 @@ function __scriptureLine() constructor {
 	checkForWrap = function() {
 		var _textbox = global.__scripTextbox;
 		var _result = {didWrap: false, leftovers: []};
-		if(_textbox.__lineBreakWidth <= 0 || width <= _textbox.__lineBreakWidth) return _result
+		if(_textbox.lineBreakWidth <= 0 || width <= _textbox.lineBreakWidth) return _result
 		
 		var _lastSpace = _textbox.__forceLineBreaks ? 0 : lastSpace;
 		if(lastSpace == undefined && _textbox.__forceLineBreaks == false) return _result
@@ -832,8 +832,15 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 	var _wrapResult = _curLine.checkForWrap();
 	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
 		_curPage.calcHeight();
-		if(_forceNewPage || (global.__scripTextbox.__pageBreakHeight > 0 && _curPage.height >= global.__scripTextbox.__pageBreakHeight)) {
-			_curPage = global.__scripText.addPage();
+		if(_forceNewPage 
+			 || (global.__scripTextbox.pageBreakHeight > 0 
+					 && _curPage.height >= global.__scripTextbox.pageBreakHeight)) {
+			var _newPage = global.__scripText.addPage();
+			var _lastLineIndex = array_length(_curPage.lines)-1
+			array_push(_newPage.lines, _curPage.lines[_lastLineIndex]);
+			array_delete(_curPage.lines,_lastLineIndex,1);
+			_curPage.calcHeight();
+			_curPage = _newPage;
 		} 
 		
 		_curLine = _curPage.addLine();
@@ -949,7 +956,7 @@ function scripture_register_event(_key, _func, _canSkip = true) {
 		event: function() {
 			var _string = global.__scripOpenTag + key +" ";
 			for(var _i = 0; _i < argument_count; _i++) {
-				_string += argument[_i] + (_i == argument_count -1 ? "" : ",")
+				_string += string(argument[_i]) + (_i == argument_count -1 ? "" : ",")
 			}
 			_string +=  global.__scripCloseTag
 			return _string;

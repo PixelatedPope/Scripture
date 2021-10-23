@@ -16,7 +16,7 @@ setEmotion = function(_emotionString){
 		case EMOTION_SHOCKED: currentEmotion = Emotion.shocked; break;
 		case EMOTION_SAD: currentEmotion = Emotion.sad; break;
 		case EMOTION_ANGRY: currentEmotion = Emotion.angry; break;
-		case EMOTION_SMUG:	currentEmotion = Emotion.smug; break;
+		case EMOTION_SCARED:	currentEmotion = Emotion.scared; break;
 		case EMOTION_ANNOYED: currentEmotion = Emotion.annoyed; break;
 	}
 }
@@ -29,7 +29,7 @@ stateTimer = 0;
 #macro EMOTION_SHOCKED "shocked"
 #macro EMOTION_SAD "sad"
 #macro EMOTION_ANGRY "angry"
-#macro EMOTION_SMUG	"smug"
+#macro EMOTION_SCARED	"scared"
 #macro EMOTION_ANNOYED "annoyed"
 
 enum Emotion{
@@ -38,7 +38,8 @@ enum Emotion{
 	smile,
 	shocked,
 	sad,
-	angry,
-	smug,
+	scared,
 	annoyed,
+	angry,
+	count,
 }

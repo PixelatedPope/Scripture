@@ -6,6 +6,13 @@
 #macro VN_BOY_COLOR $3c2214
 #macro VN_GIRL_COLOR $3c1427
 
+instance_create_depth(0,0,0,sysEvents);
+instance_create_depth(0,0,0,objVnTextbox);
+instance_create_depth(0,0,0,objDemoToolbar);
+instance_create_depth(965,665,0,objVnBoy);
+instance_create_depth(289,665,0,objVnGirl);
+
+#region particles
 global.vnPartSystemLower = part_system_create()
 part_system_depth(global.vnPartSystemLower,VN_PART_SYSTEM_LOWER)
 global.vnPartSystemUpper = part_system_create()
@@ -73,13 +80,14 @@ part_type_speed(global.note, 8, 10, 0, 0);
 part_type_direction(global.note, 45, 135, 0, 0);
 part_type_gravity(global.note, 0.20, 270);
 
-global.he = part_type_create();
-part_type_sprite(global.he, sprHehe, 1, 0, 0);
-part_type_scale(global.he, 1, 1);
-part_type_orientation(global.he, -15, 15, 0, 0, 0);
-part_type_color1(global.he, c_white);
-part_type_alpha3(global.he, 1, 1, 0);
-part_type_blend(global.he, 1);
-part_type_life(global.he, 50, 60);
-part_type_speed(global.he, 5, 5, 0, 4);
-part_type_direction(global.he, 63, 118, 0, 10);
+global.go = part_type_create();
+part_type_sprite(global.go, sprGogo, 1, 0, 0);
+part_type_scale(global.go, .75, .75);
+part_type_orientation(global.go, -15, 15, 0, 0, 0);
+part_type_color1(global.go, c_white);
+part_type_alpha3(global.go, 1, 1, 0);
+part_type_blend(global.go, 1);
+part_type_life(global.go, 50, 60);
+part_type_speed(global.go, 0, 0, 0, 4);
+part_type_direction(global.go, 63, 118, 0, 10);
+#endregion

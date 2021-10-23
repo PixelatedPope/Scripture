@@ -15,5 +15,6 @@ enum Event {
 	slideInDone,
 	girlTalking,
 	boyTalking,
+	changeBoysName,
 }
 

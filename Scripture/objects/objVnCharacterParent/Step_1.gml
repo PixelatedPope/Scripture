@@ -10,4 +10,4 @@ if(keyboard_check_pressed(vk_left)) {
 	currentEmotion--;
 }
 
-currentEmotion = clamp(currentEmotion,Emotion.normal, Emotion.annoyed)
+currentEmotion = clamp(currentEmotion,Emotion.normal, Emotion.count-1)

@@ -32,11 +32,27 @@ switch(currentEmotion) {
 			part_particles_create(global.vnPartSystemLower,random_range(bbox_left,bbox_right),y+50,global.fireCounterClockwise,1)
 		}	
 	} break;
-	case Emotion.smug:{
-		var _length = room_speed / 3;
-		emotionOff.y = twerp(TwerpType.out_cubic,-5,0,(emotionTimer mod _length)/_length);
-		if(emotionTimer % (_length * 2) == 0) {
-			part_particles_create(global.vnPartSystemLower,x,bbox_top+150,global.he,1);	
+	case Emotion.scared:{
+		var _length = 20;
+		emotionOff.y = twerp(TwerpType.out_cubic,0,20,emotionTimer/room_speed);
+		emotionOff.x = sin_oscillate(-1,1,.25);
+		if(emotionTimer % _length == 0) {
+			var _dist = 150;
+			var _ang = -1;
+			
+			var _remainder = (emotionTimer div _length) % 6;
+			switch(_remainder) {
+				case 0: _ang = 135; break;
+				case 1: _ang = 105; break;
+				case 2: _ang = 75; break;
+				case 3: _ang = 35; break;
+			
+			}
+			if(_ang == -1) break;
+			
+			var _x = x+lengthdir_x(_dist,_ang);
+			var _y = bbox_top+_dist + lengthdir_y(_dist,_ang);
+			part_particles_create(global.vnPartSystemLower,_x,_y,global.go,1);	
 		}
 	} break;
 	case Emotion.annoyed:{

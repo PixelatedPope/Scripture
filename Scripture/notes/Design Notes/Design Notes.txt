@@ -33,5 +33,5 @@ Emotions
 3 - shocked
 4 - Sad
 5 - Angry
-6 - Smug
+6 - scared
 7 - annoyed
