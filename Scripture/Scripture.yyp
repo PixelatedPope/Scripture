@@ -54,8 +54,8 @@
     "children": [],
   },
   "RoomOrderNodes": [
-    {"roomId":{"name":"rmVnDemo","path":"rooms/rmVnDemo/rmVnDemo.yy",},},
     {"roomId":{"name":"rmExample","path":"rooms/rmExample/rmExample.yy",},},
+    {"roomId":{"name":"rmVnDemo","path":"rooms/rmVnDemo/rmVnDemo.yy",},},
   ],
   "Folders": [
     {"folderPath":"folders/Helpful Scripts.yy","order":6,"resourceVersion":"1.0","name":"Helpful Scripts","tags":[],"resourceType":"GMFolder",},

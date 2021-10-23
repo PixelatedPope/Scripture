@@ -4,7 +4,7 @@ emotionTimer = 0;
 startXOff = 0;
 key = "";
 emotionOffReset = function() {
-	emotionOff = {x: 0, y: 0, angle: 0};
+	emotionOff = {x: 0, y: 0, angle: 0, color: c_white};
 }
 emotionOffReset();
 setEmotion = function(_emotionString){
