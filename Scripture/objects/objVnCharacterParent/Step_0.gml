@@ -4,6 +4,9 @@ switch(currentEmotion) {
 	} break;
 	case Emotion.smile:{
 		emotionOff.angle = twerp(TwerpType.out_back,0,5,emotionTimer/25);
+		if(emotionTimer == 25) {
+			part_particles_create(global.ps,x,bbox_top+150,global.note,6);	
+		}
 	} break;
 	case Emotion.shocked:{
 		if(emotionTimer == 0) {
@@ -22,6 +25,7 @@ switch(currentEmotion) {
 		emotionOff.y = twerp(TwerpType.out_cubic,0,20,emotionTimer/room_speed);
 	} break;
 	case Emotion.angry:{
+		emotionOff.color = merge_color(c_white,c_orange,clamp(emotionTimer/room_speed,0,.25))
 		emotionOff.x = sin_oscillate(-3,3,.1);
 		repeat(choose(0,1)) {
 			part_particles_create(global.ps,random_range(bbox_left,bbox_right),y+50,global.fireClockwise,1)
@@ -31,9 +35,14 @@ switch(currentEmotion) {
 	case Emotion.smug:{
 		var _length = room_speed / 3;
 		emotionOff.y = twerp(TwerpType.out_cubic,-5,0,(emotionTimer mod _length)/_length);
+		if(emotionTimer % (_length * 2) == 0) {
+			part_particles_create(global.ps,x,bbox_top+150,global.he,1);	
+		}
 	} break;
 	case Emotion.annoyed:{
 		emotionOff.x = sin_oscillate(-1,1,.25);
+		emotionOff.y = sin_oscillate(-1,1,.1);
+		emotionOff.color = merge_color(c_white,c_red,clamp(emotionTimer/room_speed,0,.15))
 	} break;
 }
 emotionTimer++;

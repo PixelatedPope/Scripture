@@ -52,3 +52,27 @@ part_type_life(global.surprise, 40, 40);
 part_type_speed(global.surprise, 25, 25, -2, 0);
 part_type_direction(global.surprise, 59, 115, 0, 0);
 part_type_gravity(global.surprise, 0, 0);
+
+global.note = part_type_create();
+part_type_sprite(global.note, sprNote, 0, 0, 1);
+part_type_size(global.note, 1, 1, 0, 0);
+part_type_scale(global.note, .75, .75);
+part_type_orientation(global.note, -30, 30, 0, 10, 0);
+part_type_color1(global.note, c_white);
+part_type_alpha3(global.note, 1, 1, 0);
+part_type_blend(global.note, 1);
+part_type_life(global.note, 30, 50);
+part_type_speed(global.note, 8, 10, 0, 0);
+part_type_direction(global.note, 45, 135, 0, 0);
+part_type_gravity(global.note, 0.20, 270);
+
+global.he = part_type_create();
+part_type_sprite(global.he, sprHehe, 1, 0, 0);
+part_type_scale(global.he, 1, 1);
+part_type_orientation(global.he, -15, 15, 0, 0, 0);
+part_type_color1(global.he, c_white);
+part_type_alpha3(global.he, 1, 1, 0);
+part_type_blend(global.he, 1);
+part_type_life(global.he, 50, 60);
+part_type_speed(global.he, 5, 5, 0, 4);
+part_type_direction(global.he, 63, 118, 0, 10);

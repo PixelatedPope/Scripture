@@ -9,3 +9,5 @@ if(keyboard_check_pressed(vk_left)) {
 	emotionOffReset()
 	currentEmotion--;
 }
+
+currentEmotion = clamp(currentEmotion,Emotion.normal, Emotion.annoyed)
