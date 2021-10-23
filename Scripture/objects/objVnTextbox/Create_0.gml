@@ -13,7 +13,7 @@ Textbox = function(_x, _y, _width, _height, _color = c_black, _marginX = 20, _ma
 	marginX = _marginX;
 	marginY = _marginY;
 	rebuild = function(_text, _matchWidth = true){
-		textbox = scripture_build_textbox(_text,980 - marginX * 2, height - 80, hAlign, fa_top, 5,-5);
+		textbox = scripture_build_textbox(_text,980 - marginX * 2, height - 80, hAlign, fa_top, 1,-5);
 		if(_matchWidth) {
 			width = textbox.maxWidth + marginX * 2;	
 		}
@@ -59,9 +59,10 @@ bold = scripture_register_style("VnBold",{
 })
 rotateFade = scripture_register_style("RotateFade", {
 	
-	onDraw: function(_x, _y, _style, _base, _steps, _pos) {
+	onDrawBegin: function(_x, _y, _style, _base, _steps, _pos) {
 		var _length = 30;
-		_style.angle = twerp(TwerpType.out_back,45, 0, _steps / _length);
+		_style.angle = twerp(TwerpType.out_back,180, 0, _steps / _length);
+		_style.alpha = lerp(0,1,_steps/_length);
 	}
 });
 
@@ -76,15 +77,25 @@ evChangeBoysName = scripture_register_event("ChangeName",function(_arguments) {
 	sysEvents.raiseEvent(Event.changeBoysName,{name: _arguments[0]});
 },false)
 
+evBoyBounce = scripture_register_event("BoyBounce",function(){
+	with(objVnBoy){
+		setState(State.bounce);
+	}
+});
+
+evSetEmotion = scripture_register_event("SetEmotion",function(_arguments){
+	sysEvents.raiseEvent(Event.changeEmotion,{target: _arguments[0],emotion: _arguments[1]})
+});
+
 scripture_set_default_style("VnDefault");
 
 #endregion
 
 boyName = bold.open+"Onii-san"
-boyNameKanji = bold.open+rotateFade.open+"虎<30>太<30>郎"	
-boyNameHiragana = bold.open+rotateFade.open+"こたろう"
+boyNameKanji = bold.open+rotateFade.open+"<BoyBounce>虎<60><BoyBounce>太<60><BoyBounce>郎"+bold.close+rotateFade.close
+boyNameHiragana = bold.open+rotateFade.open+"こたろう"+bold.close+rotateFade.close
 girlName = bold.open+"Yumi"
-testText = "This is test text." + "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed"+evChangeBoysName.event(1)+" do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+testText = evSetEmotion.event("Boy",EMOTION_ANGRY)+"Stop Calling me \"Onii-san\!<60> My name is "+evChangeBoysName.event(1) + boyNameKanji + "<120> And don't you forget it!"+evSetEmotion.event("Girl",EMOTION_SAD);
 
 var _center = room_width / 2;
 var _boxW = 980 / 2

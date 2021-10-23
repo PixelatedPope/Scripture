@@ -12,7 +12,6 @@ global.__scripStyles = {};
 global.__scripProtectedKeys = ["default", __SCRIPTURE_DEFULT_STYLE_KEY];
 global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
-global.__scripDelay = 0;
 
 #macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
 #macro SCRIPTURE_TYPE_STYLE 0
@@ -45,13 +44,14 @@ global.__scripSpeed = "s"
 function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks) constructor {
 	hAlign = _hAlign;
 	vAlign = _vAlign;
-	__typeSpeed = _typeSpeed;
 	lineBreakWidth = _maxWidth;
 	pageBreakHeight = _maxHeight;
+	__typeSpeed = _typeSpeed;
 	__lineSpacing = _lineSpacing;
 	__forceLineBreaks = _forceLineBreaks;
 	isPaused = false;
 	nextPageReady = false;
+	currentDelay = 0;
 	
 	var _text = __scriptureParseText(_string, self);
 	var _pageDimensions = []
@@ -279,7 +279,7 @@ function __scriptureEvent(_func, _delay = 0, _canSkip = true, _arguments = []) c
 		ran = true;
 		event(arguments);
 		if(delay > 0) 
-			global.__scripDelay = delay;
+			global.__scripTextbox.currentDelay = delay;
 		return 0;
 	}
 }
@@ -299,8 +299,8 @@ function __scriptureLine() constructor {
 		var _eventCount = 0;
 		for(var _c = 0; _c < getLength(); _c++) {
 			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) {
-				if(global.__scripDelay > 0) {
-					global.__scripDelay--;
+				if(global.__scripTextbox.currentDelay > 0) {
+					global.__scripTextbox.currentDelay--;
 					return false;
 				}
 				if(!global.__scripTextbox.isPaused)
@@ -457,7 +457,7 @@ function __scripturePage() constructor {
 			_drawY += _curLine.height + global.__scripTextbox.__lineSpacing;
 		}
 		isComplete = true;
-		global.__scripDelay = 0;
+		global.__scripTextbox.currentDelay = 0;
 		return true;
 	}
 	

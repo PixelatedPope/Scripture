@@ -23,7 +23,10 @@ setEmotion = function(_emotionString){
 
 state = State.in;
 stateTimer = 0;
-
+setState = function(_state) {
+	state = _state;
+	stateTimer = 0;
+}
 #macro EMOTION_NORMAL "normal"
 #macro EMOTION_SMILE "smile"
 #macro EMOTION_SHOCKED "shocked"

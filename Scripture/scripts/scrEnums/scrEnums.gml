@@ -4,6 +4,7 @@ enum State {
 	wait,
 	out,
 	in,
+	bounce,
 }
 
 enum Event {
@@ -13,6 +14,7 @@ enum Event {
 	transitionRoomEnd,
 	changeEmotion,
 	slideInDone,
+	changeEmotion,
 	girlTalking,
 	boyTalking,
 	changeBoysName,
