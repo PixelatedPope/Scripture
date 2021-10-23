@@ -45,11 +45,11 @@ global.__scripSpeed = "s"
 function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks) constructor {
 	hAlign = _hAlign;
 	vAlign = _vAlign;
-	typeSpeed = _typeSpeed;
+	__typeSpeed = _typeSpeed;
 	__lineBreakWidth = _maxWidth;
 	__pageBreakHeight = _maxHeight;
 	__lineSpacing = _lineSpacing;
-	forceLineBreaks = _forceLineBreaks;
+	__forceLineBreaksk = _forceLineBreaks;
 	isPaused = false;
 	nextPageReady = false;
 	
@@ -71,31 +71,31 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	maxHeight = _tallestPageHeight;
 	pageDimensions = _pageDimensions;
 	pageCount = _text.getPageCount();
-	text = _text;
+	__text = _text;
 	
 	getCurrentPageSize = function() {
-		return pageDimensions[text.curPage];
+		return pageDimensions[__text.curPage];
 	}
 	
 	getCurrentPage = function() {
-		return text.curPage;	
+		return __text.curPage;	
 	}
 	
 	gotoPageNext = function(_shortcutAnimations = true) {
-		var _curPage = text.getCurrentPage();
-		if(_curPage.isComplete) return text.incPage();
+		var _curPage = __text.getCurrentPage();
+		if(_curPage.isComplete) return __text.incPage();
 
 		_curPage.finishPage(_shortcutAnimations)   
 		return true;
 	}
 
 	gotoPagePrev = function(_reset = true) {
-		text.decPage(_reset);
+		__text.decPage(_reset);
 	}
 
 	gotoPage = function(_page, _reset = true) {
 		if(_page < 0 || _page >= pageCount) return;
-		text.setCurrentPage(_page,_reset);
+		__text.setCurrentPage(_page,_reset);
 	}
 	
 	setPaused = function(_isPaused) {
@@ -107,8 +107,8 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 		draw_set_halign(fa_center);
 		draw_set_valign(fa_middle);
 		global.__scripTextbox = self;
-		global.__scripText = text;
-		var _currentPage = text.getCurrentPage();
+		global.__scripText = __text;
+		var _currentPage = __text.getCurrentPage();
 		_currentPage.draw(_x, _y);
 		draw_set_alpha(1);
 	
@@ -304,7 +304,7 @@ function __scriptureLine() constructor {
 					return false;
 				}
 				if(!global.__scripTextbox.isPaused)
-					typePos += global.__scripTextbox.typeSpeed * characters[_c-1].style.speedMod;
+					typePos += global.__scripTextbox.__typeSpeed * characters[_c-1].style.speedMod;
 					_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
 				return false;
 			}
@@ -425,7 +425,7 @@ function __scriptureLine() constructor {
 		
 		var _lastSpace = _textbox.__forceLineBreaks ? 0 : lastSpace;
 		if(lastSpace == undefined && _textbox.__forceLineBreaks == false) return _result
-		var _length = _textbox.forceLineBreaks ? 0 : getLength() - lastSpace;
+		var _length = _textbox.__forceLineBreaks ? 0 : getLength() - lastSpace;
 		_result.didWrap = true;
 		array_copy(_result.leftovers, 0, characters, _lastSpace, _length);
 		array_delete(characters, _lastSpace, _length);
@@ -896,7 +896,7 @@ function __scriptureApplyHAlign(_x, _line) {
 }
 
 function __scriptureIsTyping(_textbox = global.__scripTextbox) {
-	return _textbox.typeSpeed > 0;	
+	return _textbox.__typeSpeed > 0;	
 }
 
 #endregion
