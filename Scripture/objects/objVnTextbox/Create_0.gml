@@ -89,7 +89,7 @@ sysEvents.addListener(id, Event.changeName,function(_options){
 		boxes[Boxes.boy].rebuild(boyNames[boyNameCurrent],true, 1);
 	} else {
 		girlNameCurrent++;
-		boxes[Boxes.boy].rebuild(girlNames[girlNameCurrent],true, 1);
+		boxes[Boxes.girl].rebuild(girlNames[girlNameCurrent],true, 1);
 	}
 })
 

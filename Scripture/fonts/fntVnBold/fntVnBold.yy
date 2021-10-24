@@ -129,6 +129,7 @@
   "ranges": [
     {"lower":32,"upper":127,},
     {"lower":9647,"upper":9647,},
+    {"lower":10084,"upper":10084,},
     {"lower":12358,"upper":12358,},
     {"lower":12371,"upper":12371,},
     {"lower":12383,"upper":12383,},

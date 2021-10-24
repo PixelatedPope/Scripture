@@ -14,15 +14,27 @@ function scrVnBuildStyles() {
 			_style.alpha = lerp(0,1,_steps/_length);
 		}
 	});
-
-	sndGirl = scripture_register_style("GirlSnd", {
-		onDraw: function(_x, _y, _style, _base, _steps, _pos){
+	shout = scripture_register_style("Shout",{
+		font: fntBold,
+		onDrawBegin: function(_x, _y, _style, _base, _steps, _index) {
+			_style.yOff = random_range(-2,2);
+			_style.xOff = random_range(-2,2);
+		}
+	});
+	sndGirl = scripture_register_style("sndGirl", {
+		onDrawBegin: function(_x, _y, _style, _base, _steps, _pos){
 			if(_steps == 0) {
 				audio_play_sound_unique(sndBeep,0,false,false,.1);	
 			}
 		}
 	});
 
+	colorful = scripture_register_style("Colorful",{
+		onDrawBegin: function(_x, _y, _style, _base, _steps, _index) {
+			_style.color = make_color_hsv((_steps * 2 + _index * 10) % 255,165,255);
+			_style.yOff = sin_oscillate(-5,5,3,get_timer()/300000 + _index)
+		}
+	});
 
 	scripture_set_default_style("VnDefault");
 }

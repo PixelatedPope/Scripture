@@ -10,6 +10,7 @@ emotionOffReset();
 
 setEmotion = function(_emotionString){
 	emotionTimer = 0;
+	emotionOffReset()
 	switch(_emotionString) {
 		case EMOTION_NORMAL: currentEmotion = Emotion.normal; break;
 		case EMOTION_SMILE: currentEmotion = Emotion.smile; break;
