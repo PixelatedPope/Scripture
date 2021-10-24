@@ -499,7 +499,7 @@ function __scripturePage() constructor {
 			if(_width > width)
 				width = _width;
 		}
-		return _width;
+		return width;
 	}
 	
 	addLine = function() {

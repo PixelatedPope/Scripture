@@ -63,19 +63,13 @@ switch(currentEmotion) {
 }
 emotionTimer++;
 
-switch(state) {
-	case State.wait: break;
-	case State.in: {
-		var _length = room_speed * 2;
-		x = twerp(TwerpType.out_sine,xstart + startXOff,xstart, stateTimer/_length);
-		if(stateTimer == _length) {
-			sysEvents.raiseEvent(Event.slideInDone,{target: key})	
-		}
-	}
-	case State.bounce: {
-		emotionOff.y = twerp(TwerpType.out_cubic,-20,0,stateTimer/room_speed);
-		if(stateTimer == room_speed)
-			setState(State.wait);
+switch(action) {
+	case Action.wait: break;
+	
+	case Action.bounce: {
+		emotionOff.y = twerp(TwerpType.out_cubic,-20,0,actionTimer/room_speed);
+		if(actionTimer == room_speed)
+			setAction(Action.wait);
 	}
 }
-stateTimer++;
+actionTimer++;

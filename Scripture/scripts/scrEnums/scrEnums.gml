@@ -5,6 +5,8 @@ enum State {
 	out,
 	in,
 	bounce,
+	girlIn,
+	boyIn
 }
 
 enum Event {
@@ -13,8 +15,13 @@ enum Event {
 	transitionDone,
 	transitionRoomEnd,
 	slideInDone,
+	slideCharacter,
 	changeSpeaker,
 	changeEmotion,
-	changeBoysName,
+	changeName,
 }
 
+enum Action {
+	wait,
+	bounce
+}

@@ -26,11 +26,11 @@
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "VN",
-    "path": "folders/VN.yy",
+    "name": "Characters",
+    "path": "folders/VN/Characters.yy",
   },
   "resourceVersion": "1.0",
-  "name": "objVnCharacterParent",
+  "name": "parVnCharacterParent",
   "tags": [],
   "resourceType": "GMObject",
 }

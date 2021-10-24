@@ -1,16 +1,29 @@
 /// @description 
-#macro VN_PART_SYSTEM_UPPER (-300)
-#macro VN_TEXTBOX_DEPTH (-200)
-#macro VN_PART_SYSTEM_LOWER (-100)
-#macro VN_CHARACTER_DEPTH 0
-#macro VN_BOY_COLOR $3c2214
-#macro VN_GIRL_COLOR $3c1427
+girlX = 289;
+boyX = 965;
+offScreen = 1000;
 
 instance_create_depth(0,0,0,sysEvents);
 instance_create_depth(0,0,0,objVnTextbox);
 instance_create_depth(0,0,0,objDemoToolbar);
-instance_create_depth(965,665,0,objVnBoy);
-instance_create_depth(289,665,0,objVnGirl);
+instance_create_depth(boyX + offScreen,665,0,objVnBoy);
+instance_create_depth(girlX - offScreen,665,0,objVnGirl);
+layer_depth("Fade",VN_FADE);
+
+state = State.in;
+stateTimer = 0;
+setState = function(_state){
+	state = _state;
+	stateTimer = 0;
+}
+
+sysEvents.addListener(id, Event.slideCharacter, function(_options) {
+	if(_options.target == VN_BOY) {
+		setState(State.boyIn);	
+	} else {
+		setState(State.girlIn);	
+	}
+});
 
 #region particles
 global.vnPartSystemLower = part_system_create()

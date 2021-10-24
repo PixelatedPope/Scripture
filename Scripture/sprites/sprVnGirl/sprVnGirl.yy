@@ -98,7 +98,7 @@
   "nineSlice": null,
   "parent": {
     "name": "Sprites",
-    "path": "folders/VN/Sprites.yy",
+    "path": "folders/VN/Characters/Sprites.yy",
   },
   "resourceVersion": "1.0",
   "name": "sprVnGirl",

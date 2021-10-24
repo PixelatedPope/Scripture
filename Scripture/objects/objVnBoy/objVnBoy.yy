@@ -8,8 +8,8 @@
   "spriteMaskId": null,
   "persistent": false,
   "parentObjectId": {
-    "name": "objVnCharacterParent",
-    "path": "objects/objVnCharacterParent/objVnCharacterParent.yy",
+    "name": "parVnCharacterParent",
+    "path": "objects/parVnCharacterParent/parVnCharacterParent.yy",
   },
   "physicsObject": false,
   "physicsSensor": false,
@@ -29,8 +29,8 @@
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "VN",
-    "path": "folders/VN.yy",
+    "name": "Characters",
+    "path": "folders/VN/Characters.yy",
   },
   "resourceVersion": "1.0",
   "name": "objVnBoy",

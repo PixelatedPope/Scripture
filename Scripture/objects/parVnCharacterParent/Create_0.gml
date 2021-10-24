@@ -1,13 +1,13 @@
 /// @description 
 currentEmotion = Emotion.normal;
 emotionTimer = 0;
-startXOff = 0;
 key = "";
 depth = VN_CHARACTER_DEPTH;
 emotionOffReset = function() {
 	emotionOff = {x: 0, y: 0, angle: 0, color: c_white};
 }
 emotionOffReset();
+
 setEmotion = function(_emotionString){
 	emotionTimer = 0;
 	switch(_emotionString) {
@@ -21,28 +21,13 @@ setEmotion = function(_emotionString){
 	}
 }
 
-state = State.in;
-stateTimer = 0;
+action = Action.wait;
+actionTimer = 0;
 setState = function(_state) {
-	state = _state;
-	stateTimer = 0;
+	action = _state;
+	actionTimer = 0;
 }
-#macro EMOTION_NORMAL "normal"
-#macro EMOTION_SMILE "smile"
-#macro EMOTION_SHOCKED "shocked"
-#macro EMOTION_SAD "sad"
-#macro EMOTION_ANGRY "angry"
-#macro EMOTION_SCARED	"scared"
-#macro EMOTION_ANNOYED "annoyed"
-
-enum Emotion{
-	blank,
-	normal,
-	smile,
-	shocked,
-	sad,
-	scared,
-	annoyed,
-	angry,
-	count,
+actionOffReset = function() {
+	actionOff = {x: 0, y: 0, angle: 0, color: c_white};
 }
+actionOffReset();
