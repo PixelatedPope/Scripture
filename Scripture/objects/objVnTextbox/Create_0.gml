@@ -6,7 +6,7 @@ Textbox = function(_x, _y, _width, _height, _color = c_black, _marginX = 20, _ma
 	x = _x;
 	y = _y;
 	textbox = undefined;
-	isVisible = true;
+	visible = true;
 	hAlign = fa_left;
 	width = _width;
 	height = _height;
@@ -36,7 +36,7 @@ Textbox = function(_x, _y, _width, _height, _color = c_black, _marginX = 20, _ma
 		}
 	}
 	draw = function(){
-		if(!isVisible) return;
+		if(!visible) return;
 		drawTextBox()
 		if(textbox == undefined) return;
 		switch(hAlign) {
@@ -86,6 +86,9 @@ evBoyBounce = scripture_register_event("BoyBounce",function(){
 evSetEmotion = scripture_register_event("SetEmotion",function(_arguments){
 	sysEvents.raiseEvent(Event.changeEmotion,{target: _arguments[0],emotion: _arguments[1]})
 });
+evSetSpeaker = scripture_register_event("SetSpeaker",function(_arguments){
+	sysEvents.raiseEvent(Event.changeSpeaker,{target: _arguments[0]})
+});
 
 scripture_set_default_style("VnDefault");
 
@@ -95,7 +98,7 @@ boyName = bold.open+"Onii-san"
 boyNameKanji = bold.open+rotateFade.open+"<BoyBounce>虎<60><BoyBounce>太<60><BoyBounce>郎"+bold.close+rotateFade.close
 boyNameHiragana = bold.open+rotateFade.open+"こたろう"+bold.close+rotateFade.close
 girlName = bold.open+"Yumi"
-testText = evSetEmotion.event("Boy",EMOTION_ANGRY)+"Stop Calling me \"Onii-san\!<60> My name is "+evChangeBoysName.event(1) + boyNameKanji + "<120> And don't you forget it!"+evSetEmotion.event("Girl",EMOTION_SAD);
+testText = evSetSpeaker.event("Boy")+evSetEmotion.event("Boy",EMOTION_ANGRY)+"Stop Calling me \"Onii-san\!<60> My name is "+evChangeBoysName.event(1) + boyNameKanji + "<120> And don't you forget it!"+evSetEmotion.event("Girl",EMOTION_SAD);
 
 var _center = room_width / 2;
 var _boxW = 980 / 2
@@ -103,7 +106,6 @@ var _boxH = 240;
 var _nameW = 300;
 var _nameH = 64;
 var _nameYOff = -_nameH+4;
-var _nameXOff = 0;
 boxes = [
 	new Textbox(_center - _boxW, room_height-_boxH,           _boxW*2, _boxH).rebuild(testText, false),
 	new Textbox(_center - _boxW, room_height-_boxH+_nameYOff, _nameW,  _nameH, VN_GIRL_COLOR, 20, 5),
@@ -114,23 +116,9 @@ boxes[1].rebuild(bold.open+girlName);
 boxes[2].hAlign = fa_right
 boxes[2].rebuild(bold.open+boyName);
 
-sysEvents.addListener(id, Event.boyTalking,function(_options){
-	boxes[0].color = VN_BOY_COLOR;
-	boxes[1].visible = false;
-	boxes[2].visible = true;
-})
-
-sysEvents.addListener(id, Event.girlTalking,function(_options){
-	boxes[0].color = VN_GIRL_COLOR;
-	boxes[1].visible = true;
-	boxes[2].visible = false;
-})
-
-sysEvents.addListener(id, Event.changeBoysName,function(_options){
-	switch(_options.name) {
-		case "1": boxes[2].rebuild(boyNameKanji); break;
-		case "2": boxes[2].rebuild(boyNameHiragana); break;
-		case "3": boxes[2].rebuild(boyNameEnglish); break;
-	}
-	
+sysEvents.addListener(id, Event.changeSpeaker,function(_options){
+	var _speaker = _options.target;
+	boxes[0].color = _speaker == "Boy" ? VN_BOY_COLOR : VN_GIRL_COLOR;
+	boxes[1].visible = _speaker != "Boy"
+	boxes[2].visible = _speaker == "Boy"
 })

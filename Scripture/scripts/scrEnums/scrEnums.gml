@@ -12,11 +12,9 @@ enum Event {
 	transitionStarted,
 	transitionDone,
 	transitionRoomEnd,
-	changeEmotion,
 	slideInDone,
+	changeSpeaker,
 	changeEmotion,
-	girlTalking,
-	boyTalking,
 	changeBoysName,
 }
 
