@@ -420,7 +420,7 @@ function __scriptureLine() constructor {
 	
 	checkForWrap = function() {
 		var _textbox = global.__scripTextbox;
-		var _result = {didWrap: false, leftovers: []};
+		var _result = {didWrap: false, leftovers: [], leftoverHeight: 0};
 		if(_textbox.lineBreakWidth <= 0 || width <= _textbox.lineBreakWidth) return _result
 		
 		var _lastSpace = _textbox.__forceLineBreaks ? 0 : lastSpace;
@@ -430,6 +430,12 @@ function __scriptureLine() constructor {
 		array_copy(_result.leftovers, 0, characters, _lastSpace, _length);
 		array_delete(characters, _lastSpace, _length);
 		
+		var _maxHeight = 0;
+		for(var _i = 0; _i < array_length(_result.leftovers); _i++) {
+			var _h =_result.leftovers[_i].height;
+			if(_h > _maxHeight) _maxHeight = _h;
+		}
+		_result.leftoverHeight = _maxHeight;
 		return _result
 	}
 }
@@ -828,19 +834,18 @@ function __scriptureEnqueueStyle(_key) {
   __scripturePushArrayToStyleStack(_style);
 }
 
+function __scriptureLineWillForceNewPage(_curPage, _wrapResult){
+	if(global.__scripTextbox.pageBreakHeight <= 0) return false;
+	
+	return _curPage.height + global.__scripTextbox.__lineSpacing + _wrapResult.leftoverHeight >= global.__scripTextbox.pageBreakHeight; 
+}
+
 function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = false, _forceNewPage = false) {
 	var _wrapResult = _curLine.checkForWrap();
 	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
 		_curPage.calcHeight();
-		if(_forceNewPage 
-			 || (global.__scripTextbox.pageBreakHeight > 0 
-					 && _curPage.height >= global.__scripTextbox.pageBreakHeight)) {
-			var _newPage = global.__scripText.addPage();
-			var _lastLineIndex = array_length(_curPage.lines)-1
-			array_push(_newPage.lines, _curPage.lines[_lastLineIndex]);
-			array_delete(_curPage.lines,_lastLineIndex,1);
-			_curPage.calcHeight();
-			_curPage = _newPage;
+		if(_forceNewPage || __scriptureLineWillForceNewPage(_curPage, _wrapResult)) {
+			_curPage = global.__scripText.addPage();
 		} 
 		
 		_curLine = _curPage.addLine();
