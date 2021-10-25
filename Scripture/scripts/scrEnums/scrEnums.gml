@@ -16,6 +16,7 @@ enum Event {
 	transitionRoomEnd,
 	slideInDone,
 	slideCharacter,
+	finishSlide,
 	changeSpeaker,
 	changeEmotion,
 	changeName,

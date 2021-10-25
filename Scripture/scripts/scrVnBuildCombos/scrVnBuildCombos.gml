@@ -1,4 +1,6 @@
 function scrVnBuildCombos() {
+	setSpeakerBoy = sndGirl.close+evSetSpeaker.event(VN_BOY) + sndBoy.open
+	setSpeakerGirl = sndBoy.close+evSetSpeaker.event(VN_GIRL) + sndGirl.open
 	boyNameOniisan = 
 		bold.open +
 			"Onii-san" +

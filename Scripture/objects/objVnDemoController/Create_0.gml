@@ -25,6 +25,12 @@ sysEvents.addListener(id, Event.slideCharacter, function(_options) {
 	}
 });
 
+sysEvents.addListener(id, Event.finishSlide, function(_options) {
+	if((_options.target == VN_GIRL && state == State.girlIn) || (_options.target == VN_BOY && State.boyIn)) {
+		stateTimer = 100000;	
+	}
+});
+
 #region particles
 global.vnPartSystemLower = part_system_create()
 part_system_depth(global.vnPartSystemLower,VN_PART_SYSTEM_LOWER)

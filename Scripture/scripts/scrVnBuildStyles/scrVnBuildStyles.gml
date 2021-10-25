@@ -21,10 +21,17 @@ function scrVnBuildStyles() {
 			_style.xOff = random_range(-2,2);
 		}
 	});
-	sndGirl = scripture_register_style("sndGirl", {
+	sndGirl = scripture_register_style("SndGirl", {
 		onDrawBegin: function(_x, _y, _style, _base, _steps, _pos){
-			if(_steps == 0) {
-				audio_play_sound_unique(sndBeep,0,false,false,.1);	
+			if(_steps == 0 && !_base.isSpace) {
+				audio_play_sound_unique(sndBeep,0,false,false,.9,1.1);	
+			}
+		}
+	});
+	sndBoy = scripture_register_style("SndBoy", {
+		onDrawBegin: function(_x, _y, _style, _base, _steps, _pos){
+			if(_steps == 0 && !_base.isSpace) {
+				audio_play_sound_unique(sndBeep,0,false,false,.7,.8);	
 			}
 		}
 	});

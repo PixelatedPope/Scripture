@@ -9,6 +9,10 @@ function scrVnBuildEvents() {
 		}
 	});
 	
+	evSnapSlide = scripture_register_event("SnapSlide", function(_arguments) {
+		sysEvents.raiseEvent(Event.finishSlide, {target: _arguments[0]});	
+	}, false);
+	
 	evSlideInCharacter = scripture_register_event("SlideCharacter",function(_arguments) {
 		sysEvents.raiseEvent(Event.slideCharacter, {target: _arguments[0]});
 	},false);

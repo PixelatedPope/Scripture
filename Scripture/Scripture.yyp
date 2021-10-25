@@ -9,6 +9,7 @@
     {"id":{"name":"scrVnBuildScript","path":"scripts/scrVnBuildScript/scrVnBuildScript.yy",},"order":9,},
     {"id":{"name":"sprPixel","path":"sprites/sprPixel/sprPixel.yy",},"order":3,},
     {"id":{"name":"scrEnums","path":"scripts/scrEnums/scrEnums.yy",},"order":18,},
+    {"id":{"name":"sndBoyBeep","path":"sounds/sndBoyBeep/sndBoyBeep.yy",},"order":21,},
     {"id":{"name":"sprGogo","path":"sprites/sprGogo/sprGogo.yy",},"order":3,},
     {"id":{"name":"fntScripture","path":"fonts/fntScripture/fntScripture.yy",},"order":11,},
     {"id":{"name":"scrVnBuildStyles","path":"scripts/scrVnBuildStyles/scrVnBuildStyles.yy",},"order":6,},
@@ -50,6 +51,7 @@
     {"id":{"name":"scrVnBuildSprites","path":"scripts/scrVnBuildSprites/scrVnBuildSprites.yy",},"order":8,},
     {"id":{"name":"fntOpenSans","path":"fonts/fntOpenSans/fntOpenSans.yy",},"order":13,},
     {"id":{"name":"audio_play_sound_unique","path":"scripts/audio_play_sound_unique/audio_play_sound_unique.yy",},"order":2,},
+    {"id":{"name":"sprEmojiCry","path":"sprites/sprEmojiCry/sprEmojiCry.yy",},"order":5,},
     {"id":{"name":"rmExample","path":"rooms/rmExample/rmExample.yy",},"order":0,},
   ],
   "Options": [
