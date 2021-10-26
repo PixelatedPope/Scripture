@@ -578,7 +578,7 @@ function __scriptureText() constructor {
 	
 	decPage = function(_reset = false) {
 		if(curPage-1 < 0) return false;
-		setCurrentPage(curPage-1)	
+		setCurrentPage(curPage-1,_reset)	
 		return true;
 	}
 	

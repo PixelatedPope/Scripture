@@ -5,3 +5,8 @@ if(mouse_check_button_pressed(mb_left)) {
 			boxes[_i].textbox.gotoPageNext();
 	}
 }
+
+if(keyboard_check_pressed(vk_left)){
+	boxes[Boxes.main].textbox.gotoPagePrev(true);
+
+}

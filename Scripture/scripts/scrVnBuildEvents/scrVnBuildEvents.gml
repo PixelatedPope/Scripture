@@ -1,6 +1,6 @@
 function scrVnBuildEvents() {
 	evChangeName = scripture_register_event("ChangeName",function(_arguments) {
-		sysEvents.raiseEvent(Event.changeName,{target: _arguments[0]});
+		sysEvents.raiseEvent(Event.changeName,{target: _arguments[0],index: real(_arguments[1])});
 	},false)
 
 	evBoyBounce = scripture_register_event("BoyBounce",function(){

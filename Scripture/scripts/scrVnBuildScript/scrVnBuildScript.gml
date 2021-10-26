@@ -14,7 +14,7 @@ function scrVnBuildScript() {
 			shout.close +
 		setSpeakerBoy +
 		"Yumi?\r" +
-		evChangeName.event(VN_GIRL) +
+		evChangeName.event(VN_GIRL,1) +
 		evSetEmotion.event(VN_GIRL, EMOTION_SHOCKED) +
 		wait(60) + 
 		setSpeakerGirl +
@@ -28,8 +28,8 @@ function scrVnBuildScript() {
 		bold.close +
 		evSetEmotion.event(VN_BOY, EMOTION_ANNOYED) +
 		setSpeakerBoy +
-			"<s 2>Will you cut it out with the weeb crap?<30> Stop Calling me \""+boyNameOniisan+"\"!<30> My name is " + 
-			evChangeName.event(VN_BOY) +
+			"<s 4>Will you cut it out with the weeb crap?<30> Stop Calling me \""+boyNameOniisan+"\"!My name is " + 
+			evChangeName.event(VN_BOY, 1) +
 			boyNameKanji + "<s 1>\r"  +
 		evSnapSlide.event(VN_BOY) +
 		evSetEmotion.event(VN_GIRL,EMOTION_SAD) +
@@ -37,7 +37,7 @@ function scrVnBuildScript() {
 			sprCry + sprCry + sprCry + sprCry + sprCry +"I can't read <#3333FF>kanji<#FFFFFF>...\r" +
 		setSpeakerBoy +
 		evSetEmotion.event(VN_BOY,EMOTION_NORMAL) +
-			"It's fine. <30>Don't worry about it."+ evSetEmotion.event(VN_GIRL, EMOTION_NORMAL) + "<30> Anyway where are we?\r"
+			"Fine."+ evChangeName.event(VN_BOY, 3) + "<60>Don't worry about it."+ evSetEmotion.event(VN_GIRL, EMOTION_NORMAL) + "<30> Anyway where are we?\r"
 		
 		
 		
