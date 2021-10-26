@@ -10,6 +10,7 @@
  -Allows the user to jump between any demo.  Has a mute button.
  -Can be clicked on with the mouse, or navigated with a controller by pressing up and down to swap between the demo and the toolbar.
  -Cool transitions when swapping demos.
+-Demo 1: Simple Text Box
 -Demo 1: Visual Novel
 -Demo 2: RPG Speech Bubbles
 -Demo 3: Bundled Styles and Effects
@@ -19,10 +20,11 @@ https://sutemo.itch.io/female-character
 https://sutemo.itch.io/male-character-sprite-for-visual-novel
 
 ==Future Features?==
-Force Re-parse
+Force Page Advance after X steps
+InPage wait for input
+Default styles per Textbox.
+
 Shaders
-Animation "finished" conditions
-End Page Animations
 
 ==Untested==
 Sprite Fonts

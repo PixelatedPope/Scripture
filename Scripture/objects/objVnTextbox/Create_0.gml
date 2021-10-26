@@ -86,6 +86,7 @@ sysEvents.addListener(id, Event.changeName,function(_options){
 	if(_options.target == VN_BOY) {
 		boyNameCurrent=_options.index;
 		boxes[Boxes.boy].rebuild(boyNames[boyNameCurrent],true);
+		
 	} else {
 		girlNameCurrent=_options.index;
 		boxes[Boxes.girl].rebuild(girlNames[girlNameCurrent],true, 1);

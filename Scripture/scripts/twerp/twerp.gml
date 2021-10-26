@@ -1,14 +1,7 @@
-/// @description twerp
-/// @param twerptype
-/// @param start
-/// @param end
-/// @param position
-/// @param [Option1]
-/// @param [Option2]
-///@func twerp(TwerpType, start, end, pos);
-function twerp(_type, _start, _end, _pos) {
+///@func twerp(TwerpType, start, end, pos, [looped], [option1], [option2]);
+function twerp(_type, _start, _end, _pos, _looped = false) {
   _type = clamp(_type,0,TwerpType.count);
-  _pos = clamp(_pos,0,1);
+  _pos = clamp(_looped ? _pos % 1 : _pos,0,1);
   var _chng = _end-_start;
   var _mid = (_start+_end) / 2;
 
@@ -37,16 +30,16 @@ function twerp(_type, _start, _end, _pos) {
   	// Optional Argument: Bounciness - Default: 1.5
   	#macro Twerp_Back_DefaultBounciness 1.5
   	case TwerpType.inout_back:
-  				var _b = (argument_count > 4) ? argument[4] : Twerp_Back_DefaultBounciness;	
+  				var _b = (argument_count > 5) ? argument[5] : Twerp_Back_DefaultBounciness;	
   				return (_pos < .5) ? twerp(TwerpType.in_back,_start,_mid,_pos*2,_b) 
   												   : twerp(TwerpType.out_back,_mid,_end,(_pos-.5)*2,_b);
 
   	case TwerpType.in_back:
-  				var _b = (argument_count > 4) ? argument[4] : Twerp_Back_DefaultBounciness;
+  				var _b = (argument_count > 5) ? argument[5] : Twerp_Back_DefaultBounciness;
   				return _chng * _pos * _pos * ((_b + 1) * _pos - _b) + _start
 
   	case TwerpType.out_back:			
-  				var _b = (argument_count > 4) ? argument[4] : Twerp_Back_DefaultBounciness;
+  				var _b = (argument_count > 5) ? argument[5] : Twerp_Back_DefaultBounciness;
   				_pos -= 1;
   				return _chng * (_pos * _pos * ((_b + 1) * _pos + _b) + 1) + _start;
 				
@@ -110,16 +103,16 @@ function twerp(_type, _start, _end, _pos) {
   	// Optional Argument 1: Elasticity <0-1> - Default: .3
   	// Optional Argument 2: Duration - Default: 5
   	case TwerpType.inout_elastic:
-  				var _e = (argument_count > 4) ? argument[4] : 0.3;
-  				var _d = (argument_count > 5) ? argument[5] : 5.0;
+  				var _e = (argument_count > 5) ? argument[5] : 0.3;
+  				var _d = (argument_count > 6) ? argument[6] : 5.0;
 				
   				return (_pos < .5) ? twerp(TwerpType.in_elastic,_start,_mid,_pos*2,_e,_d)
   												   : twerp(TwerpType.out_elastic,_mid,_end,(_pos-.5)*2,_e,_d);
 												 
   	case TwerpType.out_elastic:
   				var _s,_p;
-  				var _e = (argument_count > 4) ? argument[4] : 0.3;
-  				var _d = (argument_count > 5) ? argument[5] : 5.0;
+  				var _e = (argument_count > 5) ? argument[5] : 0.3;
+  				var _d = (argument_count > 6) ? argument[6] : 5.0;
 
   				if (_pos == 0 || _chng == 0) return _start;
   				if (_pos == 1) return _end;
@@ -131,8 +124,8 @@ function twerp(_type, _start, _end, _pos) {
   	case TwerpType.in_elastic:
   				var _s,_p;
 				
-  				var _e = (argument_count > 4) ? argument[4] : 0.3;
-  				var _d = (argument_count > 5) ? argument[5] : 5.0;
+  				var _e = (argument_count > 5) ? argument[5] : 0.3;
+  				var _d = (argument_count > 6) ? argument[6] : 5.0;
 
   				if (_pos == 0 || _chng == 0) return _start; 
   				if (_pos == 1) return _end;

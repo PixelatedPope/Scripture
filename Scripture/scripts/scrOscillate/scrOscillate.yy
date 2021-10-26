@@ -6,7 +6,7 @@
     "path": "folders/Helpful Scripts.yy",
   },
   "resourceVersion": "1.0",
-  "name": "sin_oscillate",
+  "name": "scrOscillate",
   "tags": [],
   "resourceType": "GMScript",
 }

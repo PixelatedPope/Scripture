@@ -28,6 +28,10 @@ function scripture_build_example_styles() {
 		kerning: 20,
 		speedMod: .1,
 		color: make_color_rgb(255,234,163),
+		onDrawBegin: function(_x, _y, _style, _base, _steps){
+			var _length = room_speed;
+			return _steps < _length;
+		},
 		onDrawEnd: function(_x, _y, _style, _base, _steps, _index) {
 			var _length = room_speed;
 			if(_steps < _length) {
