@@ -52,6 +52,7 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	isPaused = false;
 	nextPageReady = false;
 	currentDelay = 0;
+	pageAdvanceDelay = -1;
 	
 	var _text = __scriptureParseText(_string, self);
 	var _pageDimensions = []
@@ -102,6 +103,22 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 		isPaused = _isPaused;	
 	}
 	
+	autoAdvancePage = function(_currentPage) {
+		if(pageCount <=  1 || !_currentPage.isComplete || !global.__scripText.canIncPage()) return;
+		if(self.pageAdvanceDelay >= 0) {
+			self.pageAdvanceDelay--;
+			if(self.pageAdvanceDelay == -1)
+					gotoPageNext(false);
+
+			return;
+		}
+		
+		var _delay = _currentPage.getPageAdvanceDelay();
+		if(_delay	>= 0)
+			self.pageAdvanceDelay	= _delay;
+	}
+	
+	
 	///@func draw(x,y)
 	draw = function(_x, _y) {
 		draw_set_halign(fa_center);
@@ -113,8 +130,10 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 		draw_set_alpha(1);
 	
 		nextPageReady = _currentPage.isComplete;
+		autoAdvancePage(_currentPage);
 	}
 }
+
 function __scriptureStyle(_style = {}) constructor {
 	type = SCRIPTURE_TYPE_STYLE
 	//Return a duplicate of the given style with new key
@@ -130,6 +149,7 @@ function __scriptureStyle(_style = {}) constructor {
 	angle = _style[$ "angle"] == undefined ? 0 : _style.angle;
 	alpha = _style[$ "alpha"] == undefined ? 1 : _style.alpha;
 	textAlign = _style[$ "textAlign"] == undefined ? fa_middle : _style.textAlign;
+	pageAdvanceDelay = _style[$ "pageAdvanceDelay"] == undefined ? -1 : _style.pageAdvanceDelay;
 	onDrawBegin = _style[$ "onDrawBegin"] == undefined ? function(){} : _style.onDrawBegin;
 	onDrawEnd = _style[$ "onDrawEnd"] == undefined ? function(){} : _style.onDrawEnd;
 }
@@ -265,7 +285,10 @@ function __scriptureEvent(_func, _delay = 0, _canSkip = true, _arguments = []) c
 	event = _func;
 	arguments = _arguments;
 	isSpace = false;
-	style = {speedMod:1};
+	style = {
+		speedMod:1, pageAdvanceDelay: 
+		global.__scripActiveStyle.pageAdvanceDelay
+	};
 	ran = false;
 	wasSkipped = false;
 	canSkip = _canSkip;
@@ -295,6 +318,8 @@ function __scriptureLine() constructor {
 	getLength = function() { return array_length(characters) };
 	typePos = 0;
 	delay = __scriptureIsTyping();
+	getCharacterCount = function(){return array_length(characters)}
+	
 	draw = function(_x, _y, _page) {
 		var _eventCount = 0;
 		for(var _c = 0; _c < getLength(); _c++) {
@@ -513,6 +538,12 @@ function __scripturePage() constructor {
 		array_push(lines, _newLine)
 		return _newLine;
 	}
+	
+	getPageAdvanceDelay = function(){
+		var _lastLine = lines[getLineCount()-1]
+		var _lastChar = _lastLine.characters[_lastLine.getCharacterCount()-1]		
+		return _lastChar.style.pageAdvanceDelay;
+	}
 }
 
 function __scriptureText() constructor {
@@ -566,12 +597,17 @@ function __scriptureText() constructor {
 	setCurrentPage = function(_page, _reset = false) {
 		var _prevPage = curPage;
 		curPage = clamp(_page,0,getPageCount()-1);
+		pageAdvanceDelay = -1;
 		if(_reset && _prevPage >= curPage)
 			resetFromPage(curPage);
 	}
 	
+	canIncPage = function() {
+		return curPage+1 < getPageCount()
+	}
+	
 	incPage = function() {
-		if(curPage+1 >= getPageCount()) return false;
+		if(!canIncPage()) return false;
 		setCurrentPage(curPage+1)
 		return true;
 	}

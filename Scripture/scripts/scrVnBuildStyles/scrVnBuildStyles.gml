@@ -42,6 +42,11 @@ function scrVnBuildStyles() {
 			_style.yOff = sin_oscillate(-5,5,3,get_timer()/300000 + _index)
 		}
 	});
+	
+	rant = scripture_register_style("Rant",{
+		pageAdvanceDelay: 10,
+		speedMod: 10,
+	});
 
 	scripture_set_default_style("VnDefault");
 }

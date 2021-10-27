@@ -20,9 +20,9 @@ https://sutemo.itch.io/female-character
 https://sutemo.itch.io/male-character-sprite-for-visual-novel
 
 ==Future Features?==
-Force Page Advance after X steps
-InPage wait for input
 Default styles per Textbox.
+InPage wait for input
+Justified "stretch" text.
 
 Shaders
 
