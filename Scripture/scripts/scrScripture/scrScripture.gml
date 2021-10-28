@@ -285,7 +285,7 @@ function __scriptureImg(_style) constructor {
 	}
 }
 
-function __scriptureEvent(_func, _delay = 0, _canSkip = true, _arguments = []) constructor {
+function __scriptureEvent(_func, _delay = undefined, _canSkip = true, _arguments = []) constructor {
 	type = SCRIPTURE_TYPE_EVENT;
 	event = _func;
 	arguments = _arguments;
@@ -306,8 +306,11 @@ function __scriptureEvent(_func, _delay = 0, _canSkip = true, _arguments = []) c
 		if(ran) return 0;
 		ran = true;
 		event(arguments);
+		if(delay == undefined) return 0;
 		if(delay > 0) 
 			global.__scripTextbox.currentDelay = delay;
+		else
+			global.__scripTextbox.inPageBreak = true;
 		return 0;
 	}
 }
@@ -333,7 +336,7 @@ function __scriptureLine() constructor {
 					global.__scripTextbox.currentDelay--;
 					return false;
 				}
-				if(!global.__scripTextbox.isPaused)
+				if(!global.__scripTextbox.isPaused && !global.__scripText.inPageBreak)
 					typePos += global.__scripTextbox.__typeSpeed * characters[_c-1].style.speedMod;
 					_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
 				return false;
@@ -563,6 +566,7 @@ function __scriptureText() constructor {
 	curPage = 0;
 	getPageCount = function() { return array_length(pages) };
 	getCurrentPage = function() { return pages[curPage] };
+	inPageBreak = false;
 	calcHeight = function() {	
 		height = 0;
 		for(var _i = 0; _i < getPageCount(); _i++) {
@@ -793,18 +797,17 @@ function __scriptureHandleTag(_string, _curLine) {
 	
 	var _style = global.__scripStyles[$ _key];
 	if(_style == undefined) {
-		if(__scriptureCheckForInlineStyle(_tagContent, _curLine)) {
-			
-		} else {
-			try {
-				var _amount = real(_tagContent);
-				//if(_amount > 0) 
-				_curLine.addElement(new __scriptureEvent(function(){},_amount, false))
-			} catch(_ex){
-				show_debug_message(_ex);
-				show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
-			}
+		if(__scriptureCheckForInlineStyle(_tagContent, _curLine)) 
+			return _string;
+
+		try {
+			var _amount = real(_tagContent);
+			_curLine.addElement(new __scriptureEvent(function(){},_amount, false))
+		} catch(_ex){
+			show_debug_message(_ex);
+			show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
 		}
+		
 		return _string;
 	}
 	switch(_style.type) {

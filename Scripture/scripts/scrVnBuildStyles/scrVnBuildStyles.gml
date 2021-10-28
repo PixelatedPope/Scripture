@@ -40,7 +40,7 @@ function scrVnBuildStyles() {
 	colorful = scripture_register_style("Colorful",{
 		onDrawBegin: function(_x, _y, _style, _base, _steps, _index) {
 			_style.color = make_color_hsv((_steps * 2 + _index * 10) % 255,165,255);
-			_style.yOff = sin_oscillate(-5,5,3,steps_to_microseconds(_steps * 3 + _index))
+			_style.yOff = sin_oscillate(-5,5,3,get_timer()*3 + steps_to_microseconds(_index* 5))
 		}
 	});
 	
