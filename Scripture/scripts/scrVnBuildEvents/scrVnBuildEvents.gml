@@ -5,7 +5,7 @@ function scrVnBuildEvents() {
 
 	evBoyBounce = scripture_register_event("BoyBounce",function(){
 		with(objVnBoy){
-			setState(State.bounce);
+			setAction(Action.bounce);
 		}
 	});
 	

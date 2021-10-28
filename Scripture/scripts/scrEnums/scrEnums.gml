@@ -4,7 +4,6 @@ enum State {
 	wait,
 	out,
 	in,
-	bounce,
 	girlIn,
 	boyIn
 }

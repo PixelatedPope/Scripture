@@ -24,7 +24,7 @@ setEmotion = function(_emotionString){
 
 action = Action.wait;
 actionTimer = 0;
-setState = function(_state) {
+setAction = function(_state) {
 	action = _state;
 	actionTimer = 0;
 }

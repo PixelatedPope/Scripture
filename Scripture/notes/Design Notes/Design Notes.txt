@@ -16,8 +16,9 @@
 -Demo 3: Bundled Styles and Effects
 
 ==Credits
-https://sutemo.itch.io/female-character
-https://sutemo.itch.io/male-character-sprite-for-visual-novel
+Female Character: https://sutemo.itch.io/female-character
+Male Character: https://sutemo.itch.io/male-character-sprite-for-visual-novel
+Button Icons: https://1up-indie2.itch.io/pixel-art-input-icons
 
 ==Future Features?==
 Default styles per Textbox.

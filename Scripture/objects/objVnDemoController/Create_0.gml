@@ -12,16 +12,16 @@ layer_depth("Fade",VN_FADE);
 
 state = State.in;
 stateTimer = 0;
-setState = function(_state){
+setAction = function(_state){
 	state = _state;
 	stateTimer = 0;
 }
 
 sysEvents.addListener(id, Event.slideCharacter, function(_options) {
 	if(_options.target == VN_BOY) {
-		setState(State.boyIn);	
+		setAction(State.boyIn);	
 	} else {
-		setState(State.girlIn);	
+		setAction(State.girlIn);	
 	}
 });
 

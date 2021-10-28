@@ -84,18 +84,23 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	
 	gotoPageNext = function(_shortcutAnimations = true) {
 		var _curPage = __text.getCurrentPage();
-		if(_curPage.isComplete) return __text.incPage();
+		if(_curPage.isComplete) {
+			pageAdvanceDelay = -1;
+			return __text.incPage();
+		}
 
 		_curPage.finishPage(_shortcutAnimations)   
 		return true;
 	}
 
 	gotoPagePrev = function(_reset = true) {
+			pageAdvanceDelay = -1;
 		__text.decPage(_reset);
 	}
 
 	gotoPage = function(_page, _reset = true) {
 		if(_page < 0 || _page >= pageCount) return;
+			pageAdvanceDelay = -1;
 		__text.setCurrentPage(_page,_reset);
 	}
 	
@@ -463,6 +468,12 @@ function __scriptureLine() constructor {
 		_result.leftoverHeight = _maxHeight;
 		return _result
 	}
+	
+	forceComplete = function() {
+		isComplete = true;
+		typePos = 100000;
+		delay = 0;
+	}
 }
 
 function __scripturePage() constructor {
@@ -498,9 +509,7 @@ function __scripturePage() constructor {
 		isComplete = true;
 		linePos = getLineCount();
 		for(var _i = 0; _i < getLineCount(); _i++) {
-			lines[_i].isComplete = true;
-			lines[_i].typePos = 100000;
-			lines[_i].delay = 0;
+			lines[_i].forceComplete();
 			if(_shortcutAnims) {
 				lines[_i].endAnimations();
 			}
@@ -552,7 +561,6 @@ function __scriptureText() constructor {
 	height = 0;
 	pages = [];
 	curPage = 0;
-	//forceRerender = false;
 	getPageCount = function() { return array_length(pages) };
 	getCurrentPage = function() { return pages[curPage] };
 	calcHeight = function() {	
@@ -820,7 +828,10 @@ function __scriptureHandleTag(_string, _curLine) {
 }
 
 function __scriptureRebuildActiveStyle() {
-	var _style = {onDrawBegin: [], onDrawEnd: []};
+	var _style = {
+		onDrawBegin: [], 
+		onDrawEnd: []
+	};
 	for(var _i = 0; _i < array_length(global.__scripStyleStack); _i++) {
 		var _stackStyle = global.__scripStyleStack[_i];
 		var _props = variable_struct_get_names(_stackStyle)
@@ -905,10 +916,8 @@ function __scriptureParseText(_string, _textbox) {
 		var _forceNewLine = false;
 		var _forceNewPage = false;
 		switch(_char) {
-			case "\r": 
-				_forceNewPage = true; 
-			break;			
-			case "\n": _forceNewLine = true;break;
+			case "\r": _forceNewPage = true; break;			
+			case "\n": _forceNewLine = true; break;
 			case global.__scripOpenTag: _string = __scriptureHandleTag(_string, _curLine); break;
 			case "-":	_curLine.addHyphen(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle))) break;
 			case " ": _curLine.addSpace() break;			

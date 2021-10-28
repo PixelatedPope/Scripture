@@ -61,15 +61,15 @@ switch(currentEmotion) {
 		emotionOff.color = merge_color(c_white,c_red,clamp(emotionTimer/room_speed,0,.15))
 	} break;
 }
-emotionTimer++;
 
+emotionTimer++;
 switch(action) {
-	case Action.wait: break;
+	case Action.wait: 
+		break;
 	
-	case Action.bounce: {
-		emotionOff.y = twerp(TwerpType.out_cubic,-20,0,actionTimer/room_speed);
+	case Action.bounce: 
+		actionOff.y = twerp(TwerpType.out_cubic,-20,0,actionTimer/room_speed);
 		if(actionTimer == room_speed)
 			setAction(Action.wait);
-	}
 }
 actionTimer++;

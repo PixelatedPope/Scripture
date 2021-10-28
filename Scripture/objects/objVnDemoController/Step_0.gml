@@ -8,7 +8,7 @@ switch(state) {
 	var _bg = layer_background_get_id("Fade")
 	layer_background_alpha(_bg, 1 - stateTimer/_length);
 	if(stateTimer >= _length) {
-		setState(State.wait);
+		setAction(State.wait);
 		sysEvents.raiseEvent(Event.transitionDone);
 	}
 	break;
@@ -18,7 +18,7 @@ switch(state) {
 		objVnGirl.x = twerp(TwerpType.out_back, girlX-offScreen,girlX,stateTimer/_length);
 		if(stateTimer >= _length) {
 			sysEvents.raiseEvent(Event.slideInDone,{target: VN_GIRL});
-			setState(State.wait);
+			setAction(State.wait);
 		}
 	break;
 	
@@ -27,7 +27,7 @@ switch(state) {
 		objVnBoy.x = twerp(TwerpType.out_back, boyX+offScreen,boyX,stateTimer/_length);
 		if(stateTimer >= _length) {
 			sysEvents.raiseEvent(Event.slideInDone,{target: VN_GIRL});
-			setState(State.wait);
+			setAction(State.wait);
 		}
 	break;
 }
