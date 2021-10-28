@@ -9,7 +9,7 @@ function scrVnBuildCombos() {
 	boyNameKanji = 
 		bold.open +
 			rotateFade.open + 
-				"<BoyBounce>虎<60><BoyBounce>太<60><BoyBounce>郎<60>" + 
+				"<BoyBounce>虎<35><BoyBounce>太<35><BoyBounce>郎<35>" + 
 			bold.close + 
 		rotateFade.close
 

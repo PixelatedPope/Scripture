@@ -797,9 +797,9 @@ function __scriptureHandleTag(_string, _curLine) {
 			
 		} else {
 			try {
-				var _amount = abs(real(_tagContent));
-				if(_amount > 0) 
-					_curLine.addElement(new __scriptureEvent(function(){},_amount, false))
+				var _amount = real(_tagContent);
+				//if(_amount > 0) 
+				_curLine.addElement(new __scriptureEvent(function(){},_amount, false))
 			} catch(_ex){
 				show_debug_message(_ex);
 				show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
