@@ -5,7 +5,7 @@
 // - Pixelated Pope
 //*************************************************************************
 
-global.__scripText = {};
+global.__scripStory = {};
 global.__scripTextbox = {};
 global.__scripString = "";
 global.__scripStyles = {};
@@ -49,18 +49,19 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	__typeSpeed = _typeSpeed;
 	__lineSpacing = _lineSpacing;
 	__forceLineBreaks = _forceLineBreaks;
+	inPageBreak = false;
 	isPaused = false;
 	nextPageReady = false;
 	currentDelay = 0;
 	pageAdvanceDelay = -1;
 	
-	var _text = __scriptureParseText(_string, self);
+	var _story = __scriptureBuildStory(_string, self);
 	var _pageDimensions = []
 	var _widestPageWidth = 0;
 	var _tallestPageHeight = 0;
-	for(var _i = 0; _i < _text.getPageCount(); _i++){
-		var _width = _text.pages[_i].width;
-		var _height = _text.pages[_i].height;
+	for(var _i = 0; _i < _story.getPageCount(); _i++){
+		var _width = _story.pages[_i].width;
+		var _height = _story.pages[_i].height;
 		if(_width > _widestPageWidth)
 			_widestPageWidth = _width;
 		if(_height > _tallestPageHeight)
@@ -71,22 +72,27 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	maxWidth = _widestPageWidth;
 	maxHeight = _tallestPageHeight;
 	pageDimensions = _pageDimensions;
-	pageCount = _text.getPageCount();
-	__text = _text;
+	pageCount = _story.getPageCount();
+	__story = _story;
 	
 	getCurrentPageSize = function() {
-		return pageDimensions[__text.curPage];
+		return pageDimensions[__story.curPage];
 	}
 	
 	getCurrentPage = function() {
-		return __text.curPage;	
+		return __story.curPage;	
 	}
 	
 	gotoPageNext = function(_shortcutAnimations = true) {
-		var _curPage = __text.getCurrentPage();
+		if(inPageBreak) {
+			inPageBreak = false;
+			pageAdvanceDelay = -1
+			return false;
+		}
+		var _curPage = __story.getCurrentPage();
 		if(_curPage.isComplete) {
 			pageAdvanceDelay = -1;
-			return __text.incPage();
+			return __story.incPage();
 		}
 
 		_curPage.finishPage(_shortcutAnimations)   
@@ -95,13 +101,13 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 
 	gotoPagePrev = function(_reset = true) {
 			pageAdvanceDelay = -1;
-		__text.decPage(_reset);
+		__story.decPage(_reset);
 	}
 
 	gotoPage = function(_page, _reset = true) {
 		if(_page < 0 || _page >= pageCount) return;
 			pageAdvanceDelay = -1;
-		__text.setCurrentPage(_page,_reset);
+		__story.setCurrentPage(_page,_reset);
 	}
 	
 	setPaused = function(_isPaused) {
@@ -109,32 +115,41 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	}
 	
 	autoAdvancePage = function(_currentPage) {
-		if(pageCount <=  1 || !_currentPage.isComplete || !global.__scripText.canIncPage()) return;
-		if(self.pageAdvanceDelay >= 0) {
-			self.pageAdvanceDelay--;
-			if(self.pageAdvanceDelay == -1)
-					gotoPageNext(false);
+		//Do I need all the selfs?
+		if(self.inPageBreak) {
+			if(self.pageAdvanceDelay >= 0) {
+				self.pageAdvanceDelay--;
+				if(self.pageAdvanceDelay == -1)
+						self.inPageBreak = false;
 
-			return;
+				return;
+			}
+		} else {
+			if(pageCount <=  1 || !_currentPage.isComplete || !global.__scripStory.canIncPage()) return;
+			if(self.pageAdvanceDelay >= 0) {
+				self.pageAdvanceDelay--;
+				if(self.pageAdvanceDelay == -1)
+						gotoPageNext(false);
+
+				return;
+			}
 		}
-		
 		var _delay = _currentPage.getPageAdvanceDelay();
 		if(_delay	>= 0)
 			self.pageAdvanceDelay	= _delay;
 	}
-	
 	
 	///@func draw(x,y)
 	draw = function(_x, _y) {
 		draw_set_halign(fa_center);
 		draw_set_valign(fa_middle);
 		global.__scripTextbox = self;
-		global.__scripText = __text;
-		var _currentPage = __text.getCurrentPage();
+		global.__scripStory = __story;
+		var _currentPage = __story.getCurrentPage();
 		_currentPage.draw(_x, _y);
 		draw_set_alpha(1);
 	
-		nextPageReady = _currentPage.isComplete;
+		nextPageReady = _currentPage.isComplete || inPageBreak;
 		autoAdvancePage(_currentPage);
 	}
 }
@@ -331,14 +346,15 @@ function __scriptureLine() constructor {
 	draw = function(_x, _y, _page) {
 		var _eventCount = 0;
 		for(var _c = 0; _c < getLength(); _c++) {
-			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) {
+			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) { //Delay Countdown
 				if(global.__scripTextbox.currentDelay > 0) {
 					global.__scripTextbox.currentDelay--;
 					return false;
 				}
-				if(!global.__scripTextbox.isPaused && !global.__scripText.inPageBreak)
+				if(!global.__scripTextbox.isPaused && !global.__scripTextbox.inPageBreak) { //Paused or InPageBreak
 					typePos += global.__scripTextbox.__typeSpeed * characters[_c-1].style.speedMod;
 					_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
+				}
 				return false;
 			}
 			_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
@@ -472,10 +488,25 @@ function __scriptureLine() constructor {
 		return _result
 	}
 	
+	findNextInPageBreak = function(){
+		for(var _i = typePos; _i < getCharacterCount(); _i++) {
+			var _char = characters[_i];
+			if( _char.type == SCRIPTURE_TYPE_EVENT && _char.delay <= 0)
+				return _i;
+		}
+		return _i;
+	}
+	
 	forceComplete = function() {
+		var _pos = findNextInPageBreak();
+		if(_pos < getCharacterCount()) {
+			typePos = _pos;
+			return false;
+		}
 		isComplete = true;
-		typePos = 100000;
+		typePos = 10000000;
 		delay = 0;
+		return true;
 	}
 }
 
@@ -509,14 +540,14 @@ function __scripturePage() constructor {
 	getLineCount = function() {return array_length(lines);}
 	
 	finishPage = function(_shortcutAnims) {
-		isComplete = true;
-		linePos = getLineCount();
 		for(var _i = 0; _i < getLineCount(); _i++) {
-			lines[_i].forceComplete();
+			if(!lines[_i].forceComplete()) return;
 			if(_shortcutAnims) {
 				lines[_i].endAnimations();
 			}
 		}
+		isComplete = true;
+		linePos = getLineCount();
 	}
 	
 	reset = function() {
@@ -551,14 +582,17 @@ function __scripturePage() constructor {
 		return _newLine;
 	}
 	
-	getPageAdvanceDelay = function(){
+	getPageLastCharacter = function() {
 		var _lastLine = lines[getLineCount()-1]
-		var _lastChar = _lastLine.characters[_lastLine.getCharacterCount()-1]		
-		return _lastChar.style.pageAdvanceDelay;
+		return _lastLine.characters[_lastLine.getCharacterCount()-1]		
+	}
+	
+	getPageAdvanceDelay = function(_character = getPageLastCharacter()){
+		return _character.style.pageAdvanceDelay;
 	}
 }
 
-function __scriptureText() constructor {
+function __scriptureStory() constructor {
 	type = SCRIPTURE_TYPE_TEXT
 	width = 0;
 	height = 0;
@@ -822,7 +856,7 @@ function __scriptureHandleTag(_string, _curLine) {
 		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style)); break;
 		case SCRIPTURE_TYPE_EVENT: 
 			var _arguments = __scriptureMultiParse(_tagContent)
-			_curLine.addElement(new __scriptureEvent(_style.event, 0, _style.canSkip, _arguments)); 
+			_curLine.addElement(new __scriptureEvent(_style.event, undefined, _style.canSkip, _arguments)); 
 		break;
 	}
 	
@@ -895,7 +929,7 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
 		_curPage.calcHeight();
 		if(_forceNewPage || __scriptureLineWillForceNewPage(_curPage, _wrapResult)) {
-			_curPage = global.__scripText.addPage();
+			_curPage = global.__scripStory.addPage();
 		} 
 		
 		_curLine = _curPage.addLine();
@@ -905,12 +939,12 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 	return {curLine: _curLine, curPage: _curPage};
 }
 
-function __scriptureParseText(_string, _textbox) {
+function __scriptureBuildStory(_string, _textbox) {
 	global.__scripTextbox = _textbox;
 	global.__scripStyleStack = [];
 	__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
-	global.__scripText = new __scriptureText();
-	var _curPage = global.__scripText.addPage();
+	global.__scripStory = new __scriptureStory();
+	var _curPage = global.__scripStory.addPage();
 	var _curLine = _curPage.addLine();
 	
 	while(string_length(_string) > 0) {
@@ -933,17 +967,17 @@ function __scriptureParseText(_string, _textbox) {
 		_curPage = _wrapResult.curPage;
 	}
 	
-	global.__scripText.calcDimensions();
-	return global.__scripText;
+	global.__scripStory.calcDimensions();
+	return global.__scripStory;
 }
 
 function __scriptureApplyVAlign(_y) {
 	var _textbox = global.__scripTextbox,
-			_text = global.__scripText;
+			_story = global.__scripStory;
 	switch(_textbox.vAlign) {
 		case fa_top:    return _y;
-		case fa_middle: return _y - floor(_text.getCurPageHeight() / 2 - _textbox.__lineSpacing / 2)
-		case fa_bottom: return _y - floor(_text.getCurPageHeight()) + _textbox.__lineSpacing; 
+		case fa_middle: return _y - floor(_story.getCurPageHeight() / 2 - _textbox.__lineSpacing / 2)
+		case fa_bottom: return _y - floor(_story.getCurPageHeight()) + _textbox.__lineSpacing; 
 	}	
 }
 
