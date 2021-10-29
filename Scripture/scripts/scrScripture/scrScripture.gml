@@ -115,28 +115,21 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	}
 	
 	autoAdvancePage = function(_currentPage) {
-		//Do I need all the selfs?
-		if(self.inPageBreak) {
-			if(self.pageAdvanceDelay >= 0) {
-				self.pageAdvanceDelay--;
-				if(self.pageAdvanceDelay == -1)
-						self.inPageBreak = false;
+		if(!inPageBreak && (pageCount <=  1 || !_currentPage.isComplete || !global.__scripStory.canIncPage())) return;
+		if(pageAdvanceDelay >= 0) {
+			pageAdvanceDelay--;
+			if(pageAdvanceDelay == -1)
+				if(inPageBreak)
+					inPageBreak = false;
+				else
+					gotoPageNext(false);
 
-				return;
-			}
-		} else {
-			if(pageCount <=  1 || !_currentPage.isComplete || !global.__scripStory.canIncPage()) return;
-			if(self.pageAdvanceDelay >= 0) {
-				self.pageAdvanceDelay--;
-				if(self.pageAdvanceDelay == -1)
-						gotoPageNext(false);
-
-				return;
-			}
+			return;
 		}
+
 		var _delay = _currentPage.getPageAdvanceDelay();
 		if(_delay	>= 0)
-			self.pageAdvanceDelay	= _delay;
+			pageAdvanceDelay	= _delay;
 	}
 	
 	///@func draw(x,y)
