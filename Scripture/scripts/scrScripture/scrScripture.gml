@@ -41,7 +41,7 @@ global.__scripAlign = "L"
 global.__scripSpeed = "s"
 
 #region Scripture Constructors
-function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks) constructor {
+function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _defaultStyle, _forceLineBreaks) constructor {
 	hAlign = _hAlign;
 	vAlign = _vAlign;
 	lineBreakWidth = _maxWidth;
@@ -54,6 +54,14 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	nextPageReady = false;
 	currentDelay = 0;
 	pageAdvanceDelay = -1;
+	defaultStyle = undefined;
+	if(_defaultStyle != undefined) {
+		var _style = global.__scripStyles[$ _defaultStyle];
+		if(_style != undefined) {
+			defaultStyle = new __scriptureStyle(_style);
+			defaultStyle.key = "textboxDefaultStyle";
+		}
+	}
 	
 	var _story = __scriptureBuildStory(_string, self);
 	var _pageDimensions = []
@@ -935,7 +943,10 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 function __scriptureBuildStory(_string, _textbox) {
 	global.__scripTextbox = _textbox;
 	global.__scripStyleStack = [];
-	__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
+	if(defaultStyle == undefined)
+		__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
+	else
+		__scripturePushArrayToStyleStack(defaultStyle);
 	global.__scripStory = new __scriptureStory();
 	var _curPage = global.__scripStory.addPage();
 	var _curLine = _curPage.addLine();
@@ -998,6 +1009,7 @@ function scripture_register_style(_key, _style) {
 	_style.type = SCRIPTURE_TYPE_STYLE;
 	global.__scripStyles[$ _key] = _style;
 	return {
+		key: _key,
 		open: global.__scripOpenTag+_key+global.__scripCloseTag,
 		close: global.__scripOpenTag+global.__scripEndTag+_key+global.__scripCloseTag
 	}		
@@ -1090,8 +1102,8 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripSpeed = _speedMod;
 }
 
-function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _forceLineBreaks = false){
-	return new __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _forceLineBreaks)
+function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _defaultStyle = undefined, _forceLineBreaks = false){
+	return new __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _defaultStyle, _forceLineBreaks)
 }
 
 function scripture_hex_to_color(_hexString) {

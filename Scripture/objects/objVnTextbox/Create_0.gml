@@ -1,8 +1,8 @@
 /// @description 
 depth = VN_TEXTBOX_DEPTH;
 
-///@func Textbox(x, y, width, height, [color], [margin x], [margin y], [typeSpeed])
-Textbox = function(_x, _y, _width, _height, _color = c_black, _marginX = 20, _marginY = 10) constructor {
+///@func Textbox(x, y, width, height, defaultStyle, [color], [margin x], [margin y], [typeSpeed])
+Textbox = function(_x, _y, _width, _height, _defaultStyle, _color = c_black, _marginX = 20, _marginY = 10) constructor {
 	color = _color;
 	x = _x;
 	y = _y;
@@ -14,10 +14,11 @@ Textbox = function(_x, _y, _width, _height, _color = c_black, _marginX = 20, _ma
 	marginX = _marginX;
 	marginY = _marginY;
 	defaultTypeSpeed = .25;
+	defaultStyle = _defaultStyle;
 	
 	///@func rebuild(text, matchWidth, typeSpeed);
 	rebuild = function(_text,_matchWidth,  _typeSpeed = defaultTypeSpeed){
-		textbox = scripture_build_textbox(_text,980 - marginX * 2, height - 80, hAlign, fa_top, _typeSpeed, -5);
+		textbox = scripture_build_textbox(_text,980 - marginX * 2, height - 80, hAlign, fa_top, _typeSpeed, -5, defaultStyle);
 		if(_matchWidth)
 			width = textbox.maxWidth + marginX * 2;
 		return self;
@@ -57,7 +58,7 @@ Textbox = function(_x, _y, _width, _height, _color = c_black, _marginX = 20, _ma
 text = scrVnBuildScript();
 girlNames = ["??????",girlName]
 girlNameCurrent = 0;
-boyNames =  [boyNameOniisan,boyNameKanji, boyNameHiragana, boyNameRomaji];
+boyNames =  [boyNameOniisan,boyNameKanji, boyNameRomaji];
 boyNameCurrent = 0;
 
 var _center = room_width / 2;
@@ -67,9 +68,9 @@ var _nameW = 300;
 var _nameH = 64;
 var _nameYOff = -_nameH+4;
 boxes = [
-	new Textbox(_center - _boxW, room_height-_boxH,           _boxW*2, _boxH),
-	new Textbox(_center - _boxW, room_height-_boxH+_nameYOff, _nameW,  _nameH, VN_GIRL_COLOR, 20, 5),
-	new Textbox(_center + _boxW, room_height-_boxH+_nameYOff, _nameW,  _nameH, VN_BOY_COLOR, 20, 5)
+	new Textbox(_center - _boxW, room_height-_boxH,           _boxW*2, _boxH, regular.key),
+	new Textbox(_center - _boxW, room_height-_boxH+_nameYOff, _nameW, _nameH, bold.key, VN_GIRL_COLOR, 20, 5),
+	new Textbox(_center + _boxW, room_height-_boxH+_nameYOff, _nameW, _nameH, bold.key, VN_BOY_COLOR, 20, 5)
 ]
 boxes[Boxes.girl].hAlign = fa_left;
 boxes[Boxes.boy].hAlign = fa_right;
