@@ -5,6 +5,7 @@
 // - Pixelated Pope
 //*************************************************************************
 
+#region Globals and Macros
 global.__scripChapter = {};
 global.__scripTextbox = {};
 global.__scripString = "";
@@ -36,50 +37,69 @@ global.__scripAngle = "a"
 global.__scripAlpha = "A"
 global.__scripAlign = "L"
 global.__scripSpeed = "s"
+#endregion
 
 #region Scripture Constructors
 function __scriptureTextBox() constructor {
 	__hAlign = fa_left;
 	__vAlign = fa_top;
 	__lineBreakWidth = 0;
-	__pageBreakHeight = 0;
+	__verseBreakHeight = 0;
 	__typeSpeed = 0;
 	__lineSpacing = 0;
 	__forceLineBreaks = false;
 	__built = false;
 	__defaultStyle = undefined;
-	__inPageBreak = false;
+	__inVerseBreak = false;
 	__isPaused = false;
-	__pageAdvanceDelay = -1;
+	__verseAdvanceDelay = -1;
 	__chapter = undefined;
+	__currentDelay = 0;
+	__nextVerseReady = false;
 	
-	nextPageReady = false;
-	currentDelay = 0;
 	maxWidth = undefined;
 	maxHeight = undefined;
-	pageDimensions = undefined;
-	pageCount = undefined
+	__verseDimensions = undefined;
+	__verseCount = undefined
+	
+	__autoAdvanceVerse = function(_currentVerse) {
+		if(!__inVerseBreak && (__verseCount <=  1 || !_currentVerse.__isComplete || !global.__scripChapter.__canIncVerse())) return;
+		if(__verseAdvanceDelay >= 0) {
+			__verseAdvanceDelay--;
+			if(__verseAdvanceDelay == -1)
+				if(__inVerseBreak)
+					__inVerseBreak = false;
+				else
+					gotoPageNext(false);
+
+			return;
+		}
+
+		var _delay = _currentVerse.__getVerseAdvanceDelay();
+		if(_delay	>= 0)
+			__verseAdvanceDelay	= _delay;
+	}
 	
 	build = function(_string) {
 		__built = true;
 		var _chapter = __scriptureBuildChapter(_string, self);
-		var _pageDimensions = []
-		var _widestPageWidth = 0;
-		var _tallestPageHeight = 0;
-		for(var _i = 0; _i < _chapter.getPageCount(); _i++){
-			var _width = _chapter.pages[_i].width;
-			var _height = _chapter.pages[_i].height;
-			if(_width > _widestPageWidth)
-				_widestPageWidth = _width;
-			if(_height > _tallestPageHeight)
-				_tallestPageHeight = _height;
-			array_push(_pageDimensions, {width: _width, height: _height});
+		var _verseDimensions = []
+		var _widestVerseWidth = 0;
+		var _tallestVerseHeight = 0;
+		for(var _i = 0; _i < _chapter.__getVerseCount(); _i++){
+			var _width = _chapter.__verses[_i].__width;
+			var _height = _chapter.__verses[_i].__height;
+			if(_width > _widestVerseWidth)
+				_widestVerseWidth = _width;
+			if(_height > _tallestVerseHeight)
+				_tallestVerseHeight = _height;
+			array_push(_verseDimensions, {width: _width, height: _height});
 		}
 	
-		maxWidth = _widestPageWidth;
-		maxHeight = _tallestPageHeight;
-		pageDimensions = _pageDimensions;
-		pageCount = _chapter.getPageCount();
+		maxWidth = _widestVerseWidth;
+		maxHeight = _tallestVerseHeight;
+		__verseDimensions = _verseDimensions;
+		__verseCount = _chapter.__getVerseCount();
 		__chapter = _chapter;
 		return self
 	}
@@ -92,7 +112,7 @@ function __scriptureTextBox() constructor {
 	
 	setSize = function(_maxWidth, _maxHeight, _lineSpacing = 0, _forceLineBreaks = false) {
 		__lineBreakWidth = _maxWidth;
-		__pageBreakHeight = _maxHeight;
+		__verseBreakHeight = _maxHeight;
 		__lineSpacing = _lineSpacing;
 		__forceLineBreaks = _forceLineBreaks;
 		return self
@@ -116,65 +136,55 @@ function __scriptureTextBox() constructor {
 	}
 	
 	getPageAdvanceDelay = function() {
-		return __pageAdvanceDelay;	
+		return __verseAdvanceDelay;	
 	}
 	
-	getCurrentPageSize = function() {
-		return pageDimensions[__chapter.curPage];
+	getAllPageDimension = function() {
+		return __verseDimensions;	
+	}
+	
+	getCurrentPageDimensions = function() {
+		return __verseDimensions[__chapter.__curVerse];
 	}
 	
 	getCurrentPage = function() {
-		return __chapter.curPage;	
+		return __chapter.__curVerse;	
+	}
+	
+	getNextPageIsReady = function() {
+		return 	__nextVerseReady;
 	}
 	
 	gotoPageNext = function(_shortcutAnimations = true) {
-		if(__inPageBreak) {
-			__inPageBreak = false;
-			__pageAdvanceDelay = -1
+		if(__inVerseBreak) {
+			__inVerseBreak = false;
+			__verseAdvanceDelay = -1
 			return false;
 		}
-		var _curPage = __chapter.getCurrentPage();
-		if(_curPage.__isComplete) {
-			__pageAdvanceDelay = -1;
-			return __chapter.incPage();
+		var _curVerse = __chapter.__getCurrentVerse();
+		if(_curVerse.__isComplete) {
+			__verseAdvanceDelay = -1;
+			return __chapter.__incVerse();
 		}
 
-		_curPage.finishPage(_shortcutAnimations)   
+		_curVerse.__finishVerse(_shortcutAnimations)   
 		return true;
 	}
 
 	gotoPagePrev = function(_reset = true) {
-		__pageAdvanceDelay = -1;
-		__chapter.decPage(_reset);
+		__verseAdvanceDelay = -1;
+		__chapter.__decVerse(_reset);
 	}
 
-	gotoPage = function(_page, _reset = true) {
-		if(_page < 0 || _page >= pageCount) return;
-		__pageAdvanceDelay = -1;
-		__chapter.setCurrentPage(_page,_reset);
+	gotoPage = function(_verse, _reset = true) {
+		if(_verse < 0 || _verse >= __verseCount) return;
+		__verseAdvanceDelay = -1;
+		__chapter.__setCurrentVerse(_verse,_reset);
 	}
 	
 	setPaused = function(_isPaused) {
 		__isPaused = _isPaused;	
-	}
-	
-	__autoAdvancePage = function(_currentPage) {
-		if(!__inPageBreak && (pageCount <=  1 || !_currentPage.__isComplete || !global.__scripChapter.canIncPage())) return;
-		if(__pageAdvanceDelay >= 0) {
-			__pageAdvanceDelay--;
-			if(__pageAdvanceDelay == -1)
-				if(__inPageBreak)
-					__inPageBreak = false;
-				else
-					gotoPageNext(false);
-
-			return;
-		}
-
-		var _delay = _currentPage.getPageAdvanceDelay();
-		if(_delay	>= 0)
-			__pageAdvanceDelay	= _delay;
-	}
+	}	
 	
 	///@func draw(x,y)
 	draw = function(_x, _y) {
@@ -186,12 +196,12 @@ function __scriptureTextBox() constructor {
 		draw_set_valign(fa_middle);
 		global.__scripTextbox = self;
 		global.__scripChapter = __chapter;
-		var _currentPage = __chapter.getCurrentPage();
-		_currentPage.draw(_x, _y);
+		var _currentVerse = __chapter.__getCurrentVerse();
+		_currentVerse.__draw(_x, _y);
 		draw_set_alpha(1);
 	
-		nextPageReady = _currentPage.__isComplete || __inPageBreak;
-		__autoAdvancePage(_currentPage);
+		__nextVerseReady = _currentVerse.__isComplete || __inVerseBreak;
+		__autoAdvanceVerse(_currentVerse);
 	}
 }
 
@@ -219,7 +229,7 @@ global.__scripStyles.defaultStyle = new __scriptureStyle();
 global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 
 function __scriptureBuildElement(_style) {
-	style = _style;
+	__style = _style;
 	xScale = _style.xScale;
 	yScale = _style.yScale;
 	xOff = _style.xOff;
@@ -230,34 +240,34 @@ function __scriptureBuildElement(_style) {
 	_style.xOff = 0;
 	_style.yOff = 0;
 	_style.alpha = 1;
-	onDrawBeginSteps = [];
-	onDrawEndSteps = [];
-	wasSkipped = false;
-	resetSteps = function(){
-		wasSkipped = false;
-		onDrawBeginSteps = [];
-			onDrawEndSteps = [];
+	__onDrawBeginSteps = [];
+	__onDrawEndSteps = [];
+	__wasSkipped = false;
+	__resetSteps = function () {
+		__wasSkipped = false;
+		__onDrawBeginSteps = [];
+		__onDrawEndSteps = [];
 	}
-	skip = function(_line){
-		wasSkipped = true;
-		onDrawBeginSteps = [];
-		onDrawEndSteps = [];
-		draw(-100000,-100000, 0, _line);
+	__skip = function(_line) {
+		__wasSkipped = true;
+		__onDrawBeginSteps = [];
+		__onDrawEndSteps = [];
+		__draw(-__SCRIPTURE_SKIP_VAL,-__SCRIPTURE_SKIP_VAL, 0, _line);
 	}
-	executeOnDrawBegin = function(_x, _y,  _index) {
-		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
-			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? __SCRIPTURE_SKIP_VAL : 0; 
-			var _breakChain = style.onDrawBegin[_i](_x, _y, style, self, onDrawBeginSteps[_i], _index)
-			onDrawBeginSteps[_i] += !global.__scripTextbox.__isPaused;
+	__executeOnDrawBegin = function(_x, _y,  _index) {
+		for(var _i = 0; _i < array_length(__style.onDrawBegin); _i++) {
+			if(array_length(__onDrawBeginSteps) < _i+1) __onDrawBeginSteps[_i] = __wasSkipped ? __SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = __style.onDrawBegin[_i](_x, _y, __style, self, __onDrawBeginSteps[_i], _index)
+			__onDrawBeginSteps[_i] += !global.__scripTextbox.__isPaused;
 			if(_breakChain)	break;
 		}
 	}
 	
-	executeOnDrawEnd = function(_x, _y,  _index) {
-		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
-			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? __SCRIPTURE_SKIP_VAL : 0; 
-			var _breakChain = style.onDrawEnd[_i](_x, _y, style, self, onDrawEndSteps[_i], _index)
-			onDrawEndSteps[_i] += !global.__scripTextbox.__isPaused;
+	__executeOnDrawEnd = function(_x, _y,  _index) {
+		for(var _i = 0; _i < array_length(__style.onDrawEnd); _i++) {
+			if(array_length(__onDrawEndSteps) < _i+1) __onDrawEndSteps[_i] = __wasSkipped ? __SCRIPTURE_SKIP_VAL : 0; 
+			var _breakChain = __style.onDrawEnd[_i](_x, _y, __style, self, __onDrawEndSteps[_i], _index)
+			__onDrawEndSteps[_i] += !global.__scripTextbox.__isPaused;
 			if(_breakChain)	break;
 		}
 	}
@@ -268,38 +278,38 @@ function __scriptureChar(_char, _style = new __scriptureStyle()) constructor {
 	char = _char;
 	isSpace = _char == " ";
 	__scriptureBuildElement(_style);
-	draw_set_font(style.font);
-	width = string_width(char) * xScale + style.kerning;
+	draw_set_font(__style.font);
+	width = string_width(char) * xScale + __style.kerning;
 	height = string_height(char) * yScale;
 	centerX = width / 2;
 	centerY = height / 2;
-	color = style.color;
+	color = __style.color;
 	
-	draw = function(_x, _y, _index, _line) {
+	__draw = function(_x, _y, _index, _line) {
 		var _drawX = floor(_x + centerX) + xOff;
 		var _drawY = floor(_y + centerY) + yOff;
 		
-		switch(style.textAlign) {
+		switch(__style.textAlign) {
 			case fa_top: break;
-			case fa_middle: _drawY += floor(_line.height/2 - centerY); break;
-			case fa_bottom: _drawY += floor(_line.height - centerY * 2); break;
+			case fa_middle: _drawY += floor(_line.__height/2 - centerY); break;
+			case fa_bottom: _drawY += floor(_line.__height - centerY * 2); break;
 		}
 		
-		draw_set_font(style.font);
-		draw_set_color(style.color);
-		draw_set_alpha(alpha * style.alpha);
+		draw_set_font(__style.font);
+		draw_set_color(__style.color);
+		draw_set_alpha(alpha * __style.alpha);
 		
-		executeOnDrawBegin(_drawX, _drawY, _index);
+		__executeOnDrawBegin(_drawX, _drawY, _index);
 		
-		_drawX += style.xOff;
-		_drawY += style.yOff;
+		_drawX += __style.xOff;
+		_drawY += __style.yOff;
 		
-		draw_set_font(style.font);
-		draw_set_color(style.color);
-		draw_set_alpha(alpha * style.alpha);
-		draw_text_transformed(_drawX, _drawY, char, xScale * style.xScale, yScale * style.yScale, style.angle);
+		draw_set_font(__style.font);
+		draw_set_color(__style.color);
+		draw_set_alpha(alpha * __style.alpha);
+		draw_text_transformed(_drawX, _drawY, char, xScale * __style.xScale, yScale * __style.yScale, __style.angle);
 		
-		executeOnDrawEnd(_drawX, _drawY, _index);
+		__executeOnDrawEnd(_drawX, _drawY, _index);
 
 		return width;
 	}
@@ -320,21 +330,21 @@ function __scriptureImg(_style) constructor {
 																				 ? sprite_get_speed(sprite) 
 																				 : sprite_get_speed(sprite) / room_speed;
 	__scriptureBuildElement(_active)
-	style = _active;
-	width = sprite_get_width(sprite) * xScale + style.kerning;
+	__style = _active;
+	width = sprite_get_width(sprite) * xScale + __style.kerning;
 	height = sprite_get_height(sprite) * yScale;
 	centerX = width/2;
 	centerY = height/2;
 	
-	draw = function(_drawX, _drawY, _index) {
-		executeOnDrawBegin(_drawX, _drawY, _index);
+	__draw = function(_drawX, _drawY, _index) {
+		__executeOnDrawBegin(_drawX, _drawY, _index);
 
 		draw_sprite_ext(sprite, image, 
-										_drawX + style.xOff + centerX, _drawY + style.yOff + centerY, 
-										xScale * style.xScale, yScale * style.yScale, 
-										style.angle, style.color, alpha * style.alpha);
+										_drawX + __style.xOff + centerX, _drawY + __style.yOff + centerY, 
+										xScale * __style.xScale, yScale * __style.yScale, 
+										__style.angle, __style.color, alpha * __style.alpha);
 		
-		executeOnDrawEnd(_drawX, _drawY, _index);
+		__executeOnDrawEnd(_drawX, _drawY, _index);
 		
 		image += speed * !global.__scripTextbox.__isPaused;
 		return width;
@@ -343,369 +353,370 @@ function __scriptureImg(_style) constructor {
 
 function __scriptureEvent(_func, _delay = undefined, _canSkip = true, _arguments = []) constructor {
 	type = __SCRIPTURE_TYPE_EVENT;
-	event = _func;
-	arguments = _arguments;
+	__event = _func;
+	__arguments = _arguments;
 	isSpace = false;
-	style = {
-		speedMod:1, pageAdvanceDelay: 
-		global.__scripActiveStyle.pageAdvanceDelay
+	__style = {
+		speedMod: 1, 
+		pageAdvanceDelay: global.__scripActiveStyle.pageAdvanceDelay
 	};
-	ran = false;
-	wasSkipped = false;
-	canSkip = _canSkip;
-	delay = _delay;
-	skip = function(_line){
-		wasSkipped = true;	
-		draw();
+	__ran = false;
+	__wasSkipped = false;
+	__canSkip = _canSkip;
+	__delay = _delay;
+	__skip = function(_line){
+		__wasSkipped = true;	
+		__draw();
 	}
-	draw = function(){
-		if(ran) return 0;
-		ran = true;
-		event(arguments);
-		if(delay == undefined) return 0;
-		if(delay > 0) 
-			global.__scripTextbox.currentDelay = delay;
+	__draw = function(){
+		if(__ran) return 0;
+		__ran = true;
+		__event(__arguments);
+		if(__delay == undefined) return 0;
+		if(__delay > 0) 
+			global.__scripTextbox.__currentDelay = __delay;
 		else
-			global.__scripTextbox.__inPageBreak = true;
+			global.__scripTextbox.__inVerseBreak = true;
 		return 0;
 	}
 }
 
-
 function __scriptureLine() constructor {
-	width = 0;
-	height = 0;
-	characters = [];
+	__width = 0;
+	__height = 0;
+	__characters = [];
 	__isComplete = false;
-	lastSpace = undefined;
-	getLength = function() { return array_length(characters) };
-	typePos = 0;
-	delay = __scriptureIsTyping();
-	getCharacterCount = function(){return array_length(characters)}
+	__lastSpace = undefined;
+	__typePos = 0;
+	__delay = __scriptureIsTyping();
+	__getCharacterCount = function(){return array_length(__characters)}
 	
-	draw = function(_x, _y, _page) {
+	__draw = function(_x, _y, _verse) {
 		var _eventCount = 0;
-		for(var _c = 0; _c < getLength(); _c++) {
-			if(!__isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) { //Delay Countdown
-				if(global.__scripTextbox.currentDelay > 0) {
-					global.__scripTextbox.currentDelay--;
+		for(var _c = 0; _c < __getCharacterCount(); _c++) {
+			if(!__isComplete && __scriptureIsTyping() && _c > __typePos && _c > 0) { //Delay Countdown
+				if(global.__scripTextbox.__currentDelay > 0) {
+					global.__scripTextbox.__currentDelay--;
 					return false;
 				}
-				if(!global.__scripTextbox.__isPaused && !global.__scripTextbox.__inPageBreak) { //Paused or InPageBreak
-					typePos += global.__scripTextbox.__typeSpeed * characters[_c-1].style.speedMod;
-					_eventCount += characters[_c].type == __SCRIPTURE_TYPE_EVENT;
+				if(!global.__scripTextbox.__isPaused && !global.__scripTextbox.__inVerseBreak) { //Paused or InPageBreak
+					__typePos += global.__scripTextbox.__typeSpeed * __characters[_c-1].__style.speedMod;
+					_eventCount += __characters[_c].type == __SCRIPTURE_TYPE_EVENT;
 				}
 				return false;
 			}
-			_eventCount += characters[_c].type == __SCRIPTURE_TYPE_EVENT;
-			_x += characters[_c].draw(_x, _y, _c - _eventCount, self);
+			_eventCount += __characters[_c].type == __SCRIPTURE_TYPE_EVENT;
+			_x += __characters[_c].__draw(_x, _y, _c - _eventCount, self);
 		}
-		if(delay > 0) {
-			delay -= getLength() == 0 ? 1 : characters[getLength()-1].style.speedMod;
+		if(__delay > 0) {
+			__delay -= __getCharacterCount() == 0 ? 1 : __characters[__getCharacterCount()-1].__style.speedMod;
 			return false;	
 		}
 		__isComplete = true;
 		return true;
 	}
 	
-	reset = function(){
+	__reset = function(){
 		__isComplete = false;
-		typePos = 0;
-		delay = __scriptureIsTyping();
-		for(var _i = 0; _i < getLength(); _i++) {
-			var _char = characters[_i];
+		__typePos = 0;
+		__delay = __scriptureIsTyping();
+		for(var _i = 0; _i < __getCharacterCount(); _i++) {
+			var _char = __characters[_i];
 			
 			switch(_char.type) {
 				case __SCRIPTURE_TYPE_EVENT:
-					_char.ran = false;
+					_char.__ran = false;
 				break;
 				case SCRIPTURE_TYPE_IMG:
 					_char.image = 0;
 				default:
-					_char.resetSteps();
+					_char.__resetSteps();
 			}
 		}
 	}
 	
-	endAnimations = function() {
-		for(var _c = 0; _c < getLength(); _c++) {
-			var _char = characters[_c];
-			if(_char.type == __SCRIPTURE_TYPE_EVENT && _char.canSkip) {
-				_char.ran = true;
+	__endAnimations = function() {
+		for(var _c = 0; _c < __getCharacterCount(); _c++) {
+			var _char = __characters[_c];
+			if(_char.type == __SCRIPTURE_TYPE_EVENT && _char.__canSkip) {
+				_char.__ran = true;
 				continue; 
 			}
-			_char.skip(self)
+			_char.__skip(self)
 		}
 	}
 	
-	trimWhiteSpace = function(){
-		while(array_length(characters) != 0 && (characters[0].type == SCRIPTURE_TYPE_CHAR && characters[0].char == " "))
-			array_delete(characters[0],0,1);
+	__trimWhiteSpace = function() {
+		while(__getCharacterCount() != 0 && __characters[0].type == SCRIPTURE_TYPE_CHAR && __characters[0].isSpace)
+			array_delete(__characters, 0, 1);
 		
-		while(array_length(characters) > 1 && (characters[array_length(characters)-1].type == SCRIPTURE_TYPE_CHAR && characters[array_length(characters)-1].char == " "))
-			array_delete(characters,array_length(characters)-1,1);
+		while(__getCharacterCount() > 1 && __characters[__getCharacterCount() - 1].type == SCRIPTURE_TYPE_CHAR && __characters[__getCharacterCount() - 1].isSpace)
+			array_delete(__characters, __getCharacterCount()-1,1);
 	}
 	
-	addElement = function(_newElement) {
+	__addElement = function(_newElement) {
 		if(_newElement.type != __SCRIPTURE_TYPE_EVENT)
-			width += _newElement.width;
-		array_push(characters, _newElement);
+			__width += _newElement.width;
+		array_push(__characters, _newElement);
 		return _newElement;
 	}
 	
-	addElements = function(_elements) {
+	__addElements = function(_elements) {
 		for(var _i = 0; _i < array_length(_elements); _i++) {
-			array_push(characters, _elements[_i]);	
+			array_push(__characters, _elements[_i]);	
 		}
-		calcWidth();
+		__calcWidth();
 	}
 	
-	addHyphen = function(_hyphen){
-		array_push(characters,_hyphen);
-		width += _hyphen.width;
-		lastSpace = getLength();
+	__addHyphen = function(_hyphen){
+		array_push(__characters,_hyphen);
+		__width += _hyphen.width;
+		__lastSpace = __getCharacterCount();
 	}
 	
-	addSpace = function(){
-		if(getLength() == 0) return;
+	__addSpace = function(){
+		if(__getCharacterCount() == 0) return;
 		
 		var _space = new __scriptureChar(" ", new __scriptureStyle(global.__scripActiveStyle));
-		array_push(characters,_space);
-		width += _space.width;
-		lastSpace = getLength();
+		array_push(__characters,_space);
+		__width += _space.width;
+		__lastSpace = __getCharacterCount();
 	}
 	
-	calcWidth = function(){
-		trimWhiteSpace();
-		width = 0;
-		for(var _i = 0; _i < array_length(characters); _i++) {
-			var _char = characters[_i];
+	__calcWidth = function(){
+		__trimWhiteSpace();
+		__width = 0;
+		for(var _i = 0; _i < __getCharacterCount(); _i++) {
+			var _char = __characters[_i];
 			if(_char.type == __SCRIPTURE_TYPE_EVENT) continue;
 			
-			width += _char.width;
+			__width += _char.width;
 		}
-		return width;
+		return __width;
 	}
 	
-	calcHeight = function(){
-		trimWhiteSpace();	
-		height = 0;
-		for(var _i = 0; _i < array_length(characters); _i++) {
-			var _char = characters[_i];
+	__calcHeight = function(){
+		__trimWhiteSpace();	
+		__height = 0;
+		for(var _i = 0; _i < __getCharacterCount(); _i++) {
+			var _char = __characters[_i];
 			if(_char.type == __SCRIPTURE_TYPE_EVENT) continue;
 
-			if(_char.height > height) 
-				height = _char.height;
+			if(_char.height > __height) 
+				__height = _char.height;
 		}
-		if(height == 0)
-			height = string_height("QWERTYUIOPASDFGHJKLZXCVBNM<>,./;'[]{}:\"?");
-		return height;
+		if(__height == 0)
+			__height = string_height("QWERTYUIOPASDFGHJKLZXCVBNM<>,./;'[]{}:\"?");
+		return __height;
 	}
 	
-	calcDimensions = function(){
-		calcWidth();
-		calcHeight();
+	__calcDimensions = function(){
+		__calcWidth();
+		__calcHeight();
 	}
 	
-	checkForWrap = function() {
+	__checkForWrap = function() {
 		var _textbox = global.__scripTextbox;
-		var _result = {didWrap: false, leftovers: [], leftoverHeight: 0};
-		if(_textbox.__lineBreakWidth <= 0 || width <= _textbox.__lineBreakWidth) return _result
+		var _result = {
+			__didWrap: false, 
+			__leftovers: [], 
+			__leftoverHeight: 0};
+		if(_textbox.__lineBreakWidth <= 0 || __width <= _textbox.__lineBreakWidth) return _result
 		
-		var _lastSpace = _textbox.__forceLineBreaks ? 0 : lastSpace;
-		if(lastSpace == undefined && _textbox.__forceLineBreaks == false) return _result
-		var _length = _textbox.__forceLineBreaks ? 0 : getLength() - lastSpace;
-		_result.didWrap = true;
-		array_copy(_result.leftovers, 0, characters, _lastSpace, _length);
-		array_delete(characters, _lastSpace, _length);
+		var _lastSpace = _textbox.__forceLineBreaks ? 0 : __lastSpace;
+		if(__lastSpace == undefined && _textbox.__forceLineBreaks == false) return _result
+		var _length = _textbox.__forceLineBreaks ? 0 : __getCharacterCount() - __lastSpace;
+		_result.__didWrap = true;
+		array_copy(_result.__leftovers, 0, __characters, _lastSpace, _length);
+		array_delete(__characters, _lastSpace, _length);
 		
 		var _maxHeight = 0;
-		for(var _i = 0; _i < array_length(_result.leftovers); _i++) {
-			var _h =_result.leftovers[_i].height;
+		for(var _i = 0; _i < array_length(_result.__leftovers); _i++) {
+			var _h =_result.__leftovers[_i].height;
 			if(_h > _maxHeight) _maxHeight = _h;
 		}
-		_result.leftoverHeight = _maxHeight;
+		_result.__leftoverHeight = _maxHeight;
 		return _result
 	}
 	
-	findNextInPageBreak = function(){
-		for(var _i = typePos; _i < getCharacterCount(); _i++) {
-			var _char = characters[_i];
-			if( _char.type == __SCRIPTURE_TYPE_EVENT && _char.delay <= 0)
+	__findNextInVerseBreak = function(){
+		for(var _i = __typePos; _i < __getCharacterCount(); _i++) {
+			var _char = __characters[_i];
+			if( _char.type == __SCRIPTURE_TYPE_EVENT && _char.__delay <= 0)
 				return _i;
 		}
 		return _i;
 	}
 	
-	forceComplete = function() {
-		var _pos = findNextInPageBreak();
-		if(_pos < getCharacterCount()) {
-			typePos = _pos;
+	__forceComplete = function() {
+		var _pos = __findNextInVerseBreak();
+		if(_pos < __getCharacterCount()) {
+			__typePos = _pos;
 			return false;
 		}
 		__isComplete = true;
-		typePos = 10000000;
-		delay = 0;
+		__typePos = 10000000;
+		__delay = 0;
 		return true;
 	}
 }
 
-function __scripturePage() constructor {
-	width = 0;
-	height = 0;
-	linePos = 0;
+function __scriptureVerse() constructor {
+	__width = 0;
+	__height = 0;
+	__linePos = 0;
 	__isComplete = false;
-	lines = [];
-	draw = function(_x, _y) {
+	__lines = [];
+	__draw = function(_x, _y) {
 		var	_drawX,
 		    _drawY = __scriptureApplyVAlign(_y);
 	
-		for(var _i = 0; _i < getLineCount(); _i++) {
-			if(!__isComplete && __scriptureIsTyping() && _i > linePos) return false;
+		for(var _i = 0; _i < __getLineCount(); _i++) {
+			if(!__isComplete && __scriptureIsTyping() && _i > __linePos) return false;
 			
-			var _curLine = lines[_i];
+			var _curLine = __lines[_i];
 			_drawX = __scriptureApplyHAlign(_x, _curLine);
-			if(!_curLine.draw(_drawX, _drawY)) return false;
+			if(!_curLine.__draw(_drawX, _drawY)) return false;
 			
-			if(linePos == _i) 
-				linePos++;
-			_drawY += _curLine.height + global.__scripTextbox.__lineSpacing;
+			if(__linePos == _i) 
+				__linePos++;
+			_drawY += _curLine.__height + global.__scripTextbox.__lineSpacing;
 		}
 		__isComplete = true;
-		global.__scripTextbox.currentDelay = 0;
+		global.__scripTextbox.__currentDelay = 0;
 		return true;
 	}
 	
-	getLineCount = function() {return array_length(lines);}
+	__getLineCount = function() {return array_length(__lines);}
 	
-	finishPage = function(_shortcutAnims) {
-		for(var _i = 0; _i < getLineCount(); _i++) {
-			if(!lines[_i].forceComplete()) return;
+	__finishVerse = function(_shortcutAnims) {
+		for(var _i = 0; _i < __getLineCount(); _i++) {
+			if(!__lines[_i].__forceComplete()) return;
 			if(_shortcutAnims) {
-				lines[_i].endAnimations();
+				__lines[_i].__endAnimations();
 			}
 		}
 		__isComplete = true;
-		linePos = getLineCount();
+		__linePos = __getLineCount();
 	}
 	
-	reset = function() {
+	__reset = function() {
 		__isComplete = false;
-		for(var _i = 0; _i < getLineCount(); _i++) {
-			lines[_i].reset();	
+		for(var _i = 0; _i < __getLineCount(); _i++) {
+			__lines[_i].__reset();	
 		}
 	}
 	
-	calcHeight = function() {
-		height = 0;
-		for(var _i = 0; _i < getLineCount(); _i++) {
-			height += lines[_i].calcHeight() + (_i > 0 ? global.__scripTextbox.__lineSpacing : 0);
+	__calcHeight = function() {
+		__height = 0;
+		for(var _i = 0; _i < __getLineCount(); _i++) {
+			__height += __lines[_i].__calcHeight() + (_i > 0 ? global.__scripTextbox.__lineSpacing : 0);
 		}
 
-		return height;
+		return __height;
 	}
 	
-	calcWidth = function() {
-		width = 0;
-		for(var _i = 0; _i < getLineCount(); _i++) {
-			var _width = lines[_i].calcWidth();
-			if(_width > width)
-				width = _width;
+	__calcWidth = function() {
+		__width = 0;
+		for(var _i = 0; _i < __getLineCount(); _i++) {
+			var _width = __lines[_i].__calcWidth();
+			if(_width > __width)
+				__width = _width;
 		}
-		return width;
+		return __width;
 	}
 	
-	addLine = function() {
+	__addLine = function() {
 		var _newLine = new __scriptureLine();
-		array_push(lines, _newLine)
+		array_push(__lines, _newLine)
 		return _newLine;
 	}
 	
-	getPageLastCharacter = function() {
-		var _lastLine = lines[getLineCount()-1]
-		return _lastLine.characters[_lastLine.getCharacterCount()-1]		
+	__getVerseLastCharacter = function() {
+		var _lastLine = __lines[__getLineCount()-1]
+		return _lastLine.__characters[_lastLine.__getCharacterCount()-1]		
 	}
 	
-	getPageAdvanceDelay = function(_character = getPageLastCharacter()){
-		return _character.style.pageAdvanceDelay;
+	__getVerseAdvanceDelay = function(_character = __getVerseLastCharacter()){
+		return _character.__style.pageAdvanceDelay;
 	}
 }
 
 function __scriptureChapter() constructor {
-	width = 0;
-	height = 0;
-	pages = [];
-	curPage = 0;
-	getPageCount = function() { return array_length(pages) };
-	getCurrentPage = function() { return pages[curPage] };
-	__inPageBreak = false;
-	calcHeight = function() {	
-		height = 0;
-		for(var _i = 0; _i < getPageCount(); _i++) {
-			var _height = pages[_i].calcHeight();
-			if(_height > height)
-				height = _height;
+	__width = 0;
+	__height = 0;
+	__verses = [];
+	__curVerse = 0;
+	__getVerseCount = function() { return array_length(__verses) };
+	__getCurrentVerse = function() { return __verses[__curVerse] };
+	__inVerseBreak = false;
+	__calcHeight = function() {	
+		__height = 0;
+		for(var _i = 0; _i < __getVerseCount(); _i++) {
+			var _height = __verses[_i].__calcHeight();
+			if(_height > __height)
+				__height = _height;
 		}
-		return height;
+		return __height;
 	}
 	
-	calcWidth = function() {
-		width = 0; 
-		for(var _i = 0; _i < getPageCount(); _i++) {
-			var _width = pages[_i].calcWidth();
-			if(_width > width)
-				width = _width;
+	__calcWidth = function() {
+		__width = 0; 
+		for(var _i = 0; _i < __getVerseCount(); _i++) {
+			var _width = __verses[_i].__calcWidth();
+			if(_width > __width)
+				__width = _width;
 		}
-		return width;
+		return __width;
 	}
 	
-	calcDimensions = function() {
-		calcHeight();
-		calcWidth();
+	__calcDimensions = function() {
+		__calcHeight();
+		__calcWidth();
 	}
 	
-	getCurPageHeight = function() {
-		return pages[curPage].height;	
+	__getCurVerseHeight = function() {
+		return __verses[__curVerse].__height;	
 	}
 	
-	getCurPageWidth = function() {
-		return pages[curPage].width;	
+	__getCurVerseWidth = function() {
+		return __verses[__curVerse].__width;	
 	}
 	
-	resetFromPage = function(_page) {
-		for(var _i = max(0,_page); _i < getPageCount(); _i++) {
-			pages[_i].reset();	
+	__resetFromVerse = function(_verse) {
+		for(var _i = max(0,_verse); _i < __getVerseCount(); _i++) {
+			__verses[_i].__reset();	
 		}
 	}
 	
-	setCurrentPage = function(_page, _reset = false) {
-		var _prevPage = curPage;
-		curPage = clamp(_page,0,getPageCount()-1);
-		__pageAdvanceDelay = -1;
-		if(_reset && _prevPage >= curPage)
-			resetFromPage(curPage);
+	__setCurrentVerse = function(_verse, _reset = false) {
+		var _prevVerse = __curVerse;
+		__curVerse = clamp(_verse,0,__getVerseCount()-1);
+		__verseAdvanceDelay = -1;
+		if(_reset && _prevVerse >= __curVerse)
+			__resetFromVerse(__curVerse);
 	}
 	
-	canIncPage = function() {
-		return curPage+1 < getPageCount()
+	__canIncVerse = function() {
+		return __curVerse + 1 < __getVerseCount()
 	}
 	
-	incPage = function() {
-		if(!canIncPage()) return false;
-		setCurrentPage(curPage+1)
+	__incVerse = function() {
+		if(!__canIncVerse()) return false;
+		__setCurrentVerse(__curVerse + 1)
 		return true;
 	}
 	
-	decPage = function(_reset = false) {
-		if(curPage-1 < 0) return false;
-		setCurrentPage(curPage-1,_reset)	
+	__decVerse = function(_reset = false) {
+		if(__curVerse - 1 < 0) return false;
+		__setCurrentVerse(__curVerse - 1, _reset)	
 		return true;
 	}
 	
-	addPage = function() {
-		var _page = new __scripturePage();
-		array_push(pages, _page);
-		return _page;
+	__addVerse = function() {
+		var _verse = new __scriptureVerse();
+		array_push(__verses, _verse);
+		return _verse;
 	}
 }
 
@@ -748,16 +759,16 @@ function __scriptureIsInlineSignifier(_tagContent) {
 
 function __scriptureXYParse(_tagContent) {
 	var _x = "";
-	while(string_char_at(_tagContent,1) != ",") {
-		_x+=string_char_at(_tagContent,1);
-		_tagContent = string_delete(_tagContent,1,1);
+	while(string_char_at(_tagContent, 1) != ",") {
+		_x+=string_char_at(_tagContent, 1);
+		_tagContent = string_delete(_tagContent, 1, 1);
 	}
-	_tagContent = string_delete(_tagContent,1,1);
+	_tagContent = string_delete(_tagContent, 1, 1);
 	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
 	var _y = "";
 	while(_tagContent != "") {
-		_y+=string_char_at(_tagContent,1);
-		_tagContent = string_delete(_tagContent,1,1);
+		_y+=string_char_at(_tagContent, 1);
+		_tagContent = string_delete(_tagContent, 1, 1);
 	}
 	
 	return {x: real(_x), y: real(_y)};
@@ -766,16 +777,16 @@ function __scriptureXYParse(_tagContent) {
 function __scriptureMultiParse(_tagContent) {
 	var _space = string_pos(" ", _tagContent);
 	if(_space == 0) return [];
-	var _arguments = string_delete(_tagContent,1,_space);
+	var _arguments = string_delete(_tagContent, 1, _space);
 	var _array = [];
 	while(_arguments != "") {
 		var _arg = "";
 		_arguments = __scriptureStringTrimWhiteSpace(_arguments);
-		while(string_char_at(_arguments,1) != "," && _arguments != ""){
-			_arg+=string_char_at(_arguments,1);
-			_arguments = string_delete(_arguments,1,1);
+		while(string_char_at(_arguments, 1) != "," && _arguments != ""){
+			_arg += string_char_at(_arguments, 1);
+			_arguments = string_delete(_arguments, 1, 1);
 		}
-		_arguments = string_delete(_arguments,1,1);
+		_arguments = string_delete(_arguments, 1, 1);
 		array_push(_array,_arg);
 	}
 	return _array;
@@ -784,8 +795,8 @@ function __scriptureMultiParse(_tagContent) {
 function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
 	if(!__scriptureIsInlineSignifier(_tagContent)) return false;
-	var _symbol = string_char_at(_tagContent,1);
-	_tagContent = string_delete(_tagContent,1,1);
+	var _symbol = string_char_at(_tagContent, 1);
+	_tagContent = string_delete(_tagContent, 1, 1);
 	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
 	var _active = global.__scripActiveStyle;
 	switch(_symbol) {
@@ -796,7 +807,7 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 		break;
 		case global.__scripImage:
 			var _val = asset_get_index(_tagContent);
-			_curLine.addElement(new __scriptureImg({sprite: _val}))
+			_curLine.__addElement(new __scriptureImg({sprite: _val}))
 			return true;
 		case global.__scripFont:
 			var _val = asset_get_index(_tagContent);
@@ -846,24 +857,24 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 function __scriptureGetTagKey(_tag) {
 	var _space = string_pos(" ", _tag);
 	if(_space == 0) return _tag;
-	var _key = string_delete(_tag,_space,1000);
+	var _key = string_delete(_tag, _space, 1000);
 	return _key;
 }
 
 function __scriptureHandleTag(_string, _curLine) {
 	var _tagContent = "";
-	var _isClosingTag = string_char_at(_string,1) == global.__scripEndTag;
+	var _isClosingTag = string_char_at(_string, 1) == global.__scripEndTag;
 	if(_isClosingTag)
-		_string = string_delete(_string,1,1);
+		_string = string_delete(_string, 1, 1);
 		
-	while(string_char_at(_string,1) != global.__scripCloseTag) {
-		_tagContent += string_char_at(_string,1);
-		_string = string_delete(_string,1,1);
+	while(string_char_at(_string, 1) != global.__scripCloseTag) {
+		_tagContent += string_char_at(_string, 1);
+		_string = string_delete(_string, 1, 1);
 		
-		if(string_char_at(_string,1) == global.__scripOpenTag || string_length(_string) == 0)
+		if(string_char_at(_string, 1) == global.__scripOpenTag || string_length(_string) == 0)
 			throw("Unclosed Tag Found/n Check your shit, yo.");	
 	}
-	_string = string_delete(_string,1,1);
+	_string = string_delete(_string, 1, 1);
 	
 	var _key = __scriptureGetTagKey(_tagContent)
 	
@@ -874,10 +885,10 @@ function __scriptureHandleTag(_string, _curLine) {
 
 		try {
 			var _amount = real(_tagContent);
-			_curLine.addElement(new __scriptureEvent(function(){},_amount, false))
+			_curLine.__addElement(new __scriptureEvent(function(){}, _amount, false))
 		} catch(_ex){
 			show_debug_message(_ex);
-			show_debug_message("Tag: "+_tagContent+" not a valid style, doofus.");
+			show_debug_message("Tag: " + _tagContent + " not a valid style, doofus.");
 		}
 		
 		return _string;
@@ -891,10 +902,10 @@ function __scriptureHandleTag(_string, _curLine) {
 			__scriptureEnqueueStyle(_tagContent);
 		break;
 						
-		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style)); break;
+		case SCRIPTURE_TYPE_IMG: _curLine.__addElement(new __scriptureImg(_style)); break;
 		case __SCRIPTURE_TYPE_EVENT: 
 			var _arguments = __scriptureMultiParse(_tagContent)
-			_curLine.addElement(new __scriptureEvent(_style.event, undefined, _style.canSkip, _arguments)); 
+			_curLine.__addElement(new __scriptureEvent(_style.__event, undefined, _style.__canSkip, _arguments)); 
 		break;
 	}
 	
@@ -937,7 +948,7 @@ function __scriptureDequeueStyle(_key) {
 	
   var _index = __scriptureFindStyleIndex(_key);
   if(_index == -1) return;
-  array_delete(global.__scripStyleStack,_index,1);
+  array_delete(global.__scripStyleStack,_index, 1);
 	__scriptureRebuildActiveStyle();
 }
 
@@ -956,25 +967,25 @@ function __scriptureEnqueueStyle(_key) {
   __scripturePushArrayToStyleStack(_style);
 }
 
-function __scriptureLineWillForceNewPage(_curPage, _wrapResult){
-	if(global.__scripTextbox.__pageBreakHeight <= 0) return false;
+function __scriptureLineWillForceNewVerse(_curVerse, _wrapResult){
+	if(global.__scripTextbox.__verseBreakHeight <= 0) return false;
 	
-	return _curPage.height + global.__scripTextbox.__lineSpacing + _wrapResult.leftoverHeight >= global.__scripTextbox.__pageBreakHeight; 
+	return _curVerse.__height + global.__scripTextbox.__lineSpacing + _wrapResult.__leftoverHeight >= global.__scripTextbox.__verseBreakHeight; 
 }
 
-function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = false, _forceNewPage = false) {
-	var _wrapResult = _curLine.checkForWrap();
-	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
-		_curPage.calcHeight();
-		if(_forceNewPage || __scriptureLineWillForceNewPage(_curPage, _wrapResult)) {
-			_curPage = global.__scripChapter.addPage();
+function __scriptureHandleWrapAndPagination(_curLine, _curVerse, _forceNewLine = false, _forceNewVerse = false) {
+	var _wrapResult = _curLine.__checkForWrap();
+	if(_forceNewLine || _forceNewVerse || _wrapResult.__didWrap) {
+		_curVerse.__calcHeight();
+		if(_forceNewVerse || __scriptureLineWillForceNewVerse(_curVerse, _wrapResult)) {
+			_curVerse = global.__scripChapter.__addVerse();
 		} 
 		
-		_curLine = _curPage.addLine();
-		_curLine.addElements(_wrapResult.leftovers);
+		_curLine = _curVerse.__addLine();
+		_curLine.__addElements(_wrapResult.__leftovers);
 	}
 	
-	return {curLine: _curLine, curPage: _curPage};
+	return {__curLine: _curLine, __curVerse: _curVerse};
 }
 
 function __scriptureBuildChapter(_string, _textbox) {
@@ -985,30 +996,30 @@ function __scriptureBuildChapter(_string, _textbox) {
 	else
 		__scripturePushArrayToStyleStack(__defaultStyle);
 	global.__scripChapter = new __scriptureChapter();
-	var _curPage = global.__scripChapter.addPage();
-	var _curLine = _curPage.addLine();
+	var _curVerse = global.__scripChapter.__addVerse();
+	var _curLine = _curVerse.__addLine();
 	
 	while(string_length(_string) > 0) {
 		var _char = string_char_at(_string,0);
-		_string = string_delete(_string,1,1);
+		_string = string_delete(_string, 1, 1);
 		var _forceNewLine = false;
-		var _forceNewPage = false;
+		var _forceNewVerse = false;
 		switch(_char) {
-			case "\r": _forceNewPage = true; break;			
+			case "\r": _forceNewVerse = true; break;			
 			case "\n": _forceNewLine = true; break;
 			case global.__scripOpenTag: _string = __scriptureHandleTag(_string, _curLine); break;
-			case "-":	_curLine.addHyphen(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle))) break;
-			case " ": _curLine.addSpace() break;			
-			default: _curLine.addElement(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle)))
+			case "-":	_curLine.__addHyphen(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle))) break;
+			case " ": _curLine.__addSpace() break;			
+			default: _curLine.__addElement(new __scriptureChar(_char, new __scriptureStyle(global.__scripActiveStyle)))
 		}
 		
 		//Handle Wrapping
-		var _wrapResult = __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine, _forceNewPage);
-		_curLine = _wrapResult.curLine;
-		_curPage = _wrapResult.curPage;
+		var _wrapResult = __scriptureHandleWrapAndPagination(_curLine, _curVerse, _forceNewLine, _forceNewVerse);
+		_curLine = _wrapResult.__curLine;
+		_curVerse = _wrapResult.__curVerse;
 	}
 	
-	global.__scripChapter.calcDimensions();
+	global.__scripChapter.__calcDimensions();
 	return global.__scripChapter;
 }
 
@@ -1017,16 +1028,16 @@ function __scriptureApplyVAlign(_y) {
 			_chapter = global.__scripChapter;
 	switch(_textbox.__vAlign) {
 		case fa_top:    return _y;
-		case fa_middle: return _y - floor(_chapter.getCurPageHeight() / 2 - _textbox.__lineSpacing / 2)
-		case fa_bottom: return _y - floor(_chapter.getCurPageHeight()) + _textbox.__lineSpacing; 
+		case fa_middle: return _y - floor(_chapter.__getCurVerseHeight() / 2 - _textbox.__lineSpacing / 2)
+		case fa_bottom: return _y - floor(_chapter.__getCurVerseHeight()) + _textbox.__lineSpacing; 
 	}	
 }
 
 function __scriptureApplyHAlign(_x, _line) {
 	switch(global.__scripTextbox.__hAlign) {
 		case fa_left: return _x;
-		case fa_center: return floor(_x - _line.width / 2); break;
-		case fa_right: return _x - _line.width; break;
+		case fa_center: return floor(_x - _line.__width / 2); break;
+		case fa_right: return _x - _line.__width; break;
 	}	
 }
 
@@ -1077,8 +1088,8 @@ function scripture_register_event(_key, _func, _canSkip = true) {
 	global.__scripStyles[$ _key] = {
 		key: _key,
 		type: __SCRIPTURE_TYPE_EVENT,
-		event: _func,
-		canSkip: _canSkip
+		__event: _func,
+		__canSkip: _canSkip
 	}
 	return {
 		key: _key,
@@ -1107,7 +1118,7 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 	_align = global.__scripAlign,
 	_speedMod = global.__scripSpeed) {
 
-		for(var _i = 0; _i< argument_count; _i++) {
+		for(var _i = 0; _i < argument_count; _i++) {
 			var _arg = argument[_i];
 			if(string_length(_arg) != 1) throw("Tags must be a single character only");
 			for(var _j = 0; _j < argument_count; _j++) {

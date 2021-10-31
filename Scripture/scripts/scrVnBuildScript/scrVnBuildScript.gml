@@ -7,7 +7,7 @@ function scrVnBuildScript() {
 	
 	var _text = "" 
 		+ setSpeakerGirl 
-			+ "Hello?<30>  Onii-san?<30> Where are you?"
+			+ "Hello?<30>  Onii-san?<0> Where are you?"
 			+ evSlideInCharacter.event(VN_GIRL)
 			+ "\r" + evSnapSlide.event(VN_GIRL) 
 			+ evSetEmotion.event(VN_GIRL,EMOTION_ANGRY)

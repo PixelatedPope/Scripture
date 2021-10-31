@@ -3,7 +3,7 @@ for(var _i = 0; _i < array_length(boxes); _i++) {
 	boxes[_i].draw();
 }
 var _main = boxes[Boxes.main]
-if(_main.textbox == undefined || !_main.textbox.nextPageReady) exit;
+if(_main.textbox == undefined || !_main.textbox.getNextPageIsReady()) exit;
 
 
 var _x = _main.x + _main.width + 10
