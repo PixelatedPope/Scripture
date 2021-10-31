@@ -52,4 +52,7 @@ scripture = scripture_register_style("Scripture", {
 		}
 	});
 testString = scripture.open + spin.open +"SCRIPTURE";
-textbox = scripture_build_textbox(testString, 0, 0, fa_center, fa_middle, typeSpeed);
+textbox = scripture_create_textbox()
+	.build(testString)
+	.setAlignment(fa_center, fa_middle)
+	.setTypeSpeed(typeSpeed);

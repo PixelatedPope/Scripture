@@ -3,7 +3,7 @@ textbox = undefined;
 visible = false;
 setText = function(_text, _color) {
 	var _string = flash.open + flyIn.open + outline.open + fadeOut.open + "<#"+_color+">" + string(_text);
-	textbox = scripture_build_textbox(_string, 0,0,fa_center, fa_bottom,.5);
+	textbox = scripture_create_textbox(_string, 0,0,fa_center, fa_bottom,.5);
 	visible = true;
 }
 

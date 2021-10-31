@@ -48,7 +48,4 @@ function scrVnBuildStyles() {
 		pageAdvanceDelay: 10,
 		speedMod: 10,
 	});
-
-
-	scripture_set_default_style("VnDefault");
 }

@@ -18,7 +18,13 @@ Textbox = function(_x, _y, _width, _height, _defaultStyle, _color = c_black, _ma
 	
 	///@func rebuild(text, matchWidth, typeSpeed);
 	rebuild = function(_text,_matchWidth,  _typeSpeed = defaultTypeSpeed){
-		textbox = scripture_build_textbox(_text,980 - marginX * 2, height - 80, hAlign, fa_top, _typeSpeed, -5, defaultStyle);
+		textbox = scripture_create_textbox()
+			.setAlignment(hAlign, fa_top)
+			.setSize(980 - marginX * 2, height - 80, -5)
+			.setTypeSpeed(_typeSpeed)
+			.setDefaultStyle(defaultStyle)
+			.build(_text)
+			
 		if(_matchWidth)
 			width = textbox.maxWidth + marginX * 2;
 		return self;

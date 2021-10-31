@@ -28,4 +28,4 @@ testString =
 						"Coming Soon...";					
 //testString = "short page\r" + "wide page a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a\r" + "Tall Page \n1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
 instance_create_depth(room_width / 2,room_height/ 2,0,objExampleText1)
-.textbox = scripture_build_textbox(testString, 0, 150, fa_center, fa_middle, 1);
+	.textbox = scripture_create_textbox(testString, 0, 150, fa_center, fa_middle, 1);

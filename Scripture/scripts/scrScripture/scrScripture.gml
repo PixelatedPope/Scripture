@@ -13,15 +13,12 @@ global.__scripProtectedKeys = ["default", __SCRIPTURE_DEFULT_STYLE_KEY];
 global.__scripStyleStack = [];
 global.__scripActiveStyle = {};
 
-#macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
-#macro SCRIPTURE_TYPE_STYLE 0
 #macro SCRIPTURE_TYPE_IMG 1
-#macro SCRIPTURE_TYPE_EVENT 2
-#macro SCRIPTURE_TYPE_CHAR 3
-#macro SCRIPTURE_TYPE_LINE 4
-#macro SCRIPTURE_TYPE_PAGE 5
-#macro SCRIPTURE_TYPE_TEXT 6
-#macro SCRIPTURE_SKIP_VAL 10000
+#macro SCRIPTURE_TYPE_CHAR 2
+#macro __SCRIPTURE_TYPE_STYLE 3
+#macro __SCRIPTURE_TYPE_EVENT 4
+#macro __SCRIPTURE_DEFULT_STYLE_KEY "defaultStyle"
+#macro __SCRIPTURE_SKIP_VAL 10000
 
 //Global Tag Definitions
 //You can change these here or use the available function.
@@ -41,47 +38,83 @@ global.__scripAlign = "L"
 global.__scripSpeed = "s"
 
 #region Scripture Constructors
-function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _defaultStyle, _forceLineBreaks) constructor {
-	hAlign = _hAlign;
-	vAlign = _vAlign;
-	lineBreakWidth = _maxWidth;
-	pageBreakHeight = _maxHeight;
-	__typeSpeed = _typeSpeed;
-	__lineSpacing = _lineSpacing;
-	__forceLineBreaks = _forceLineBreaks;
-	inPageBreak = false;
-	isPaused = false;
+function __scriptureTextBox() constructor {
+	__hAlign = fa_left;
+	__vAlign = fa_top;
+	__lineBreakWidth = 0;
+	__pageBreakHeight = 0;
+	__typeSpeed = 0;
+	__lineSpacing = 0;
+	__forceLineBreaks = false;
+	__built = false;
+	__defaultStyle = undefined;
+	
+	
+	__inPageBreak = false;
+	__isPaused = false;
 	nextPageReady = false;
 	currentDelay = 0;
 	pageAdvanceDelay = -1;
-	defaultStyle = undefined;
-	if(_defaultStyle != undefined) {
-		var _style = global.__scripStyles[$ _defaultStyle];
-		if(_style != undefined) {
-			defaultStyle = new __scriptureStyle(_style);
-			defaultStyle.key = "textboxDefaultStyle";
+	maxWidth = undefined;
+	maxHeight = undefined;
+	pageDimensions = undefined;
+	pageCount = undefined
+	__story = undefined
+	
+	build = function(_string) {
+		__built = true;
+		var _story = __scriptureBuildStory(_string, self);
+		var _pageDimensions = []
+		var _widestPageWidth = 0;
+		var _tallestPageHeight = 0;
+		for(var _i = 0; _i < _story.getPageCount(); _i++){
+			var _width = _story.pages[_i].width;
+			var _height = _story.pages[_i].height;
+			if(_width > _widestPageWidth)
+				_widestPageWidth = _width;
+			if(_height > _tallestPageHeight)
+				_tallestPageHeight = _height;
+			array_push(_pageDimensions, {width: _width, height: _height});
 		}
+	
+		maxWidth = _widestPageWidth;
+		maxHeight = _tallestPageHeight;
+		pageDimensions = _pageDimensions;
+		pageCount = _story.getPageCount();
+		__story = _story;
+		return self
 	}
 	
-	var _story = __scriptureBuildStory(_string, self);
-	var _pageDimensions = []
-	var _widestPageWidth = 0;
-	var _tallestPageHeight = 0;
-	for(var _i = 0; _i < _story.getPageCount(); _i++){
-		var _width = _story.pages[_i].width;
-		var _height = _story.pages[_i].height;
-		if(_width > _widestPageWidth)
-			_widestPageWidth = _width;
-		if(_height > _tallestPageHeight)
-			_tallestPageHeight = _height;
-		array_push(_pageDimensions, {width: _width, height: _height});
+	setAlignment = function(_hAlign, _vAlign) {
+		__hAlign = _hAlign;
+		__vAlign = _vAlign;
+		return self
 	}
 	
-	maxWidth = _widestPageWidth;
-	maxHeight = _tallestPageHeight;
-	pageDimensions = _pageDimensions;
-	pageCount = _story.getPageCount();
-	__story = _story;
+	setSize = function(_maxWidth, _maxHeight, _lineSpacing = 0, _forceLineBreaks = false) {
+		__lineBreakWidth = _maxWidth;
+		__pageBreakHeight = _maxHeight;
+		__lineSpacing = _lineSpacing;
+		__forceLineBreaks = _forceLineBreaks;
+		return self
+	}
+	
+	setTypeSpeed = function(_typeSpeed) {
+		__typeSpeed = _typeSpeed;
+		return self
+	}
+	
+	
+	setDefaultStyle = function(_defaultStyle) {
+		if(_defaultStyle != undefined) {
+			var _style = global.__scripStyles[$ _defaultStyle];
+			if(_style != undefined) {
+				__defaultStyle = new __scriptureStyle(_style);
+				__defaultStyle.key = "textboxDefaultStyle";
+			}
+		}
+		return self
+	}
 	
 	getCurrentPageSize = function() {
 		return pageDimensions[__story.curPage];
@@ -92,13 +125,13 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	}
 	
 	gotoPageNext = function(_shortcutAnimations = true) {
-		if(inPageBreak) {
-			inPageBreak = false;
+		if(__inPageBreak) {
+			__inPageBreak = false;
 			pageAdvanceDelay = -1
 			return false;
 		}
 		var _curPage = __story.getCurrentPage();
-		if(_curPage.isComplete) {
+		if(_curPage.__isComplete) {
 			pageAdvanceDelay = -1;
 			return __story.incPage();
 		}
@@ -119,16 +152,16 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	}
 	
 	setPaused = function(_isPaused) {
-		isPaused = _isPaused;	
+		__isPaused = _isPaused;	
 	}
 	
-	autoAdvancePage = function(_currentPage) {
-		if(!inPageBreak && (pageCount <=  1 || !_currentPage.isComplete || !global.__scripStory.canIncPage())) return;
+	__autoAdvancePage = function(_currentPage) {
+		if(!__inPageBreak && (pageCount <=  1 || !_currentPage.__isComplete || !global.__scripStory.canIncPage())) return;
 		if(pageAdvanceDelay >= 0) {
 			pageAdvanceDelay--;
 			if(pageAdvanceDelay == -1)
-				if(inPageBreak)
-					inPageBreak = false;
+				if(__inPageBreak)
+					__inPageBreak = false;
 				else
 					gotoPageNext(false);
 
@@ -142,6 +175,10 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 	
 	///@func draw(x,y)
 	draw = function(_x, _y) {
+		if(!__built) {
+			throw("Need to call \"build()\" on textbox before drawing.");	
+		}
+		
 		draw_set_halign(fa_center);
 		draw_set_valign(fa_middle);
 		global.__scripTextbox = self;
@@ -150,13 +187,13 @@ function __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _t
 		_currentPage.draw(_x, _y);
 		draw_set_alpha(1);
 	
-		nextPageReady = _currentPage.isComplete || inPageBreak;
-		autoAdvancePage(_currentPage);
+		nextPageReady = _currentPage.__isComplete || __inPageBreak;
+		__autoAdvancePage(_currentPage);
 	}
 }
 
 function __scriptureStyle(_style = {}) constructor {
-	type = SCRIPTURE_TYPE_STYLE
+	type = __SCRIPTURE_TYPE_STYLE
 	//Return a duplicate of the given style with new key
 	color = _style[$ "color"] == undefined ? c_white : _style.color;
 	sprite = _style[$ "sprite"] == undefined ? undefined: _style.sprite;
@@ -206,18 +243,18 @@ function __scriptureBuildElement(_style) {
 	}
 	executeOnDrawBegin = function(_x, _y,  _index) {
 		for(var _i = 0; _i < array_length(style.onDrawBegin); _i++) {
-			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			if(array_length(onDrawBeginSteps) < _i+1) onDrawBeginSteps[_i] = wasSkipped ? __SCRIPTURE_SKIP_VAL : 0; 
 			var _breakChain = style.onDrawBegin[_i](_x, _y, style, self, onDrawBeginSteps[_i], _index)
-			onDrawBeginSteps[_i] += !global.__scripTextbox.isPaused;
+			onDrawBeginSteps[_i] += !global.__scripTextbox.__isPaused;
 			if(_breakChain)	break;
 		}
 	}
 	
 	executeOnDrawEnd = function(_x, _y,  _index) {
 		for(var _i = 0; _i < array_length(style.onDrawEnd); _i++) {
-			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? SCRIPTURE_SKIP_VAL : 0; 
+			if(array_length(onDrawEndSteps) < _i+1) onDrawEndSteps[_i] = wasSkipped ? __SCRIPTURE_SKIP_VAL : 0; 
 			var _breakChain = style.onDrawEnd[_i](_x, _y, style, self, onDrawEndSteps[_i], _index)
-			onDrawEndSteps[_i] += !global.__scripTextbox.isPaused;
+			onDrawEndSteps[_i] += !global.__scripTextbox.__isPaused;
 			if(_breakChain)	break;
 		}
 	}
@@ -296,13 +333,13 @@ function __scriptureImg(_style) constructor {
 		
 		executeOnDrawEnd(_drawX, _drawY, _index);
 		
-		image += speed * !global.__scripTextbox.isPaused;
+		image += speed * !global.__scripTextbox.__isPaused;
 		return width;
 	}
 }
 
 function __scriptureEvent(_func, _delay = undefined, _canSkip = true, _arguments = []) constructor {
-	type = SCRIPTURE_TYPE_EVENT;
+	type = __SCRIPTURE_TYPE_EVENT;
 	event = _func;
 	arguments = _arguments;
 	isSpace = false;
@@ -326,18 +363,17 @@ function __scriptureEvent(_func, _delay = undefined, _canSkip = true, _arguments
 		if(delay > 0) 
 			global.__scripTextbox.currentDelay = delay;
 		else
-			global.__scripTextbox.inPageBreak = true;
+			global.__scripTextbox.__inPageBreak = true;
 		return 0;
 	}
 }
 
 
 function __scriptureLine() constructor {
-	type = SCRIPTURE_TYPE_LINE
 	width = 0;
 	height = 0;
 	characters = [];
-	isComplete = false;
+	__isComplete = false;
 	lastSpace = undefined;
 	getLength = function() { return array_length(characters) };
 	typePos = 0;
@@ -347,37 +383,37 @@ function __scriptureLine() constructor {
 	draw = function(_x, _y, _page) {
 		var _eventCount = 0;
 		for(var _c = 0; _c < getLength(); _c++) {
-			if(!isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) { //Delay Countdown
+			if(!__isComplete && __scriptureIsTyping() && _c > typePos && _c > 0) { //Delay Countdown
 				if(global.__scripTextbox.currentDelay > 0) {
 					global.__scripTextbox.currentDelay--;
 					return false;
 				}
-				if(!global.__scripTextbox.isPaused && !global.__scripTextbox.inPageBreak) { //Paused or InPageBreak
+				if(!global.__scripTextbox.__isPaused && !global.__scripTextbox.__inPageBreak) { //Paused or InPageBreak
 					typePos += global.__scripTextbox.__typeSpeed * characters[_c-1].style.speedMod;
-					_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
+					_eventCount += characters[_c].type == __SCRIPTURE_TYPE_EVENT;
 				}
 				return false;
 			}
-			_eventCount += characters[_c].type == SCRIPTURE_TYPE_EVENT;
+			_eventCount += characters[_c].type == __SCRIPTURE_TYPE_EVENT;
 			_x += characters[_c].draw(_x, _y, _c - _eventCount, self);
 		}
 		if(delay > 0) {
 			delay -= getLength() == 0 ? 1 : characters[getLength()-1].style.speedMod;
 			return false;	
 		}
-		isComplete = true;
+		__isComplete = true;
 		return true;
 	}
 	
 	reset = function(){
-		isComplete = false;
+		__isComplete = false;
 		typePos = 0;
 		delay = __scriptureIsTyping();
 		for(var _i = 0; _i < getLength(); _i++) {
 			var _char = characters[_i];
 			
 			switch(_char.type) {
-				case SCRIPTURE_TYPE_EVENT:
+				case __SCRIPTURE_TYPE_EVENT:
 					_char.ran = false;
 				break;
 				case SCRIPTURE_TYPE_IMG:
@@ -391,7 +427,7 @@ function __scriptureLine() constructor {
 	endAnimations = function() {
 		for(var _c = 0; _c < getLength(); _c++) {
 			var _char = characters[_c];
-			if(_char.type == SCRIPTURE_TYPE_EVENT && _char.canSkip) {
+			if(_char.type == __SCRIPTURE_TYPE_EVENT && _char.canSkip) {
 				_char.ran = true;
 				continue; 
 			}
@@ -408,7 +444,7 @@ function __scriptureLine() constructor {
 	}
 	
 	addElement = function(_newElement) {
-		if(_newElement.type != SCRIPTURE_TYPE_EVENT)
+		if(_newElement.type != __SCRIPTURE_TYPE_EVENT)
 			width += _newElement.width;
 		array_push(characters, _newElement);
 		return _newElement;
@@ -441,7 +477,7 @@ function __scriptureLine() constructor {
 		width = 0;
 		for(var _i = 0; _i < array_length(characters); _i++) {
 			var _char = characters[_i];
-			if(_char.type == SCRIPTURE_TYPE_EVENT) continue;
+			if(_char.type == __SCRIPTURE_TYPE_EVENT) continue;
 			
 			width += _char.width;
 		}
@@ -453,7 +489,7 @@ function __scriptureLine() constructor {
 		height = 0;
 		for(var _i = 0; _i < array_length(characters); _i++) {
 			var _char = characters[_i];
-			if(_char.type == SCRIPTURE_TYPE_EVENT) continue;
+			if(_char.type == __SCRIPTURE_TYPE_EVENT) continue;
 
 			if(_char.height > height) 
 				height = _char.height;
@@ -471,7 +507,7 @@ function __scriptureLine() constructor {
 	checkForWrap = function() {
 		var _textbox = global.__scripTextbox;
 		var _result = {didWrap: false, leftovers: [], leftoverHeight: 0};
-		if(_textbox.lineBreakWidth <= 0 || width <= _textbox.lineBreakWidth) return _result
+		if(_textbox.__lineBreakWidth <= 0 || width <= _textbox.__lineBreakWidth) return _result
 		
 		var _lastSpace = _textbox.__forceLineBreaks ? 0 : lastSpace;
 		if(lastSpace == undefined && _textbox.__forceLineBreaks == false) return _result
@@ -492,7 +528,7 @@ function __scriptureLine() constructor {
 	findNextInPageBreak = function(){
 		for(var _i = typePos; _i < getCharacterCount(); _i++) {
 			var _char = characters[_i];
-			if( _char.type == SCRIPTURE_TYPE_EVENT && _char.delay <= 0)
+			if( _char.type == __SCRIPTURE_TYPE_EVENT && _char.delay <= 0)
 				return _i;
 		}
 		return _i;
@@ -504,7 +540,7 @@ function __scriptureLine() constructor {
 			typePos = _pos;
 			return false;
 		}
-		isComplete = true;
+		__isComplete = true;
 		typePos = 10000000;
 		delay = 0;
 		return true;
@@ -512,18 +548,17 @@ function __scriptureLine() constructor {
 }
 
 function __scripturePage() constructor {
-	type = SCRIPTURE_TYPE_PAGE
 	width = 0;
 	height = 0;
 	linePos = 0;
-	isComplete = false;
+	__isComplete = false;
 	lines = [];
 	draw = function(_x, _y) {
 		var	_drawX,
 		    _drawY = __scriptureApplyVAlign(_y);
 	
 		for(var _i = 0; _i < getLineCount(); _i++) {
-			if(!isComplete && __scriptureIsTyping() && _i > linePos) return false;
+			if(!__isComplete && __scriptureIsTyping() && _i > linePos) return false;
 			
 			var _curLine = lines[_i];
 			_drawX = __scriptureApplyHAlign(_x, _curLine);
@@ -533,7 +568,7 @@ function __scripturePage() constructor {
 				linePos++;
 			_drawY += _curLine.height + global.__scripTextbox.__lineSpacing;
 		}
-		isComplete = true;
+		__isComplete = true;
 		global.__scripTextbox.currentDelay = 0;
 		return true;
 	}
@@ -547,12 +582,12 @@ function __scripturePage() constructor {
 				lines[_i].endAnimations();
 			}
 		}
-		isComplete = true;
+		__isComplete = true;
 		linePos = getLineCount();
 	}
 	
 	reset = function() {
-		isComplete = false;
+		__isComplete = false;
 		for(var _i = 0; _i < getLineCount(); _i++) {
 			lines[_i].reset();	
 		}
@@ -594,14 +629,13 @@ function __scripturePage() constructor {
 }
 
 function __scriptureStory() constructor {
-	type = SCRIPTURE_TYPE_TEXT
 	width = 0;
 	height = 0;
 	pages = [];
 	curPage = 0;
 	getPageCount = function() { return array_length(pages) };
 	getCurrentPage = function() { return pages[curPage] };
-	inPageBreak = false;
+	__inPageBreak = false;
 	calcHeight = function() {	
 		height = 0;
 		for(var _i = 0; _i < getPageCount(); _i++) {
@@ -846,7 +880,7 @@ function __scriptureHandleTag(_string, _curLine) {
 		return _string;
 	}
 	switch(_style.type) {
-		case SCRIPTURE_TYPE_STYLE:
+		case __SCRIPTURE_TYPE_STYLE:
 			if(_isClosingTag) {
 				__scriptureDequeueStyle(_tagContent);
 				break;
@@ -855,7 +889,7 @@ function __scriptureHandleTag(_string, _curLine) {
 		break;
 						
 		case SCRIPTURE_TYPE_IMG: _curLine.addElement(new __scriptureImg(_style)); break;
-		case SCRIPTURE_TYPE_EVENT: 
+		case __SCRIPTURE_TYPE_EVENT: 
 			var _arguments = __scriptureMultiParse(_tagContent)
 			_curLine.addElement(new __scriptureEvent(_style.event, undefined, _style.canSkip, _arguments)); 
 		break;
@@ -920,9 +954,9 @@ function __scriptureEnqueueStyle(_key) {
 }
 
 function __scriptureLineWillForceNewPage(_curPage, _wrapResult){
-	if(global.__scripTextbox.pageBreakHeight <= 0) return false;
+	if(global.__scripTextbox.__pageBreakHeight <= 0) return false;
 	
-	return _curPage.height + global.__scripTextbox.__lineSpacing + _wrapResult.leftoverHeight >= global.__scripTextbox.pageBreakHeight; 
+	return _curPage.height + global.__scripTextbox.__lineSpacing + _wrapResult.leftoverHeight >= global.__scripTextbox.__pageBreakHeight; 
 }
 
 function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = false, _forceNewPage = false) {
@@ -943,10 +977,10 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 function __scriptureBuildStory(_string, _textbox) {
 	global.__scripTextbox = _textbox;
 	global.__scripStyleStack = [];
-	if(defaultStyle == undefined)
+	if(__defaultStyle == undefined)
 		__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
 	else
-		__scripturePushArrayToStyleStack(defaultStyle);
+		__scripturePushArrayToStyleStack(__defaultStyle);
 	global.__scripStory = new __scriptureStory();
 	var _curPage = global.__scripStory.addPage();
 	var _curLine = _curPage.addLine();
@@ -978,7 +1012,7 @@ function __scriptureBuildStory(_string, _textbox) {
 function __scriptureApplyVAlign(_y) {
 	var _textbox = global.__scripTextbox,
 			_story = global.__scripStory;
-	switch(_textbox.vAlign) {
+	switch(_textbox.__vAlign) {
 		case fa_top:    return _y;
 		case fa_middle: return _y - floor(_story.getCurPageHeight() / 2 - _textbox.__lineSpacing / 2)
 		case fa_bottom: return _y - floor(_story.getCurPageHeight()) + _textbox.__lineSpacing; 
@@ -986,7 +1020,7 @@ function __scriptureApplyVAlign(_y) {
 }
 
 function __scriptureApplyHAlign(_x, _line) {
-	switch(global.__scripTextbox.hAlign) {
+	switch(global.__scripTextbox.__hAlign) {
 		case fa_left: return _x;
 		case fa_center: return floor(_x - _line.width / 2); break;
 		case fa_right: return _x - _line.width; break;
@@ -1006,7 +1040,7 @@ function scripture_register_style(_key, _style) {
 	__scriptureStyleNameIsProtected(_key)
 	
 	_style.key = _key;
-	_style.type = SCRIPTURE_TYPE_STYLE;
+	_style.type = __SCRIPTURE_TYPE_STYLE;
 	global.__scripStyles[$ _key] = _style;
 	return {
 		key: _key,
@@ -1039,7 +1073,7 @@ function scripture_register_event(_key, _func, _canSkip = true) {
 	
 	global.__scripStyles[$ _key] = {
 		key: _key,
-		type: SCRIPTURE_TYPE_EVENT,
+		type: __SCRIPTURE_TYPE_EVENT,
 		event: _func,
 		canSkip: _canSkip
 	}
@@ -1054,14 +1088,6 @@ function scripture_register_event(_key, _func, _canSkip = true) {
 			return _string;
 		}
 	}
-}
-
-function scripture_set_default_style(_key){
-	var _style = global.__scripStyles[$ _key];
-	if(_style == undefined) return;
-	
-	global.__scripStyles.defaultStyle = new __scriptureStyle(_style);
-	global.__scripStyles.defaultStyle.key = __SCRIPTURE_DEFULT_STYLE_KEY;
 }
 
 function scripture_set_tag_characters(_start = global.__scripOpenTag, 
@@ -1102,8 +1128,8 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripSpeed = _speedMod;
 }
 
-function scripture_build_textbox(_string, _maxWidth = 0 ,_maxHeight = 0, _hAlign = fa_left, _vAlign = fa_top, _typeSpeed = 0, _lineSpacing = 0, _defaultStyle = undefined, _forceLineBreaks = false){
-	return new __scriptureTextBox(_string, _maxWidth, _maxHeight, _hAlign, _vAlign, _typeSpeed, _lineSpacing, _defaultStyle, _forceLineBreaks)
+function scripture_create_textbox(){
+	return new __scriptureTextBox()
 }
 
 function scripture_hex_to_color(_hexString) {
