@@ -5,14 +5,14 @@ function scrVnBuildScript() {
 	scrVnBuildCombos();
 
 	
-	var _text = "" 
+	var _text = ""
 		+ setSpeakerGirl 
 			+ "Hello?<30>  Onii-san?<0> Where are you?"
 			+ evSlideInCharacter.event(VN_GIRL)
 			+ "\r" + evSnapSlide.event(VN_GIRL) 
 			+ evSetEmotion.event(VN_GIRL,EMOTION_ANGRY)
 			+ shout.open
-				+ "\nONIIIIIIIIIIII-SAAAAAAAAAAAN!!!!!!\r"
+				+ "\nONIIIIIIIIIIII-<//>SAAAAAAAAAAAN!!!!!!\r"
 			+ shout.close
 		+ setSpeakerBoy
 		+ "Yumi?"
@@ -42,7 +42,5 @@ function scrVnBuildScript() {
 		+ "Whatever.  It's read "+boyNameRomaji + evChangeName.event(VN_BOY, 2) + ".<60>  But don't worry about it."+ evSetEmotion.event(VN_GIRL, EMOTION_NORMAL) + "<30> We should probably worry more about where we are right now.\r"
 		+ colorful.open + 
 			"MORE DEMO COMING SOON"
-		
-		
 	return _text;
 }

@@ -753,7 +753,8 @@ function __scriptureIsInlineSignifier(_tagContent) {
 		 _char == global.__scripAlpha ||
 		 _char == global.__scripAlign ||
 		 _char == global.__scripSpeed ||
-		 _char == global.__scripColor) return true;
+		 _char == global.__scripColor ||
+		 _char == global.__scripEndTag) return true;
 	return false
 }
 
@@ -798,43 +799,48 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 	var _symbol = string_char_at(_tagContent, 1);
 	_tagContent = string_delete(_tagContent, 1, 1);
 	_tagContent = __scriptureStringTrimWhiteSpace(_tagContent);
-	var _active = global.__scripActiveStyle;
+	var _newStyle = new __scriptureStyle(global.__scripActiveStyle);
+	_newStyle.onDrawBegin = function(){};
+	_newStyle.onDrawEnd = function(){};
 	switch(_symbol) {
+		case global.__scripEndTag:
+			__scriptureDequeueStyle();
+			return false;
 		case global.__scripColor:
 			var _color = scripture_hex_to_color(_tagContent)
-			_active.color = _color;
-			return true;
+			_newStyle.color = _color;
+			break;
 		break;
 		case global.__scripImage:
 			var _val = asset_get_index(_tagContent);
 			_curLine.__addElement(new __scriptureImg({sprite: _val}))
-			return true;
+			break;
 		case global.__scripFont:
 			var _val = asset_get_index(_tagContent);
-			_active.font = _val;
-			return true;
+			_newStyle.font = _val;
+			break;
 		case global.__scripKerning: 
 			var _val = real(_tagContent);
-			_active.kerning = _val;
-			return true;
+			_newStyle.kerning = _val;
+			break;
 		case global.__scripScale: 
 			var _val = __scriptureXYParse(_tagContent);
-			_active.xScale = _val.x;
-			_active.yScale = _val.y;
-			return true;
+			_newStyle.xScale = _val.x;
+			_newStyle.yScale = _val.y;
+			break;
 		case global.__scripOff:
 			var _val = __scriptureXYParse(_tagContent);
-			_active.xOff = _val.x;
-			_active.yOff = _val.y;
-			return true;
+			_newStyle.xOff = _val.x;
+			_newStyle.yOff = _val.y;
+			break;
 		case global.__scripAngle:
 			var _val = real(_tagContent);
-			_active.angle = _val;
-			return true;
+			_newStyle.angle = _val;
+			break;
 		case global.__scripAlpha:
 			var _val = real(_tagContent);
-			_active.alpha = _val;
-			return true;
+			_newStyle.alpha = _val;
+			break;
 		case global.__scripAlign:
 			var _val;
 			switch(_tagContent) {
@@ -843,15 +849,15 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 				case "fa_center": _val = fa_middle; break;
 				case "fa_bottom": _val = fa_bottom; break;
 			}
-			_active.textAlign = _val;
-			return true;
+			_newStyle.textAlign = _val;
+			break;
 		case global.__scripSpeed:
 			var _val = real(_tagContent);
-			_active.speedMod = max(.0001, _val);
-			return true;
+			_newStyle.speedMod = max(.0001, _val);
+			break;
 	}
-	
-	return false; //this should never happen...
+	__scripturePushStyleToStyleStack(_newStyle);
+	return false;
 }
 
 function __scriptureGetTagKey(_tag) {
@@ -938,21 +944,23 @@ function __scriptureRebuildActiveStyle() {
 
 function __scriptureFindStyleIndex(_key){
   for(var _i = 0; _i < array_length(global.__scripStyleStack); _i++) {
-    if(global.__scripStyleStack[_i].key == _key) return _i;
+		var _styleKey = global.__scripStyleStack[_i][$ "key"];
+    if(_styleKey != undefined && _styleKey == _key) return _i;
   }
   return -1;
 }
 
-function __scriptureDequeueStyle(_key) {
+function __scriptureDequeueStyle(_key = undefined) {
 	if(array_length(global.__scripStyleStack) <= 1) return;
 	
-  var _index = __scriptureFindStyleIndex(_key);
-  if(_index == -1) return;
-  array_delete(global.__scripStyleStack,_index, 1);
+	var _index = _key == undefined ? array_length(global.__scripStyleStack) - 1 : __scriptureFindStyleIndex(_key);
+	if(_index == -1) return;
+	
+	array_delete(global.__scripStyleStack,_index, 1);
 	__scriptureRebuildActiveStyle();
 }
 
-function __scripturePushArrayToStyleStack(_style) {
+function __scripturePushStyleToStyleStack(_style) {
 	array_push(global.__scripStyleStack,_style);
 	__scriptureRebuildActiveStyle();
 }
@@ -964,7 +972,7 @@ function __scriptureEnqueueStyle(_key) {
   var _index = __scriptureFindStyleIndex(_key);
   if(_index != -1) return;
 		
-  __scripturePushArrayToStyleStack(_style);
+  __scripturePushStyleToStyleStack(_style);
 }
 
 function __scriptureLineWillForceNewVerse(_curVerse, _wrapResult){
@@ -994,7 +1002,7 @@ function __scriptureBuildChapter(_string, _textbox) {
 	if(__defaultStyle == undefined)
 		__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
 	else
-		__scripturePushArrayToStyleStack(__defaultStyle);
+		__scripturePushStyleToStyleStack(__defaultStyle);
 	global.__scripChapter = new __scriptureChapter();
 	var _curVerse = global.__scripChapter.__addVerse();
 	var _curLine = _curVerse.__addLine();
