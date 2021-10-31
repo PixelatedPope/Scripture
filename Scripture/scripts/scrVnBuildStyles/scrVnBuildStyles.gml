@@ -2,7 +2,7 @@ function scrVnBuildStyles() {
 	regular = scripture_register_style("VnDefault", {
 		font: fntVnZen,
 		color: c_white,
-		pageAdvanceDelay: room_speed * 5,
+		pageAdvanceDelay: room_speed * 2,
 	});
 	bold = scripture_register_style("VnBold",{
 		font: fntVnBold

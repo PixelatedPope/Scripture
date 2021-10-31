@@ -5,7 +5,7 @@
 // - Pixelated Pope
 //*************************************************************************
 
-global.__scripStory = {};
+global.__scripChapter = {};
 global.__scripTextbox = {};
 global.__scripString = "";
 global.__scripStyles = {};
@@ -48,28 +48,27 @@ function __scriptureTextBox() constructor {
 	__forceLineBreaks = false;
 	__built = false;
 	__defaultStyle = undefined;
-	
-	
 	__inPageBreak = false;
 	__isPaused = false;
+	__pageAdvanceDelay = -1;
+	__chapter = undefined;
+	
 	nextPageReady = false;
 	currentDelay = 0;
-	pageAdvanceDelay = -1;
 	maxWidth = undefined;
 	maxHeight = undefined;
 	pageDimensions = undefined;
 	pageCount = undefined
-	__story = undefined
 	
 	build = function(_string) {
 		__built = true;
-		var _story = __scriptureBuildStory(_string, self);
+		var _chapter = __scriptureBuildChapter(_string, self);
 		var _pageDimensions = []
 		var _widestPageWidth = 0;
 		var _tallestPageHeight = 0;
-		for(var _i = 0; _i < _story.getPageCount(); _i++){
-			var _width = _story.pages[_i].width;
-			var _height = _story.pages[_i].height;
+		for(var _i = 0; _i < _chapter.getPageCount(); _i++){
+			var _width = _chapter.pages[_i].width;
+			var _height = _chapter.pages[_i].height;
 			if(_width > _widestPageWidth)
 				_widestPageWidth = _width;
 			if(_height > _tallestPageHeight)
@@ -80,8 +79,8 @@ function __scriptureTextBox() constructor {
 		maxWidth = _widestPageWidth;
 		maxHeight = _tallestPageHeight;
 		pageDimensions = _pageDimensions;
-		pageCount = _story.getPageCount();
-		__story = _story;
+		pageCount = _chapter.getPageCount();
+		__chapter = _chapter;
 		return self
 	}
 	
@@ -116,24 +115,28 @@ function __scriptureTextBox() constructor {
 		return self
 	}
 	
+	getPageAdvanceDelay = function() {
+		return __pageAdvanceDelay;	
+	}
+	
 	getCurrentPageSize = function() {
-		return pageDimensions[__story.curPage];
+		return pageDimensions[__chapter.curPage];
 	}
 	
 	getCurrentPage = function() {
-		return __story.curPage;	
+		return __chapter.curPage;	
 	}
 	
 	gotoPageNext = function(_shortcutAnimations = true) {
 		if(__inPageBreak) {
 			__inPageBreak = false;
-			pageAdvanceDelay = -1
+			__pageAdvanceDelay = -1
 			return false;
 		}
-		var _curPage = __story.getCurrentPage();
+		var _curPage = __chapter.getCurrentPage();
 		if(_curPage.__isComplete) {
-			pageAdvanceDelay = -1;
-			return __story.incPage();
+			__pageAdvanceDelay = -1;
+			return __chapter.incPage();
 		}
 
 		_curPage.finishPage(_shortcutAnimations)   
@@ -141,14 +144,14 @@ function __scriptureTextBox() constructor {
 	}
 
 	gotoPagePrev = function(_reset = true) {
-			pageAdvanceDelay = -1;
-		__story.decPage(_reset);
+		__pageAdvanceDelay = -1;
+		__chapter.decPage(_reset);
 	}
 
 	gotoPage = function(_page, _reset = true) {
 		if(_page < 0 || _page >= pageCount) return;
-			pageAdvanceDelay = -1;
-		__story.setCurrentPage(_page,_reset);
+		__pageAdvanceDelay = -1;
+		__chapter.setCurrentPage(_page,_reset);
 	}
 	
 	setPaused = function(_isPaused) {
@@ -156,10 +159,10 @@ function __scriptureTextBox() constructor {
 	}
 	
 	__autoAdvancePage = function(_currentPage) {
-		if(!__inPageBreak && (pageCount <=  1 || !_currentPage.__isComplete || !global.__scripStory.canIncPage())) return;
-		if(pageAdvanceDelay >= 0) {
-			pageAdvanceDelay--;
-			if(pageAdvanceDelay == -1)
+		if(!__inPageBreak && (pageCount <=  1 || !_currentPage.__isComplete || !global.__scripChapter.canIncPage())) return;
+		if(__pageAdvanceDelay >= 0) {
+			__pageAdvanceDelay--;
+			if(__pageAdvanceDelay == -1)
 				if(__inPageBreak)
 					__inPageBreak = false;
 				else
@@ -170,7 +173,7 @@ function __scriptureTextBox() constructor {
 
 		var _delay = _currentPage.getPageAdvanceDelay();
 		if(_delay	>= 0)
-			pageAdvanceDelay	= _delay;
+			__pageAdvanceDelay	= _delay;
 	}
 	
 	///@func draw(x,y)
@@ -182,8 +185,8 @@ function __scriptureTextBox() constructor {
 		draw_set_halign(fa_center);
 		draw_set_valign(fa_middle);
 		global.__scripTextbox = self;
-		global.__scripStory = __story;
-		var _currentPage = __story.getCurrentPage();
+		global.__scripChapter = __chapter;
+		var _currentPage = __chapter.getCurrentPage();
 		_currentPage.draw(_x, _y);
 		draw_set_alpha(1);
 	
@@ -628,7 +631,7 @@ function __scripturePage() constructor {
 	}
 }
 
-function __scriptureStory() constructor {
+function __scriptureChapter() constructor {
 	width = 0;
 	height = 0;
 	pages = [];
@@ -678,7 +681,7 @@ function __scriptureStory() constructor {
 	setCurrentPage = function(_page, _reset = false) {
 		var _prevPage = curPage;
 		curPage = clamp(_page,0,getPageCount()-1);
-		pageAdvanceDelay = -1;
+		__pageAdvanceDelay = -1;
 		if(_reset && _prevPage >= curPage)
 			resetFromPage(curPage);
 	}
@@ -964,7 +967,7 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 	if(_forceNewLine || _forceNewPage || _wrapResult.didWrap) {
 		_curPage.calcHeight();
 		if(_forceNewPage || __scriptureLineWillForceNewPage(_curPage, _wrapResult)) {
-			_curPage = global.__scripStory.addPage();
+			_curPage = global.__scripChapter.addPage();
 		} 
 		
 		_curLine = _curPage.addLine();
@@ -974,15 +977,15 @@ function __scriptureHandleWrapAndPagination(_curLine, _curPage, _forceNewLine = 
 	return {curLine: _curLine, curPage: _curPage};
 }
 
-function __scriptureBuildStory(_string, _textbox) {
+function __scriptureBuildChapter(_string, _textbox) {
 	global.__scripTextbox = _textbox;
 	global.__scripStyleStack = [];
 	if(__defaultStyle == undefined)
 		__scriptureEnqueueStyle(__SCRIPTURE_DEFULT_STYLE_KEY);
 	else
 		__scripturePushArrayToStyleStack(__defaultStyle);
-	global.__scripStory = new __scriptureStory();
-	var _curPage = global.__scripStory.addPage();
+	global.__scripChapter = new __scriptureChapter();
+	var _curPage = global.__scripChapter.addPage();
 	var _curLine = _curPage.addLine();
 	
 	while(string_length(_string) > 0) {
@@ -1005,17 +1008,17 @@ function __scriptureBuildStory(_string, _textbox) {
 		_curPage = _wrapResult.curPage;
 	}
 	
-	global.__scripStory.calcDimensions();
-	return global.__scripStory;
+	global.__scripChapter.calcDimensions();
+	return global.__scripChapter;
 }
 
 function __scriptureApplyVAlign(_y) {
 	var _textbox = global.__scripTextbox,
-			_story = global.__scripStory;
+			_chapter = global.__scripChapter;
 	switch(_textbox.__vAlign) {
 		case fa_top:    return _y;
-		case fa_middle: return _y - floor(_story.getCurPageHeight() / 2 - _textbox.__lineSpacing / 2)
-		case fa_bottom: return _y - floor(_story.getCurPageHeight()) + _textbox.__lineSpacing; 
+		case fa_middle: return _y - floor(_chapter.getCurPageHeight() / 2 - _textbox.__lineSpacing / 2)
+		case fa_bottom: return _y - floor(_chapter.getCurPageHeight()) + _textbox.__lineSpacing; 
 	}	
 }
 

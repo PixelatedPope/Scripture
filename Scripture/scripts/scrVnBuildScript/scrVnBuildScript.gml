@@ -7,7 +7,7 @@ function scrVnBuildScript() {
 	
 	var _text = "" 
 		+ setSpeakerGirl 
-			+ "Hello?<0>  Onii-san?<0> Where<0> are<0> you?"
+			+ "Hello?<30>  Onii-san?<30> Where are you?"
 			+ evSlideInCharacter.event(VN_GIRL)
 			+ "\r" + evSnapSlide.event(VN_GIRL) 
 			+ evSetEmotion.event(VN_GIRL,EMOTION_ANGRY)
@@ -30,7 +30,7 @@ function scrVnBuildScript() {
 		+ bold.close
 		+ evSetEmotion.event(VN_BOY, EMOTION_ANNOYED)
 		+ setSpeakerBoy
-			+ "<s 4>Will you cut it out with the weeb crap?<30> Stop Calling me \""+boyNameOniisan+"\"!  My name is " 
+			+ "<s 4>Will you cut it out with the weeb crap?<30> Stop Calling me \""+boyNameOniisan+"\"!  My name is <30>" 
 			+ evChangeName.event(VN_BOY, 1)
 			+ boyNameKanji + "!!<s 1>\r" 
 		+ evSnapSlide.event(VN_BOY)

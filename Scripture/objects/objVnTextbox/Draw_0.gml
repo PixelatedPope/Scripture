@@ -9,7 +9,7 @@ if(_main.textbox == undefined || !_main.textbox.nextPageReady) exit;
 var _x = _main.x + _main.width + 10
 var _y = _main.y + _main.height - objDemoToolbar.sprite_height - 5;
 draw_sprite(sprMouseClick,round(sin_oscillate(0,1,.8)), _x, _y);
-var _delay = _main.textbox.pageAdvanceDelay
+var _delay = _main.textbox.getPageAdvanceDelay()
 if(_delay != -1) {
 	_y -= sprite_get_height(sprMouseClick) - 5;
 	_x += sprite_get_width(sprMouseClick) / 2;

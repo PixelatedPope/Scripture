@@ -80,8 +80,9 @@ boxes = [
 ]
 boxes[Boxes.girl].hAlign = fa_left;
 boxes[Boxes.boy].hAlign = fa_right;
-boxes[Boxes.boy].rebuild(boyNames[boyNameCurrent],true, 1);
-boxes[Boxes.girl].rebuild(girlNames[girlNameCurrent],true, 1);
+boxes[Boxes.boy].rebuild(boyNames[boyNameCurrent], true, 1);
+boxes[Boxes.girl].rebuild(girlNames[girlNameCurrent], true, 1);
+
 sysEvents.addListener(id, Event.changeSpeaker,function(_options){
 	var _speaker = _options.target;
 	boxes[Boxes.main].color = _speaker == VN_BOY ? VN_BOY_COLOR : VN_GIRL_COLOR;
