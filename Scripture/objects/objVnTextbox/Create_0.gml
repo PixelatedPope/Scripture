@@ -1,6 +1,8 @@
 /// @description 
 depth = VN_TEXTBOX_DEPTH;
 
+
+
 ///@func Textbox(x, y, width, height, defaultStyle, [color], [margin x], [margin y], [typeSpeed])
 Textbox = function(_x, _y, _width, _height, _defaultStyle, _color = c_black, _marginX = 20, _marginY = 10) constructor {
 	color = _color;

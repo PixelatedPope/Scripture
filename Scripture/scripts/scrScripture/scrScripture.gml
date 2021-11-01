@@ -80,6 +80,7 @@ function __scriptureTextBox() constructor {
 			__verseAdvanceDelay	= _delay;
 	}
 	
+	///@func build(string);
 	build = function(_string) {
 		__built = true;
 		var _chapter = __scriptureBuildChapter(_string, self);
@@ -104,12 +105,14 @@ function __scriptureTextBox() constructor {
 		return self
 	}
 	
+	///@func setAlignment(halign, valign)
 	setAlignment = function(_hAlign, _vAlign) {
 		__hAlign = _hAlign;
 		__vAlign = _vAlign;
 		return self
 	}
 	
+	///@func setSize(width, height, [line spacing = 0], [force line breaks = false]
 	setSize = function(_maxWidth, _maxHeight, _lineSpacing = 0, _forceLineBreaks = false) {
 		__lineBreakWidth = _maxWidth;
 		__verseBreakHeight = _maxHeight;
@@ -118,12 +121,13 @@ function __scriptureTextBox() constructor {
 		return self
 	}
 	
+	///@func setTypeSpeed(characters per step)
 	setTypeSpeed = function(_typeSpeed) {
 		__typeSpeed = _typeSpeed;
 		return self
 	}
 	
-	
+	///@func setDefaultStyle(style key)
 	setDefaultStyle = function(_defaultStyle) {
 		if(_defaultStyle != undefined) {
 			var _style = global.__scripStyles[$ _defaultStyle];
@@ -1150,6 +1154,7 @@ function scripture_set_tag_characters(_start = global.__scripOpenTag,
 		global.__scripSpeed = _speedMod;
 }
 
+///@func scripture_create_textbox();
 function scripture_create_textbox(){
 	return new __scriptureTextBox()
 }
