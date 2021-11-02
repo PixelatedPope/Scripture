@@ -214,6 +214,7 @@ function __scriptureStyle(_style = {}) constructor {
 	//Return a duplicate of the given style with new key
 	color = _style[$ "color"] == undefined ? c_white : _style.color;
 	sprite = _style[$ "sprite"] == undefined ? undefined: _style.sprite;
+	imageSpeed = _style[$ "imageSpeed"] == undefined ? 1: _style.imageSpeed;
 	font = _style[$ "font"] == undefined ? -1 : _style.font;
 	speedMod = _style[$ "speedMod"] == undefined ? 1 : _style.speedMod;
 	kerning = _style[$ "kerning"] == undefined ? 0 : _style.kerning;
@@ -328,6 +329,7 @@ function __scriptureImg(_style) constructor {
 	}
 	
 	sprite = _active.sprite;
+	imageSpeed = _active.imageSpeed;
 	image = 0;
 	isSpace = false;
 	speed = sprite_get_speed_type(sprite) == spritespeed_framespergameframe 
@@ -350,7 +352,7 @@ function __scriptureImg(_style) constructor {
 		
 		__executeOnDrawEnd(_drawX, _drawY, _index);
 		
-		image += speed * !global.__scripTextbox.__isPaused;
+		image += speed * imageSpeed * !global.__scripTextbox.__isPaused;
 		return width;
 	}
 }

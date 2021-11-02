@@ -104,7 +104,7 @@ sysEvents.addListener(id, Event.changeName,function(_options){
 })
 
 sysEvents.addListener(id, Event.transitionDone, function(_options) {
-	boxes[Boxes.main].rebuild(text, false);
+	boxes[Boxes.main].rebuild(text, false, .25);
 	boxes[Boxes.main].visible = true;
 	sysEvents.raiseEvent(Event.changeSpeaker,{target: VN_GIRL});
 }, true);
