@@ -817,6 +817,7 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 	var _newStyle = new __scriptureStyle(global.__scripActiveStyle);
 	_newStyle.onDrawBegin = function(){};
 	_newStyle.onDrawEnd = function(){};
+	
 	switch(_symbol) {
 		case global.__scripEndTag:
 			__scriptureDequeueStyle();
@@ -829,7 +830,7 @@ function __scriptureCheckForInlineStyle(_tagContent, _curLine) {
 		case global.__scripImage:
 			var _val = asset_get_index(_tagContent);
 			_curLine.__addElement(new __scriptureImg({sprite: _val}))
-			break;
+			return false;
 		case global.__scripFont:
 			var _val = asset_get_index(_tagContent);
 			_newStyle.font = _val;
@@ -923,7 +924,9 @@ function __scriptureHandleTag(_string, _curLine) {
 			__scriptureEnqueueStyle(_tagContent);
 		break;
 						
-		case SCRIPTURE_TYPE_IMG: _curLine.__addElement(new __scriptureImg(_style)); break;
+		case SCRIPTURE_TYPE_IMG: 
+			_curLine.__addElement(new __scriptureImg(_style)); 
+		break;
 		case __SCRIPTURE_TYPE_EVENT: 
 			var _arguments = __scriptureMultiParse(_tagContent)
 			_curLine.__addElement(new __scriptureEvent(_style.__event, undefined, _style.__canSkip, _arguments)); 

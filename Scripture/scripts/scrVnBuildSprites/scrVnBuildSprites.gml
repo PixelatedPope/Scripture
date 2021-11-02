@@ -1,6 +1,6 @@
 function scrVnBuildSprites() {
 	sprHeart = scripture_register_sprite("Heart",sprHearts,{
-		imageSpeed: 4
+		imageSpeed: 1
 	});
 	
 	sprCry = scripture_register_sprite("Cry",sprEmojiCry,{

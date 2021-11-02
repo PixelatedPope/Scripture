@@ -11,8 +11,8 @@
 #macro VN_TEXTBOX_DEPTH (-200)
 #macro VN_PART_SYSTEM_LOWER (-100)
 #macro VN_CHARACTER_DEPTH 0
-#macro VN_BOY_COLOR $3c2214
-#macro VN_GIRL_COLOR $3c1427
+#macro VN_BOY_COLOR $995429//$3c2214
+#macro VN_GIRL_COLOR $7f2999//$3c1427
 #macro VN_BOY "Boy"
 #macro VN_GIRL "Girl"
 

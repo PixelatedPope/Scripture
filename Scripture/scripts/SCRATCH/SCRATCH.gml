@@ -23,8 +23,8 @@
 
 //styleBasic = scripture_register_style("Basic", _styleStruct);
 
-//styleGreen = scripture_register_style("Green",{
-//	color: make_color_rgb(0,255,0);	
+//styleBold = scripture_register_style("Bold",{
+//	font: fntBold
 //})
 
 //styleSpooky = scripture_register_style("spooky", _styleStruct);
@@ -55,11 +55,21 @@
 
 //myString = "I can’t believe you’ve done this!" + changeEmotion.event("leftCharacter","angry");
 
-//myString = "Please bring me 5 <I sprCoin> coins!"
 
 //coin = scripture_register_sprite("Coin",sprCoin,{
 //	xScale: 2,
 //	yScale: 2,
-//	imageSpeed: .5
+//	imageSpeed: .5,
+//	xOff = 5,
+//	yOff = 5,
+//	color: c_yellow,
 //})
+//myString = "Please bring me 5 <Coin> coins!"
+
+//myString = "It’s very important that you <F fntBold> NEVER DO THAT! <F fntDefault>Please."
+
+
+//myString = "It’s gonna be a <K -5>tight fit<//>, but after you’ll have room to <K 20> spread out.”
+
+//myString = "I need you to bring me the <S 1.5,1.5>BIG <I sprHearts><//><//>. It's very important."
 
