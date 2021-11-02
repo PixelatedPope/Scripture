@@ -2,7 +2,7 @@
 
 
 if(keyboard_check_pressed(vk_space)) {		
- 	if(!textbox.gotoPageNext(true)) {
+ 	if(!textbox.gotoNextPage(true)) {
 		textbox.gotoPage(0, true);	
 	}
 }

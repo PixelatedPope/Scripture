@@ -16,9 +16,12 @@
 //	angle: 0,
 //	alpha: 1,
 //	textAlign: fa_middle,
+//	pageAdvanceDelay: 0,
 //	onDrawBegin: function(_x, _y, _style, _base, _steps){},
 //	onDrawEnd: function(_x, _y, _style, _base, _steps){}
 //}
+
+//styleBasic = scripture_register_style("Basic", _styleStruct);
 
 //styleGreen = scripture_register_style("Green",{
 //	color: make_color_rgb(0,255,0);	
@@ -59,3 +62,4 @@
 //	yScale: 2,
 //	imageSpeed: .5
 //})
+

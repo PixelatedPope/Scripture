@@ -70,7 +70,7 @@ function __scriptureTextBox() constructor {
 				if(__inVerseBreak)
 					__inVerseBreak = false;
 				else
-					gotoPageNext(false);
+					gotoNextPage(false);
 
 			return;
 		}
@@ -139,27 +139,33 @@ function __scriptureTextBox() constructor {
 		return self
 	}
 	
+	///@func getPageAdvanceDelay()
 	getPageAdvanceDelay = function() {
 		return __verseAdvanceDelay;	
 	}
 	
-	getAllPageDimension = function() {
+	///@func getAllPageDimensions()
+	getAllPageDimensions = function() {
 		return __verseDimensions;	
 	}
 	
+	///@func getCurrentPageDimensions()
 	getCurrentPageDimensions = function() {
 		return __verseDimensions[__chapter.__curVerse];
 	}
 	
+	///@func getCurrentPage()
 	getCurrentPage = function() {
 		return __chapter.__curVerse;	
 	}
 	
+	///@func getNextPageIsReady()
 	getNextPageIsReady = function() {
 		return 	__nextVerseReady;
 	}
 	
-	gotoPageNext = function(_shortcutAnimations = true) {
+	///@func gotoNextPage([shortcut animations = true])
+	gotoNextPage = function(_shortcutAnimations = true) {
 		if(__inVerseBreak) {
 			__inVerseBreak = false;
 			__verseAdvanceDelay = -1
@@ -175,17 +181,20 @@ function __scriptureTextBox() constructor {
 		return true;
 	}
 
-	gotoPagePrev = function(_reset = true) {
+	///@func gotoPrevPage([reset = true])
+	gotoPrevPage = function(_reset = true) {
 		__verseAdvanceDelay = -1;
 		__chapter.__decVerse(_reset);
 	}
 
+	///@func gotoPage(page, [reset = true])
 	gotoPage = function(_verse, _reset = true) {
 		if(_verse < 0 || _verse >= __verseCount) return;
 		__verseAdvanceDelay = -1;
 		__chapter.__setCurrentVerse(_verse,_reset);
 	}
 	
+	///@func setPaused(isPaused)
 	setPaused = function(_isPaused) {
 		__isPaused = _isPaused;	
 	}	
@@ -1161,6 +1170,7 @@ function scripture_create_textbox(){
 	return new __scriptureTextBox()
 }
 
+///@func scripture_hex_to_color(hex color)
 function scripture_hex_to_color(_hexString) {
 	///CONVERSION CODE BASED ON SCRIPTS FROM GMLscripts.com
 	///GMLscripts.com/license
