@@ -41,6 +41,6 @@ function scrVnBuildScript() {
 		+ evSetEmotion.event(VN_BOY,EMOTION_NORMAL) 
 		+ "Whatever.  It's read "+boyNameRomaji + evChangeName.event(VN_BOY, 2) + ".<60>  But don't worry about it."+ evSetEmotion.event(VN_GIRL, EMOTION_NORMAL) + "<30> We should probably worry more about where we are right now.\r"
 		+ colorful.open + 
-			"MORE DEMO COMING SOON"
+			"MORE DEMO(s?) COMING SOME POINT IN THE FUTURE MAYBE!"
 	return _text;
 }
