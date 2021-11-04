@@ -15,14 +15,17 @@ function scripture_build_example_styles() {
 	outline = scripture_register_style("Outline", {
 		kerning: 2,
 		onDrawBegin: function(_x, _y, _style, _base, _steps, _index) {
-			draw_set_color(merge_color(_style.color,c_white,.75));
+			var _col = merge_color(_style.color,c_white,.75)
+			draw_set_color(_col);
 			var _scaleMod = _base.xScale * _style.xScale;
 			var _thick = 5 * _base.xScale;
 			for(var _i=0; _i<360; _i+= 22.5) {
 				var _xPos = _x + _style.xOff + _scaleMod * lengthdir_x(_thick, _i);
 				var _yPos = _y + _style.yOff + _scaleMod * lengthdir_y(_thick, _i);
-				
-				draw_text_transformed(_xPos, _yPos,_base.char,_scaleMod, _scaleMod,0);
+				if(_base.type == SCRIPTURE_TYPE_CHAR)
+					draw_text_transformed(_xPos, _yPos,_base.char,_scaleMod, _scaleMod,0);
+				else
+					draw_sprite_ext(_base.sprite, _base.image, _xPos, _yPos, _scaleMod, _scaleMod, _style.angle,_col, _style.alpha);
 			}
 		}
 	});
@@ -46,6 +49,14 @@ function scripture_build_example_styles() {
 	wave = scripture_register_style("Wave",{
 		onDrawBegin: function(_x, _y, _style, _base, _steps, _index) {
 			_style.yOff = sin_oscillate(-5,5,3,get_timer()*3 + steps_to_microseconds(_index* 5))
+		}
+	});
+	
+	wobble = scripture_register_style("Wobble",{
+		onDrawBegin: function(_x, _y, _style, _base, _steps, _index) {
+			_style.xScale = sin_oscillate(.5,1.5,3,get_timer()*2 - steps_to_microseconds(_index* 5))
+			_style.yScale = _style.xScale;
+			_style.alpha = _style.xScale;
 		}
 	});
 	

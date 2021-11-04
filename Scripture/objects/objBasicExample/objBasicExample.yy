@@ -28,7 +28,7 @@
     "path": "Scripture.yyp",
   },
   "resourceVersion": "1.0",
-  "name": "objBasicTest",
+  "name": "objBasicExample",
   "tags": [],
   "resourceType": "GMObject",
 }
