@@ -2,8 +2,8 @@
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "Helpful Scripts",
-    "path": "folders/Helpful Scripts.yy",
+    "name": "Libraries",
+    "path": "folders/Libraries.yy",
   },
   "resourceVersion": "1.0",
   "name": "twerp",

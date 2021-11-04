@@ -13,8 +13,8 @@
   "soundFile": "sndBoyBeep.wav",
   "duration": 0.1,
   "parent": {
-    "name": "Scripture",
-    "path": "Scripture.yyp",
+    "name": "Sounds",
+    "path": "folders/VN/Sounds.yy",
   },
   "resourceVersion": "1.0",
   "name": "sndBoyBeep",

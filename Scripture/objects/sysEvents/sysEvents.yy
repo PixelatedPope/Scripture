@@ -4,10 +4,7 @@
   "visible": true,
   "spriteMaskId": null,
   "persistent": true,
-  "parentObjectId": {
-    "name": "parController",
-    "path": "objects/parController/parController.yy",
-  },
+  "parentObjectId": null,
   "physicsObject": false,
   "physicsSensor": false,
   "physicsShape": 1,

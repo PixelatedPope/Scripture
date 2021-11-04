@@ -199,6 +199,11 @@ function __scriptureTextBox() constructor {
 		__isPaused = _isPaused;	
 	}	
 	
+	///@func getIsPaused()
+	getIsPaused = function() {
+		return __isPaused;
+	}	
+	
 	///@func draw(x,y)
 	draw = function(_x, _y) {
 		if(!__built) {

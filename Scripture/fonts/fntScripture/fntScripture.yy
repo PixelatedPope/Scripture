@@ -253,8 +253,8 @@
   "canGenerateBitmap": true,
   "maintainGms1Font": false,
   "parent": {
-    "name": "Scripture",
-    "path": "Scripture.yyp",
+    "name": "BottomBar",
+    "path": "folders/BottomBar.yy",
   },
   "resourceVersion": "1.0",
   "name": "fntScripture",

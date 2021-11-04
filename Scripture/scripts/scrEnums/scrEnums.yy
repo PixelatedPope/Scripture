@@ -2,8 +2,8 @@
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "Scripture",
-    "path": "Scripture.yyp",
+    "name": "VN",
+    "path": "folders/VN.yy",
   },
   "resourceVersion": "1.0",
   "name": "scrEnums",

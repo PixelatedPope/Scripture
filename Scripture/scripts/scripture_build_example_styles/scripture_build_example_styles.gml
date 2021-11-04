@@ -113,15 +113,6 @@ function scripture_build_example_styles() {
 			audio_play_sound_unique(sndBeep, 10, false, false, .25)	
 		}
 	})
-
-	bold = scripture_register_style("Bold", {
-		font: fntBold
-	});
-
-	small = scripture_register_style("Small", {
-		font: fntDefault
-	});
-
 }
 
 function wait(_steps) {

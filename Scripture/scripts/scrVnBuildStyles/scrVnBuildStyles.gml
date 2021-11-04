@@ -16,7 +16,7 @@ function scrVnBuildStyles() {
 		}
 	});
 	shout = scripture_register_style("Shout",{
-		font: fntBold,
+		font: fntVnBold,
 		onDrawBegin: function(_x, _y, _style, _base, _steps, _index) {
 			_style.yOff = random_range(-2,2);
 			_style.xOff = random_range(-2,2);
