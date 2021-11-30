@@ -164,6 +164,11 @@ function __scriptureTextBox() constructor {
 		return 	__nextVerseReady;
 	}
 	
+	///@func getPageCount()
+	getPageCount = function() {
+		return __verseCount;	
+	}
+	
 	///@func gotoNextPage([shortcut animations = true])
 	gotoNextPage = function(_shortcutAnimations = true) {
 		if(__inVerseBreak) {

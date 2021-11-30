@@ -71,8 +71,8 @@
     "children": [],
   },
   "RoomOrderNodes": [
-    {"roomId":{"name":"rmBasicExample","path":"rooms/rmBasicExample/rmBasicExample.yy",},},
     {"roomId":{"name":"rmVnDemo","path":"rooms/rmVnDemo/rmVnDemo.yy",},},
+    {"roomId":{"name":"rmBasicExample","path":"rooms/rmBasicExample/rmBasicExample.yy",},},
   ],
   "Folders": [
     {"folderPath":"folders/Helpful Scripts.yy","order":0,"resourceVersion":"1.0","name":"Helpful Scripts","tags":[],"resourceType":"GMFolder",},
@@ -95,7 +95,7 @@
   ],
   "IncludedFiles": [],
   "MetaData": {
-    "IDEVersion": "2.3.6.595",
+    "IDEVersion": "2.3.7.603",
   },
   "resourceVersion": "1.4",
   "name": "Scripture",
